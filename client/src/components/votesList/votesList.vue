@@ -7,8 +7,9 @@ export default {
     props: {
         userId: { type: Number, required: true },
     },
-    created() {
-        console.log('votes');
+    async created() {
+        const votes = await fetch(`/api/votes?user_id=${this.userId}`);
+        console.log(votes);
     }
 };
 </script>

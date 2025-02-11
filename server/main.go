@@ -63,7 +63,7 @@ func votesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/votes", votesHandler)
+	http.HandleFunc("/api/votes", votesHandler)
 	fmt.Println("Server is hosting on 8080 port")
 	http.ListenAndServe(":8080", nil)
 }
