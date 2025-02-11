@@ -1,15 +1,12 @@
 <template>
-    <h4>Оценки пользователя {{ userId }}</h4>
+    <h4>Оценки</h4>
+    <vote-item v-for="vote in votes" :vote="vote"/>
 </template>
 
 <script lang="ts">
 export default {
     props: {
-        userId: { type: Number, required: true },
+        votes: { type: Array, default: [] },
     },
-    async created() {
-        const votes = await fetch(`/api/votes?user_id=${this.userId}`);
-        console.log(votes);
-    }
 };
 </script>

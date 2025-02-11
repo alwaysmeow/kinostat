@@ -1,4 +1,5 @@
 {
-    "film-card": "filmCard",
-    "votes-list": "votesList"
+    "vote-item": "voteItem",
+    "votes-list": "votesList",
+    "statistic-page": "statisticPage"
 }
