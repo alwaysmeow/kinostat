@@ -11,6 +11,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      '/kinopoisk-api': {
+        target: 'https://www.kinopoisk.ru/api',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/kinopoisk-api/, ''),
+      },
     },
   }
 })
