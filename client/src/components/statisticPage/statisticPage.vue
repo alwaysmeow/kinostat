@@ -1,39 +1,51 @@
 <template>
-    <h4>Статистика пользователя {{ userId }}</h4>
+    <h4>Статистика пользователя {{ $props.userId }}</h4>
     <votes-list :votes="votes"/>
 </template>
 
 <script lang="ts">
+import { Options, mixins } from "vue-class-component";
+import StoreMixin from "../../mixins/store.mixin";
 
-interface Data {
-    votes: Array<Record<string, any>>,
+interface Vote {
+    alt: string,
+    [key: string]: any;
 }
 
-export default {
+type PropsType = {
+    userId: number;
+};
+
+@Options({
     props: {
         userId: { type: Number, required: true },
     },
-    data(): Data {
-        return {
-            votes: [],
-        }
-    },
+})
+export default class StatisticPageComponent extends mixins(StoreMixin) {
+    declare $props: PropsType;
+
     created() {
         this.getVotes();
-    },
-    methods: {
-        async getVotes() {
-            const response = await fetch(`/api/votes?user_id=${this.userId}`);
-            this.votes = await response.json();
-            this.votes = this.votes.map(item => {
-                const [title, year] = item.alt.split('(').map((str: String) => str.slice(0, -1))
-                return {
-                    title: title,
-                    year: year,
-                    ...item
-                }
-            })
-        }
     }
-};
+
+    async getVotes() {
+        const response: Vote[] = await fetch(
+            `/api/votes?user_id=${this.$props.userId}`
+        ).then((response) => response.json());
+        
+        const votes: Vote[] = response.map((item) => {
+            const [title, year] = item.alt
+                .split("(")
+                .map(str => str.slice(0, -1));
+            return {
+                title: title,
+                year: year,
+                ...item,
+            };
+        });
+
+        this.setVotes(votes);
+    }
+}
+
 </script>
