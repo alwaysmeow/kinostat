@@ -28,17 +28,20 @@ export default class StatisticPageComponent extends mixins(
         const votes: Vote[] = await this.getVotes(this.$props.userId);
         this.setVotes(votes);
         await this.getFilms(votes);
-        console.log(this.films);
     }
 
     async getFilms(votes: Vote[]) {
+        const timeout = 2000;
+
         for (var i = 0; i < votes.length; i++) {
             const vote: Vote = votes[i];
 
             const filmData = await this.getObjectQuery(vote.type, vote.id);
-            this.addFilm(filmData);
+            if (filmData) {
+                this.addFilm(filmData);
+            }
 
-            new Promise((resolve) => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, timeout));
         }
     }
 }

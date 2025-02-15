@@ -22,7 +22,7 @@ export enum QueryObjectType {
 }
 
 export default class QueryMixin extends Vue {
-    async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Object> {
+    async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Object | null> {
         const URL = `${BASE_KINOPOISK_API_URL}/${objectType}/${id}/`;
 
         try {
@@ -33,13 +33,19 @@ export default class QueryMixin extends Vue {
                 );
             }
             const data = await response.json();
+            if (data.type === 'captcha') {
+                throw new Error(
+                    `Request ${URL} failed by timeout`
+                );
+            }
             return data;
         } catch (error) {
             if (objectType === QueryObjectType.Series) {
                 return await this.getObjectQuery(QueryObjectType.Film, id);
             }
-            throw error;
+            console.error(error);
         }
+        return null;
     }
 
     async getVotes(userId: number): Promise<Vote[]> {
