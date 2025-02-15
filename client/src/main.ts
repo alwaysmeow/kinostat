@@ -2,7 +2,7 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import App from "./App.vue";
 import registerComponents from "./registerComponents";
-import "./style.sass";
+import "./styles/style.sass";
 
 const app = createApp(App);
 

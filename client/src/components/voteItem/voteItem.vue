@@ -1,5 +1,5 @@
 <template>
-    <div class="vote-item" @mouseover="onMouseOver">
+    <div :class="['vote-item', cssValueClass]" @mouseover="onMouseOver">
         <div>{{ vote.title }}</div>
         <div class="vote-value-circle">{{ vote.value }}</div>
     </div>
@@ -10,11 +10,14 @@ export default {
     props: {
         vote: { type: Object, default: 0 },
     },
+    computed: {
+        cssValueClass() {
+            return `vote-value-${this.vote.value}`;
+        },
+    },
     methods: {
-        onMouseOver() {
-            
-        }
-    }
+        onMouseOver() {},
+    },
 };
 </script>
 
@@ -25,14 +28,18 @@ export default {
     justify-content: space-between
 
     padding: 1rem
-    
+
     border: 1px solid grey
     border-radius: 5px
 
+    transition: 0.5s
+
+    user-select: none
+
     &:hover
         .vote-value-circle
-            background-color: grey
-            text-color: black
+            background-color: var(--value-color)
+        
 
 .vote-value-circle
     height: 2rem
@@ -42,7 +49,7 @@ export default {
     align-items: center
     justify-content: center
 
-    border: 1px solid grey
+    border: 1px solid var(--value-color)
     border-radius: 100%
 
     transition: 0.5s
