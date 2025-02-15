@@ -1,4 +1,5 @@
 import { Vue } from "vue-class-component";
+import type { Vote } from "../types/types";
 
 const BASE_KINOPOISK_API_URL = "/kinopoisk-api/tooltip";
 
@@ -14,18 +15,14 @@ const BASE_PARAMS = {
     },
 };
 
-interface Vote {
-    alt: string,
-    [key: string]: any;
-}
-
-enum QueryObjectType {
+export enum QueryObjectType {
     Film = "film",
     Person = "person",
+    Series = "series",
 }
 
 export default class QueryMixin extends Vue {
-    async getObjectQuery(objectType: QueryObjectType, id: number) {
+    async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Object> {
         const URL = `${BASE_KINOPOISK_API_URL}/${objectType}/${id}/`;
 
         try {
@@ -38,12 +35,14 @@ export default class QueryMixin extends Vue {
             const data = await response.json();
             return data;
         } catch (error) {
-            console.error(error);
+            if (objectType === QueryObjectType.Series) {
+                return await this.getObjectQuery(QueryObjectType.Film, id);
+            }
             throw error;
         }
     }
 
-    async getVotes(userId: number): Promise<Object[]> {
+    async getVotes(userId: number): Promise<Vote[]> {
         const URL = `/api/votes?user_id=${userId}`;
         const response: Vote[] = await fetch(URL).then((response) =>
             response.json()
@@ -53,10 +52,13 @@ export default class QueryMixin extends Vue {
             const [title, year] = item.alt
                 .split("(")
                 .map((str) => str.slice(0, -1));
+            const [,type,id] = item.url.split('/');
             return {
-                title: title,
-                year: year,
                 ...item,
+                id: Number(id),
+                year: Number(year),
+                title,
+                type,
             };
         });
 
