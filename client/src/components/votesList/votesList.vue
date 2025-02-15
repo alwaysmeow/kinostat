@@ -19,5 +19,5 @@ export default {
 .vote-items
     display: flex
     flex-direction: column
-    gap: 5px
+    gap: 1rem
 </style>
