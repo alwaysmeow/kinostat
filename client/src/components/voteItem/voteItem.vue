@@ -73,29 +73,29 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
             .vote-film-year
                 opacity: 100%
 
-.vote-film-poster
-    border-radius: 5px
-
 .vote-film-info
     display: flex
     flex-direction: row
     align-items: center
     gap: 2rem
 
-.vote-film-credits
-    display: flex
-    flex-direction: column
-    justify-items: left
-    text-align: left
+    .vote-film-poster
+        border-radius: 5px
 
-    transform: translateY(25%)
-    transition: 0.5s
+    .vote-film-credits
+        display: flex
+        flex-direction: column
+        justify-items: left
+        text-align: left
 
-    text-wrap: pretty
-
-    .vote-film-year
-        opacity: 0%
+        transform: translateY(25%)
         transition: 0.5s
+
+        text-wrap: pretty
+
+        .vote-film-year
+            opacity: 0%
+            transition: 0.5s
 
 .vote-value-circle
     height: 3rem
