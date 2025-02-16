@@ -1,9 +1,11 @@
 <template>
     <div :class="['vote-item', cssValueClass]">
-        <img :src="posterSrc"/>
         <div class="vote-film-info">
-            <div class="vote-film-name">{{ $props.vote.title }}</div>
-            <div class="vote-film-year dark-text">{{ $props.vote.year }}</div>
+            <img class="vote-film-poster" :src="posterSrc"/>
+            <div class="vote-film-credits">
+                <div class="vote-film-name">{{ $props.vote.title }}</div>
+                <div class="vote-film-year dark-text">{{ $props.vote.year }}</div>
+            </div>
         </div>
         <div class="vote-value-circle">{{ $props.vote.value }}</div>
     </div>
@@ -53,9 +55,6 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     display: flex
     align-items: center
     justify-content: space-between
-    gap: 2rem
-
-    padding: 2rem
 
     border: 1px solid grey
     border-radius: 5px
@@ -68,14 +67,22 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
         .vote-value-circle
             background-color: var(--value-color)
         
-        .vote-film-info
+        .vote-film-credits
             transform: translateY(0)
 
             .vote-film-year
                 opacity: 100%
 
+.vote-film-poster
+    border-radius: 5px
 
 .vote-film-info
+    display: flex
+    flex-direction: row
+    align-items: center
+    gap: 2rem
+
+.vote-film-credits
     display: flex
     flex-direction: column
     justify-items: left
@@ -91,12 +98,14 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
         transition: 0.5s
 
 .vote-value-circle
-    height: 2rem
-    width: 2rem
+    height: 3rem
+    width: 3rem
 
     display: flex
     align-items: center
     justify-content: center
+
+    margin: 2rem
 
     border: 1px solid var(--value-color)
     border-radius: 100%
