@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia';
-import type { Vote } from '../types/types';
+import type { Vote, Film } from '../types/types';
 
 interface StatisticStore {
     votes: Vote[],
-    films: Object[],
+    films: Film[],
     actors: Object[],
     directors: Object[],
 }
@@ -19,7 +19,7 @@ const useStatistic = defineStore('statistic', {
         setVotes(data: Vote[]) {
             this.votes = data;
         },
-        addFilm(film: Object) {
+        addFilm(film: Film) {
             this.films.push(film);
         },
         addActor(actor: Object) {

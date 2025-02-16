@@ -1,5 +1,5 @@
 import { Vue } from "vue-class-component";
-import type { Vote } from "../types/types";
+import type { Vote, Film } from "../types/types";
 
 const BASE_KINOPOISK_API_URL = "/kinopoisk-api/tooltip";
 
@@ -13,6 +13,7 @@ const BASE_PARAMS = {
         "user-agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
     },
+    "referrer": "https://www.kinopoisk.ru/",
 };
 
 export enum QueryObjectType {
@@ -22,7 +23,7 @@ export enum QueryObjectType {
 }
 
 export default class QueryMixin extends Vue {
-    async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Object | null> {
+    async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Film | null> {
         const URL = `${BASE_KINOPOISK_API_URL}/${objectType}/${id}/`;
 
         try {
@@ -38,7 +39,7 @@ export default class QueryMixin extends Vue {
                     `Request ${URL} failed by timeout`
                 );
             }
-            return data;
+            return data.film;
         } catch (error) {
             if (objectType === QueryObjectType.Series) {
                 return await this.getObjectQuery(QueryObjectType.Film, id);

@@ -1,26 +1,50 @@
 <template>
-    <div :class="['vote-item', cssValueClass]" @mouseover="onMouseOver">
+    <div :class="['vote-item', cssValueClass]">
+        <img :src="posterSrc"/>
         <div class="vote-film-info">
-            <div class="vote-film-name">{{ vote.title }}</div>
-            <div class="vote-film-year dark-text">{{ vote.year }}</div>
+            <div class="vote-film-name">{{ $props.vote.title }}</div>
+            <div class="vote-film-year dark-text">{{ $props.vote.year }}</div>
         </div>
-        <div class="vote-value-circle">{{ vote.value }}</div>
+        <div class="vote-value-circle">{{ $props.vote.value }}</div>
     </div>
 </template>
 
 <script lang="ts">
-export default {
+import { Options, mixins } from "vue-class-component";
+import StoreMixin from '../../mixins/store.mixin';
+import type { Vote } from '../../types/types';
+
+type PropsType = {
+    vote: Vote;
+};
+
+@Options({
     props: {
         vote: { type: Object, default: 0 },
     },
-    computed: {
-        cssValueClass() {
-            return `vote-value-${this.vote.value}`;
-        },
-    },
-    methods: {
-        onMouseOver() {},
-    },
+})
+export default class VoteItemComponent extends mixins(StoreMixin) {
+    declare $props: PropsType;
+
+    posterSrc: string = '';
+
+    get cssValueClass(): string {
+        return `vote-value-${this.$props.vote.value}`;
+    }
+
+    created() {
+        this.getPosterSrc();
+    }
+
+    getPosterSrc() {
+        const film = this.getFilm(this.$props.vote.id);
+        if (film) {
+            console.log(film);
+            this.posterSrc = `${film.posterBaseUrl}/120x`;
+        } else {
+            setTimeout(this.getPosterSrc, 5000);
+        }
+    }
 };
 </script>
 
