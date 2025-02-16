@@ -36,7 +36,7 @@ export default class StatisticPageComponent extends mixins(
         for (var i = 0; i < votes.length; i++) {
             const vote: Vote = votes[i];
 
-            const filmData = await this.getObjectQuery(vote.type, vote.id);
+            const filmData = await this.getObjectQuery(vote.type, vote.filmId);
             if (filmData) {
                 this.addFilm(filmData);
             }

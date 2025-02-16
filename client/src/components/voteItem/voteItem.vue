@@ -39,7 +39,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     }
 
     getPosterSrc() {
-        const film = this.getFilm(this.$props.vote.id);
+        const film = this.getFilm(this.$props.vote.filmId);
         if (film) {
             console.log(film);
             this.posterSrc = `${film.posterBaseUrl}/120x`;
@@ -93,6 +93,10 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 
         text-wrap: pretty
 
+        .vote-film-name
+            font-weight: bold
+            font-size: 1.2rem
+
         .vote-film-year
             opacity: 0%
             transition: 0.5s
@@ -109,6 +113,9 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 
     border: 1px solid var(--value-color)
     border-radius: 100%
+
+    font-weight: bold
+    font-size: 1.2rem
 
     transition: 0.5s
 </style>
