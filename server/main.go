@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 )
@@ -57,11 +58,29 @@ func getObject(objectType string, objectId int) (map[string]interface{}, error) 
 	if err != nil {
 		return nil, fmt.Errorf("Request execution error: %v", err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Request failed with status: %s", resp.Status)
+	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Response reading error: %v", err)
+	}
+
+	cacheFilePath := fmt.Sprintf("./cache/%s/%d.json", objectType, objectId)
+
+	if !isFileExist(cacheFilePath) {
+		cacheDir := fmt.Sprintf("./cache/%s", objectType)
+		if err := os.MkdirAll(cacheDir, 0755); err != nil {
+			return nil, fmt.Errorf("Failed to create cache directory: %v", err)
+		}
+
+		err = os.WriteFile(cacheFilePath, body, 0644) // 0644 — access rights
+		if err != nil {
+			// fmt.Printf("File saving error: %v\n", err)
+			return nil, fmt.Errorf("Failed to create cache directory: %v", err)
+		}
 	}
 
 	var object map[string]interface{}
@@ -71,6 +90,13 @@ func getObject(objectType string, objectId int) (map[string]interface{}, error) 
 	}
 
 	return object, nil
+}
+
+func isFileExist(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 func votesHandler(w http.ResponseWriter, r *http.Request) {
@@ -113,14 +139,27 @@ func objectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	object, err := getObject(objectType, objectId)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	cacheFilePath := fmt.Sprintf("./cache/%s/%d.json", objectType, objectId)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(object)
+	if isFileExist(cacheFilePath) {
+		data, err := os.ReadFile(cacheFilePath)
+		if err != nil {
+			http.Error(w, "Failed to read cache", http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(data)
+	} else {
+		object, err := getObject(objectType, objectId)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(object)
+	}
 }
 
 func main() {

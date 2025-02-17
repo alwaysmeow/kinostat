@@ -1,0 +1,63 @@
+{
+  "film": {
+    "id": 4895,
+    "displayTitle": "Чудо",
+    "posterBaseUrl": "//avatars.mds.yandex.net/get-kinopoisk-image/1600647/8fd98d83-6257-4fe1-855b-0509c540e745",
+    "duration": "2&nbsp;часа 15&nbsp;минут",
+    "genres": ["история", "спорт", "драма", "биография"],
+    "year": 2004,
+    "ratings": {
+      "currentRating": "kp",
+      "kp": { "count": 7296, "type": "neutral", "ready": true, "value": "6.9" }
+    },
+    "actors": [
+      {
+        "id": 37652,
+        "name": "Курт Рассел",
+        "originalName": "Kurt Russell",
+        "role": "actor",
+        "roleDetails": "Herb Brooks",
+        "image": {
+          "baseUrl": "//avatars.mds.yandex.net/get-kinopoisk-image/1704946/d2b487a3-a38e-4cf8-ac4e-081c1521fb5a",
+          "url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1704946/d2b487a3-a38e-4cf8-ac4e-081c1521fb5a/360"
+        }
+      },
+      {
+        "id": 3420,
+        "name": "Патриша Кларксон",
+        "originalName": "Patricia Clarkson",
+        "role": "actor",
+        "roleDetails": "Patti Brooks",
+        "image": {
+          "baseUrl": "//avatars.mds.yandex.net/get-kinopoisk-image/1777765/996ff911-0fca-407b-b7ff-4ca179f5cd24",
+          "url": "https://avatars.mds.yandex.net/get-kinopoisk-image/1777765/996ff911-0fca-407b-b7ff-4ca179f5cd24/360"
+        }
+      },
+      {
+        "id": 24435,
+        "name": "Ноа Эммерих",
+        "originalName": "Noah Emmerich",
+        "role": "actor",
+        "roleDetails": "Craig Patrick",
+        "image": {
+          "baseUrl": "//avatars.mds.yandex.net/get-kinopoisk-image/10703959/d4d0faa1-7d2a-4964-b650-020694f71bff",
+          "url": "https://avatars.mds.yandex.net/get-kinopoisk-image/10703959/d4d0faa1-7d2a-4964-b650-020694f71bff/360"
+        }
+      }
+    ],
+    "directors": [
+      {
+        "id": 47995,
+        "name": "Гэвин О’Коннор",
+        "originalName": "Gavin O'Connor",
+        "role": "director",
+        "image": {
+          "baseUrl": "//avatars.mds.yandex.net/get-kinopoisk-image/4774061/dc928b50-6a2d-4c4d-b3d3-5e48f47e2591",
+          "url": "https://avatars.mds.yandex.net/get-kinopoisk-image/4774061/dc928b50-6a2d-4c4d-b3d3-5e48f47e2591/360"
+        }
+      }
+    ],
+    "relativeUrl": "/film/chudo-2004-4895/",
+    "countries": ["Канада", "США"]
+  }
+}
