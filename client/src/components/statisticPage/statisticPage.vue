@@ -31,7 +31,7 @@ export default class StatisticPageComponent extends mixins(
     }
 
     async getFilms(votes: Vote[]) {
-        const timeout = 2000;
+        const timeout = 100;
 
         for (var i = 0; i < votes.length; i++) {
             const vote: Vote = votes[i];

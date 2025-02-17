@@ -1,21 +1,6 @@
 import { Vue } from "vue-class-component";
 import type { Vote, Film } from "../types/types";
 
-const BASE_KINOPOISK_API_URL = "/kinopoisk-api/tooltip";
-
-const BASE_PARAMS = {
-    method: "GET",
-    headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        "x-request-id": "1739792696378319-9332505554933574813:5",
-        "x-requested-with": "XMLHttpRequest",
-        "user-agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
-    },
-    "referrer": "https://www.kinopoisk.ru/",
-};
-
 export enum QueryObjectType {
     Film = "film",
     Person = "person",
@@ -24,10 +9,10 @@ export enum QueryObjectType {
 
 export default class QueryMixin extends Vue {
     async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Film | null> {
-        const URL = `${BASE_KINOPOISK_API_URL}/${objectType}/${id}/`;
+        const URL = `api/object?type=${objectType}&id=${id}`;
 
         try {
-            const response = await fetch(URL, BASE_PARAMS);
+            const response = await fetch(URL);
             if (!response.ok) {
                 throw new Error(
                     `Request ${URL} execution failed: ${response.status}`
