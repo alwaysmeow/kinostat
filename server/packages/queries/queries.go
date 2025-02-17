@@ -21,19 +21,19 @@ func GetVotes(userID int) ([]map[string]interface{}, error) {
 
 	resp, err := http.Get(votesURL)
 	if err != nil {
-		return nil, fmt.Errorf("Request execution error: %v", err)
+		return nil, fmt.Errorf("request execution error: %v", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Response reading error: %v", err)
+		return nil, fmt.Errorf("response reading error: %v", err)
 	}
 
 	rgx := regexp.MustCompile(`\((\[.*\])\)`)
 	matches := rgx.FindSubmatch(body)
 	if len(matches) < 2 {
-		return nil, fmt.Errorf("Can't extract JSON from response")
+		return nil, fmt.Errorf("can't extract JSON from response")
 	}
 
 	var votes []map[string]interface{}
@@ -49,6 +49,10 @@ func GetObject(objectType string, objectId int) (map[string]interface{}, error) 
 	url := fmt.Sprintf("https://www.kinopoisk.ru/api/tooltip/%s/%d/", objectType, objectId)
 
 	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+
 	req.Header.Set("accept", "application/json")
 	req.Header.Set("content-type", "application/json")
 	req.Header.Set("uber-trace-id", "1ad7474d212c3d1d:d40bfd4021bb91e3:0:1")
@@ -62,16 +66,26 @@ func GetObject(objectType string, objectId int) (map[string]interface{}, error) 
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Request execution error: %v", err)
+		return nil, fmt.Errorf("request execution error: %v", err)
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Request failed with status: %s", resp.Status)
+		return nil, fmt.Errorf("request failed with status: %s", resp.Status)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Response reading error: %v", err)
+		return nil, fmt.Errorf("response reading error: %v", err)
+	}
+
+	var object map[string]interface{}
+	err = json.Unmarshal(body, &object)
+	if err != nil {
+		return nil, fmt.Errorf("JSON parsing error: %v", err)
+	}
+
+	if _, ok := object["captcha"]; ok {
+		return nil, fmt.Errorf("captcha detected in response, skipping file save")
 	}
 
 	cacheFilePath := fmt.Sprintf("./cache/%s/%d.json", objectType, objectId)
@@ -79,20 +93,14 @@ func GetObject(objectType string, objectId int) (map[string]interface{}, error) 
 	if !isFileExist(cacheFilePath) {
 		cacheDir := fmt.Sprintf("./cache/%s", objectType)
 		if err := os.MkdirAll(cacheDir, 0755); err != nil {
-			return nil, fmt.Errorf("Failed to create cache directory: %v", err)
+			return nil, fmt.Errorf("failed to create cache directory: %v", err)
 		}
 
 		err = os.WriteFile(cacheFilePath, body, 0644) // 0644 — access rights
 		if err != nil {
 			// fmt.Printf("File saving error: %v\n", err)
-			return nil, fmt.Errorf("Failed to create cache directory: %v", err)
+			return nil, fmt.Errorf("failed to create cache directory: %v", err)
 		}
-	}
-
-	var object map[string]interface{}
-	err = json.Unmarshal(body, &object)
-	if err != nil {
-		return nil, fmt.Errorf("JSON parsing error: %v", err)
 	}
 
 	return object, nil
