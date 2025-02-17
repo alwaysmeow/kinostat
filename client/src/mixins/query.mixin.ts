@@ -8,7 +8,7 @@ const BASE_PARAMS = {
     headers: {
         accept: "application/json",
         "content-type": "application/json",
-        "x-request-id": "1739381470361490-3578854847148517558:5",
+        "x-request-id": "1739792696378319-9332505554933574813:5",
         "x-requested-with": "XMLHttpRequest",
         "user-agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Safari/537.36",
@@ -62,7 +62,7 @@ export default class QueryMixin extends Vue {
             const [,type,id] = item.url.split('/');
             return {
                 ...item,
-                id: Number(id),
+                filmId: Number(id),
                 year: Number(year),
                 title,
                 type,
