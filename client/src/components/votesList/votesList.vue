@@ -1,6 +1,15 @@
 <template>
     <div class="votes-list">
         <h4>Оценки</h4>
+        <div class="votes-list-toolbar">
+            <v-text-field
+                clearable
+                prepend-inner-icon="$vuetify"
+                v-model="filterString"
+                variant="outlined"
+            ></v-text-field>
+            <v-select :items="sortTypes" variant="outlined"></v-select>
+        </div>
         <div class="vote-items">
             <vote-item v-for="vote in votesList" :vote="vote" />
         </div>
@@ -65,10 +74,13 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
             return 0;
         };
 
+        const filterString = this.filterString.trim().toLocaleLowerCase();
+        console.log("filterString", filterString);
+
         return [...this.votes]
             .filter(
                 (item) =>
-                    item.title.includes(this.filterString) ||
+                    item.title.toLocaleLowerCase().includes(filterString) ||
                     item.year.toString() === this.filterString
             )
             .sort(compareFunction);
@@ -80,5 +92,9 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 .vote-items
     display: flex
     flex-direction: column
+    gap: 1rem
+
+.votes-list-toolbar
+    display: flex
     gap: 1rem
 </style>
