@@ -16,3 +16,14 @@ export interface Film {
     posterBaseUrl: string
     [key: string]: any,
 }
+
+export enum SortOrder {
+    Ascending = 'asc',
+    Descending = 'desc',
+}
+
+export interface SortType {
+    order: SortOrder,
+    attribute: string,
+    title: string,
+}

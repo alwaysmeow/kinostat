@@ -28,24 +28,13 @@ type PropsType = {
 export default class VoteItemComponent extends mixins(StoreMixin) {
     declare $props: PropsType;
 
-    posterSrc: string = '';
-
     get cssValueClass(): string {
         return `vote-value-${this.$props.vote.value}`;
     }
 
-    created() {
-        this.getPosterSrc();
-    }
-
-    getPosterSrc() {
+    get posterSrc(): string {
         const film = this.getFilm(this.$props.vote.filmId);
-        if (film) {
-            console.log(film);
-            this.posterSrc = `${film.posterBaseUrl}/120x`;
-        } else {
-            setTimeout(this.getPosterSrc, 5000);
-        }
+        return film ? `${film.posterBaseUrl}/120x`: '';
     }
 };
 </script>
