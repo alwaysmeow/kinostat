@@ -4,9 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"kinostat-server/packages/queries"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 func isFileExist(path string) bool {
@@ -76,6 +79,12 @@ func objectHandler(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(object)
+	}
+}
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
 	}
 }
 
