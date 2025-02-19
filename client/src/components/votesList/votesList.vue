@@ -22,7 +22,7 @@
             ></v-select>
         </div>
         <div class="vote-items">
-            <vote-item v-for="vote in votesList" :vote="vote" />
+            <vote-item v-for="vote in votesList" :vote="vote" :key="vote.num"/>
         </div>
     </div>
 </template>
@@ -90,7 +90,6 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
         };
 
         const filterString = this.filterString.trim().toLocaleLowerCase();
-        console.log("filterString", filterString);
 
         return [...this.votes]
             .filter(
