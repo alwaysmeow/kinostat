@@ -5,9 +5,9 @@
 
 <script lang="ts">
 import { Options, mixins } from "vue-class-component";
-import StoreMixin from "../../mixins/store.mixin";
-import QueryMixin, { QueryObjectType } from "../../mixins/query.mixin";
-import type { Vote } from "../../types/types";
+import StoreMixin from "../mixins/store.mixin";
+import QueryMixin, { QueryObjectType } from "../mixins/query.mixin";
+import type { Vote } from "../types/types";
 
 type PropsType = {
     userId: number;

@@ -29,10 +29,10 @@
 
 <script lang="ts">
 import { mixins } from "vue-class-component";
-import StoreMixin from "../../mixins/store.mixin";
+import StoreMixin from "../mixins/store.mixin";
 
-import { SortOrder } from "../../types/types";
-import type { Vote, SortType } from "../../types/types";
+import { SortOrder } from "../types/types";
+import type { Vote, SortType } from "../types/types";
 
 export default class VoteItemComponent extends mixins(StoreMixin) {
     searchLine: string = "";

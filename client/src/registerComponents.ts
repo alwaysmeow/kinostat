@@ -6,7 +6,7 @@ async function registerComponents(app: App) {
     const components = import.meta.glob("./components/**/*.vue");
 
     Object.entries(manifest).forEach(([name, filename]) => {
-        const path = `./components/${filename}/${filename}.vue`;
+        const path = `./components/${filename}.vue`;
         app.component(name, defineAsyncComponent(components[path] as any));
     });
 }
