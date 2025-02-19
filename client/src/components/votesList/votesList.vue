@@ -79,7 +79,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
         return (this.searchLine || "").trim().toLocaleLowerCase();
     }
 
-    get votesList(): Vote[] {
+    get sortedVotes(): Vote[] {
         const compareFunction = (a: Vote, b: Vote): number => {
             const aValue = a[this.sortType.attribute];
             const bValue = b[this.sortType.attribute];
@@ -93,6 +93,10 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
             return 0;
         };
 
+        return [...this.votes].sort(compareFunction);
+    }
+
+    get votesList(): Vote[] {
         const filterFunction = (vote: Vote): boolean => {
             const title: string = vote.title.toLocaleLowerCase()
             const titleWords: string[] = title.split(/[ ,.:]+/);
@@ -103,7 +107,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
             );
         };
 
-        return [...this.votes].filter(filterFunction).sort(compareFunction);
+        return [...this.sortedVotes].filter(filterFunction);
     }
 }
 </script>
