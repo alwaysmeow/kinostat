@@ -3,7 +3,7 @@
     <div class="page-body">
         <tabs-menu
             v-model="tabIndex"
-            :tabsTitles="tabs"
+            :tabs-titles="tabs"
         ></tabs-menu>
         <votes-list :votes="votes" />
     </div>
@@ -42,7 +42,7 @@ export default class StatisticPageComponent extends mixins(
     async getFilms(votes: Vote[]) {
         const timeout = 100;
 
-        for (var i = 0; i < votes.length; i++) {
+        for (var i = votes.length - 1; i >= 0; i--) {
             const vote: Vote = votes[i];
 
             const filmData = await this.getObjectQuery(
