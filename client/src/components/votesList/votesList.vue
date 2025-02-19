@@ -5,7 +5,7 @@
             <v-text-field
                 class="votes-list-toolbar-input"
                 clearable
-                prepend-inner-icon="$vuetify"
+                prepend-inner-icon="$search"
                 v-model="filterString"
                 variant="outlined"
                 hide-details
@@ -16,7 +16,7 @@
                 :items="sortTypeList"
                 item-title="title"
                 item-value="index"
-                prepend-inner-icon="$vuetify"
+                prepend-inner-icon="$sort"
                 variant="outlined"
                 hide-details
             ></v-select>
