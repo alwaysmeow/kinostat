@@ -6,7 +6,7 @@
                 class="votes-list-toolbar-input"
                 clearable
                 prepend-inner-icon="$search"
-                v-model="filterString"
+                v-model="searchLine"
                 variant="outlined"
                 hide-details
             ></v-text-field>
@@ -22,7 +22,7 @@
             ></v-select>
         </div>
         <div class="vote-items">
-            <vote-item v-for="vote in votesList" :vote="vote" :key="vote.num"/>
+            <vote-item v-for="vote in votesList" :vote="vote" :key="vote.num" />
         </div>
     </div>
 </template>
@@ -35,7 +35,7 @@ import { SortOrder } from "../../types/types";
 import type { Vote, SortType } from "../../types/types";
 
 export default class VoteItemComponent extends mixins(StoreMixin) {
-    filterString: string = "";
+    searchLine: string = "";
 
     sortTypes: SortType[] = [
         {
@@ -75,6 +75,10 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
         return this.sortTypes[this.selectedSortType];
     }
 
+    get filterString(): string {
+        return (this.searchLine || "").trim().toLocaleLowerCase();
+    }
+
     get votesList(): Vote[] {
         const compareFunction = (a: Vote, b: Vote): number => {
             const aValue = a[this.sortType.attribute];
@@ -89,15 +93,17 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
             return 0;
         };
 
-        const filterString = this.filterString.trim().toLocaleLowerCase();
+        const filterFunction = (vote: Vote): boolean => {
+            const title: string = vote.title.toLocaleLowerCase()
+            const titleWords: string[] = title.split(/[ ,.:]+/);
+            return (
+                titleWords.some(word => word.startsWith(this.filterString)) ||
+                title.startsWith(this.filterString) ||
+                vote.year.toString() === this.filterString
+            );
+        };
 
-        return [...this.votes]
-            .filter(
-                (item) =>
-                    item.title.toLocaleLowerCase().includes(filterString) ||
-                    item.year.toString() === this.filterString
-            )
-            .sort(compareFunction);
+        return [...this.votes].filter(filterFunction).sort(compareFunction);
     }
 }
 </script>
