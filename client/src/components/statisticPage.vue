@@ -1,6 +1,12 @@
 <template>
     <h4>Статистика пользователя {{ $props.userId }}</h4>
-    <votes-list :votes="votes" />
+    <div class="page-body">
+        <tabs-menu
+            v-model="tabIndex"
+            :tabsTitles="tabs"
+        ></tabs-menu>
+        <votes-list :votes="votes" />
+    </div>
 </template>
 
 <script lang="ts">
@@ -24,6 +30,9 @@ export default class StatisticPageComponent extends mixins(
 ) {
     declare $props: PropsType;
 
+    tabIndex: number = 0;
+    tabs: string[] = ['Оценки', 'Режиссеры', 'Актеры']
+
     async created() {
         const votes: Vote[] = await this.getVotes(this.$props.userId);
         this.setVotes(votes);
@@ -36,7 +45,10 @@ export default class StatisticPageComponent extends mixins(
         for (var i = 0; i < votes.length; i++) {
             const vote: Vote = votes[i];
 
-            const filmData = await this.getObjectQuery(QueryObjectType.Film, vote.filmId);
+            const filmData = await this.getObjectQuery(
+                QueryObjectType.Film,
+                vote.filmId
+            );
             if (filmData) {
                 this.addFilm(filmData);
             }
@@ -46,3 +58,9 @@ export default class StatisticPageComponent extends mixins(
     }
 }
 </script>
+
+<style lang="sass">
+.page-body
+    display: flex
+    gap: 5rem
+</style>

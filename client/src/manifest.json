@@ -1,5 +1,6 @@
 {
     "vote-item": "voteItem",
     "votes-list": "votesList",
-    "statistic-page": "statisticPage"
+    "statistic-page": "statisticPage",
+    "tabs-menu": "tabsMenu"
 }
