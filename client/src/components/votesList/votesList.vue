@@ -3,12 +3,23 @@
         <h4>Оценки</h4>
         <div class="votes-list-toolbar">
             <v-text-field
+                class="votes-list-toolbar-input"
                 clearable
                 prepend-inner-icon="$vuetify"
                 v-model="filterString"
                 variant="outlined"
+                hide-details
             ></v-text-field>
-            <v-select :items="sortTypes" variant="outlined"></v-select>
+            <v-select
+                class="votes-list-toolbar-input"
+                v-model="selectedSortType"
+                :items="sortTypeList"
+                item-title="title"
+                item-value="index"
+                prepend-inner-icon="$vuetify"
+                variant="outlined"
+                hide-details
+            ></v-select>
         </div>
         <div class="vote-items">
             <vote-item v-for="vote in votesList" :vote="vote" />
@@ -56,6 +67,10 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 
     selectedSortType: number = 0;
 
+    get sortTypeList() {
+        return this.sortTypes.map((item, index) => ({ ...item, index }));
+    }
+
     get sortType(): SortType {
         return this.sortTypes[this.selectedSortType];
     }
@@ -89,6 +104,11 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 </script>
 
 <style lang="sass">
+.votes-list
+    display: flex
+    flex-direction: column
+    gap: 1rem
+
 .vote-items
     display: flex
     flex-direction: column
@@ -97,4 +117,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 .votes-list-toolbar
     display: flex
     gap: 1rem
+
+.votes-list-toolbar-input
+    width: 50%
 </style>
