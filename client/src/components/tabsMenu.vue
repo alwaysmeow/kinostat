@@ -61,7 +61,6 @@ export default class StatisticPageComponent extends Vue {
     user-select: none
     cursor: pointer
 
-    width: 10rem
     padding: 0.4rem 1rem
 
     text-align: right
