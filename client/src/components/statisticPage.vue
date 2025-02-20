@@ -8,7 +8,8 @@
         ></tabs-menu>
 
         <div class="tab-content">
-            <votes-list v-if="isTab(tabIndex.votes)" :votes="votes" />
+            <votes-list v-if="isTab(tabIndex.votes)" />
+            <directors-list v-if="isTab(tabIndex.directors)" />
         </div>
     </div>
 </template>
@@ -38,8 +39,8 @@ export default class StatisticPageComponent extends mixins(
     tabsTitles: string[] = ['Оценки', 'Режиссеры', 'Актеры'];
     tabIndex: Record<string, number> = {
         votes: 0,
-        directors: 0,
-        actors: 0,
+        directors: 1,
+        actors: 2,
     };
 
     async created() {
