@@ -52,7 +52,7 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
                 const director = this.getDirector(directorRecord.id);
 
                 if (director) {
-                    director.films.push(film.displayTitle);
+                    director.films.push(film.id);
                 } else {
                     this.addDirector({
                         id: directorRecord.id,
@@ -62,6 +62,8 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
                 }
             })
         );
+
+        console.log(this.directors.filter(d => d.films.length > 1))
     }
 }
 </script>

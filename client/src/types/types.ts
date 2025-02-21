@@ -4,6 +4,7 @@ export interface Vote {
     year: number,
     type: string,
     filmId: number,
+    value: number,
     [key: string]: any,
 }
 

@@ -28,15 +28,29 @@ type PropsType = {
         id: { type: Number, default: 0 },
     },
 })
-export default class DirectorItemComponent extends mixins(StoreMixin, QueryMixin) {
+export default class DirectorItemComponent extends mixins(
+    StoreMixin,
+    QueryMixin
+) {
     declare $props: PropsType;
 
     get director(): Person | undefined {
         return this.getDirector(this.$props.id);
     }
 
-    get averageVote(): number {
-        return 10;
+    get averageVote(): string {
+        const votes: number[] =
+            this.director?.films
+                .map(
+                    (filmId) =>
+                        this.votes.find((vote) => vote.filmId === filmId)
+                            ?.value || 0
+                )
+                .filter((item) => item) || [];
+        const avgVote = (
+            votes.reduce((a, b) => a + b, 0) / votes.length
+        ).toString();
+        return avgVote.length > 1 ? avgVote.slice(0, 3) : avgVote;
     }
 
     get cssValueClass(): string {
@@ -49,11 +63,11 @@ export default class DirectorItemComponent extends mixins(StoreMixin, QueryMixin
 
     async created() {
         const director = await this.getPersonQuery(this.$props.id);
-        
+
         if (director) {
             this.setDirectorAttributes(this.$props.id, {
                 photo: director.img.photo.x2 || director.img.photo.x1,
-            })
+            });
         }
     }
 }
