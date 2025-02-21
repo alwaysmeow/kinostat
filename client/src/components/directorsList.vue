@@ -62,8 +62,6 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
                 }
             })
         );
-
-        console.log(this.directors.filter(d => d.films.length > 1))
     }
 }
 </script>
