@@ -22,7 +22,7 @@
             ></v-select>
         </div>
         <div class="vote-items">
-            <director-item v-for="director in directors" :director="director" :key="director.id"></director-item>
+            <director-item v-for="director in directorsList" :director="director" :key="director.id"></director-item>
         </div>
     </div>
 </template>
@@ -32,14 +32,14 @@ import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
 import { SortOrder } from "../types/types";
-import type { Vote, Person, SortType } from "../types/types";
+import type { Person, SortType } from "../types/types";
 
 export default class DirectorsListComponent extends mixins(StoreMixin) {
     searchLine: string = "";
 
     sortTypes: SortType[] = [
         {
-            order: SortOrder.Descending,
+            order: SortOrder.Ascending,
             attribute: "name",
             title: "По алфавиту",
         },
@@ -59,8 +59,8 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
         return (this.searchLine || "").trim().toLocaleLowerCase();
     }
 
-    get sortedVotes(): Vote[] {
-        const compareFunction = (a: Vote, b: Vote): number => {
+    get sortedDirectors(): Person[] {
+        const compareFunction = (a: Person, b: Person): number => {
             const aValue = a[this.sortType.attribute];
             const bValue = b[this.sortType.attribute];
 
@@ -73,21 +73,20 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
             return 0;
         };
 
-        return [...this.votes].sort(compareFunction);
+        return [...this.directors].sort(compareFunction);
     }
 
-    get votesList(): Vote[] {
-        const filterFunction = (vote: Vote): boolean => {
-            const title: string = vote.title.toLocaleLowerCase();
-            const titleWords: string[] = title.split(/[ ,.:]+/);
+    get directorsList(): Person[] {
+        const filterFunction = (director: Person): boolean => {
+            const fullname: string = director.name.toLocaleLowerCase();
+            const names: string[] = fullname.split(/[ ,.:]+/);
             return (
-                titleWords.some((word) => word.startsWith(this.filterString)) ||
-                title.startsWith(this.filterString) ||
-                vote.year.toString() === this.filterString
+                names.some((word) => word.startsWith(this.filterString)) ||
+                fullname.startsWith(this.filterString)
             );
         };
 
-        return [...this.sortedVotes].filter(filterFunction);
+        return [...this.sortedDirectors].filter(filterFunction);
     }
 
     created() {
@@ -106,7 +105,6 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
                 }
             })
         );
-        console.log(this.directors.filter((director: Person) => director.films.length > 1));
     }
 }
 </script>
