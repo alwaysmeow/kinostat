@@ -54,7 +54,8 @@ export default class DirectorItemComponent extends mixins(
     }
 
     get cssValueClass(): string {
-        return `vote-value-${this.averageVote}`;
+        const colorValue = Math.round(parseFloat(this.averageVote));
+        return `vote-value-${colorValue}`;
     }
 
     get photoSrc(): string {
