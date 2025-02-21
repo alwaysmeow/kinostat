@@ -17,7 +17,7 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import type { Person } from "../types/types";
-import QueryMixin, { QueryObjectType } from "../mixins/query.mixin";
+import QueryMixin from "../mixins/query.mixin";
 
 type PropsType = {
     id: number;
@@ -48,7 +48,7 @@ export default class DirectorItemComponent extends mixins(StoreMixin, QueryMixin
     }
 
     async created() {
-        const director = await this.getObjectQuery(QueryObjectType.Person, this.$props.id);
+        const director = await this.getPersonQuery(this.$props.id);
         
         if (director) {
             this.setDirectorAttributes(this.$props.id, {

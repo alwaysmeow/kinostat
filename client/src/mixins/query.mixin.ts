@@ -8,7 +8,7 @@ export enum QueryObjectType {
 }
 
 export default class QueryMixin extends Vue {
-    async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Film | Person | null> {
+    async getObjectQuery<T>(objectType: QueryObjectType | string, id: number): Promise<T | null> {
         const URL = `api/object?type=${objectType}&id=${id}`;
 
         try {
@@ -33,12 +33,17 @@ export default class QueryMixin extends Vue {
                     return data
             }
         } catch (error) {
-            if (objectType === QueryObjectType.Series) {
-                return await this.getObjectQuery(QueryObjectType.Film, id);
-            }
             console.error(error);
         }
         return null;
+    }
+
+    getFilmQuery(id: number): Promise<Film | null> {
+        return this.getObjectQuery<Film>(QueryObjectType.Film, id);
+    }
+
+    getPersonQuery(id: number): Promise<Person | null> {
+        return this.getObjectQuery<Person>(QueryObjectType.Person, id);
     }
 
     async getVotes(userId: number): Promise<Vote[]> {

@@ -17,7 +17,7 @@
 <script lang="ts">
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
-import QueryMixin, { QueryObjectType } from "../mixins/query.mixin";
+import QueryMixin from "../mixins/query.mixin";
 import type { Vote } from "../types/types";
 
 type PropsType = {
@@ -36,7 +36,7 @@ export default class StatisticPageComponent extends mixins(
     declare $props: PropsType;
 
     selectedTabIndex: number = 0;
-    tabsTitles: string[] = ['Оценки', 'Режиссеры', 'Актеры'];
+    tabsTitles: string[] = ["Оценки", "Режиссеры", "Актеры"];
     tabIndex: Record<string, number> = {
         votes: 0,
         directors: 1,
@@ -59,10 +59,8 @@ export default class StatisticPageComponent extends mixins(
         for (var i = votes.length - 1; i >= 0; i--) {
             const vote: Vote = votes[i];
 
-            const filmData = await this.getObjectQuery(
-                QueryObjectType.Film,
-                vote.filmId
-            );
+            const filmData = await this.getFilmQuery(vote.filmId);
+
             if (filmData) {
                 this.addFilm(filmData);
             }
