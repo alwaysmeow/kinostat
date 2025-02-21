@@ -47,4 +47,17 @@ export default class StoreMixin extends Vue {
         const store = useStatistic();
         return store.directors.find(director => director.id === id);
     }
+
+    setDirectorAttributes(id: number, attributes: Partial<Person>): void {
+        const store = useStatistic();
+        const directorIndex = store.directors.findIndex(director => director.id === id);
+        if (directorIndex !== -1) {
+            store.$patch((state) => {
+                state.directors[directorIndex] = {
+                    ...state.directors[directorIndex],
+                    ...attributes,
+                };
+            });
+        }
+    }
 }

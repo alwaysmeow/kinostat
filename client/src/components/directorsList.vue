@@ -11,7 +11,7 @@
             ></v-text-field>
         </div>
         <div class="director-items">
-            <director-item v-for="director in directorsList" :director="director" :key="director.id"></director-item>
+            <director-item v-for="director in directorsList" :id="director.id" :key="director.id"></director-item>
         </div>
     </div>
 </template>

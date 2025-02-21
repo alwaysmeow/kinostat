@@ -1,5 +1,5 @@
 import { Vue } from "vue-class-component";
-import type { Vote, Film } from "../types/types";
+import type { Vote, Film, Person } from "../types/types";
 
 export enum QueryObjectType {
     Film = "film",
@@ -8,7 +8,7 @@ export enum QueryObjectType {
 }
 
 export default class QueryMixin extends Vue {
-    async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Film | null> {
+    async getObjectQuery(objectType: QueryObjectType | string, id: number): Promise<Film | Person | null> {
         const URL = `api/object?type=${objectType}&id=${id}`;
 
         try {
@@ -24,7 +24,14 @@ export default class QueryMixin extends Vue {
                     `Request ${URL} failed by timeout`
                 );
             }
-            return data.film;
+            switch (objectType) {
+                case QueryObjectType.Film:
+                    return data.film
+                case QueryObjectType.Person:
+                    return data.person
+                default:
+                    return data
+            }
         } catch (error) {
             if (objectType === QueryObjectType.Series) {
                 return await this.getObjectQuery(QueryObjectType.Film, id);

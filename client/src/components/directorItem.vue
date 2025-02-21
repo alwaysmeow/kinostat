@@ -1,15 +1,15 @@
 <template>
-    <div :class="['vote-item', cssValueClass]">
-        <div class="vote-film-info">
-            <img class="vote-film-poster" :src="posterSrc" />
-            <div class="vote-film-credits">
-                <div class="vote-film-name">{{ $props.director.name }}</div>
-                <div class="vote-film-year dark-text">
-                    {{ $props.director.id }}
+    <div :class="['director-item', cssValueClass]">
+        <div class="director-info">
+            <img class="person-photo" :src="photoSrc" />
+            <div class="director-credits">
+                <div class="director-name">{{ director?.name }}</div>
+                <div class="director-year dark-text">
+                    {{ director?.id }}
                 </div>
             </div>
         </div>
-        <div class="vote-value-circle">{{ averageVote }}</div>
+        <div class="director-value-circle">{{ averageVote }}</div>
     </div>
 </template>
 
@@ -17,18 +17,23 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import type { Person } from "../types/types";
+import QueryMixin, { QueryObjectType } from "../mixins/query.mixin";
 
 type PropsType = {
-    director: Person;
+    id: number;
 };
 
 @Options({
     props: {
-        director: { type: Object, default: 0 },
+        id: { type: Number, default: 0 },
     },
 })
-export default class DirectorItemComponent extends mixins(StoreMixin) {
+export default class DirectorItemComponent extends mixins(StoreMixin, QueryMixin) {
     declare $props: PropsType;
+
+    get director(): Person | undefined {
+        return this.getDirector(this.$props.id);
+    }
 
     get averageVote(): number {
         return 10;
@@ -38,15 +43,24 @@ export default class DirectorItemComponent extends mixins(StoreMixin) {
         return `vote-value-${this.averageVote}`;
     }
 
-    get posterSrc(): string {
-        const film = this.getFilm(this.$props.director.films[0]);
-        return film ? `${film.posterBaseUrl}/120x` : "";
+    get photoSrc(): string {
+        return this.director?.photo;
+    }
+
+    async created() {
+        const director = await this.getObjectQuery(QueryObjectType.Person, this.$props.id);
+        
+        if (director) {
+            this.setDirectorAttributes(this.$props.id, {
+                photo: director.img.photo.x1,
+            })
+        }
     }
 }
 </script>
 
 <style lang="sass">
-.vote-item
+.director-item
     display: flex
     align-items: center
     justify-content: space-between
@@ -59,25 +73,27 @@ export default class DirectorItemComponent extends mixins(StoreMixin) {
     user-select: none
 
     &:hover
-        .vote-value-circle
+        .director-value-circle
             background-color: var(--value-color)
 
-        .vote-film-credits
+        .director-credits
             transform: translateY(0)
 
-            .vote-film-year
+            .director-year
                 opacity: 100%
 
-.vote-film-info
+.director-info
     display: flex
     flex-direction: row
     align-items: center
     gap: 2rem
+    height: 10rem
 
-    .vote-film-poster
+    .person-photo
         border-radius: 5px
+        height: 100%
 
-    .vote-film-credits
+    .director-credits
         display: flex
         flex-direction: column
         justify-items: left
@@ -88,15 +104,15 @@ export default class DirectorItemComponent extends mixins(StoreMixin) {
 
         text-wrap: pretty
 
-        .vote-film-name
+        .director-name
             font-weight: bold
             font-size: 1.2rem
 
-        .vote-film-year
+        .director-id
             opacity: 0%
             transition: 0.5s
 
-.vote-value-circle
+.director-value-circle
     height: 3rem
     width: 3rem
 
