@@ -52,7 +52,7 @@ export default class DirectorItemComponent extends mixins(StoreMixin, QueryMixin
         
         if (director) {
             this.setDirectorAttributes(this.$props.id, {
-                photo: director.img.photo.x1,
+                photo: director.img.photo.x2 || director.img.photo.x1,
             })
         }
     }
