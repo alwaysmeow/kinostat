@@ -34,7 +34,7 @@ import StoreMixin from "../mixins/store.mixin";
 import { SortOrder } from "../types/types";
 import type { Vote, SortType } from "../types/types";
 
-export default class VoteItemComponent extends mixins(StoreMixin) {
+export default class VotesListComponent extends mixins(StoreMixin) {
     searchLine: string = "";
 
     sortTypes: SortType[] = [

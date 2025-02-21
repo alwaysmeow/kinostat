@@ -8,12 +8,19 @@ export interface Vote {
 }
 
 export interface Film {
-    actors: Object[],
+    actors: Person[],
     countries: string[],
-    directors: Object[],
+    directors: Person[],
     genres: string[],
     id: number,
-    posterBaseUrl: string
+    posterBaseUrl: string,
+    [key: string]: any,
+}
+
+export interface Person {
+    name: string,
+    id: number,
+    films: number[],
     [key: string]: any,
 }
 

@@ -1,6 +1,6 @@
 import { Vue } from "vue-class-component";
 import useStatistic from "../store/statistic";
-import type { Vote, Film } from "../types/types";
+import type { Vote, Film, Person } from "../types/types";
 
 export default class StoreMixin extends Vue {
     get votes(): Vote[] {
@@ -13,12 +13,12 @@ export default class StoreMixin extends Vue {
         return store.films;
     }
 
-    get actors(): Object[] {
+    get actors(): Person[] {
         const store = useStatistic();
         return store.actors;
     }
 
-    get directors(): Object[] {
+    get directors(): Person[] {
         const store = useStatistic();
         return store.directors;
     }
@@ -36,5 +36,15 @@ export default class StoreMixin extends Vue {
     getFilm(id: number): Film | undefined {
         const store = useStatistic();
         return store.films.find(film => film.id === id);
+    }
+
+    addDirector(director: Person): void {
+        const store = useStatistic();
+        store.addDirector(director);
+    }
+
+    getDirector(id: number): Person | undefined {
+        const store = useStatistic();
+        return store.directors.find(director => director.id === id);
     }
 }

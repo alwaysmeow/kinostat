@@ -22,7 +22,7 @@
             ></v-select>
         </div>
         <div class="vote-items">
-            <div v-for="director in directors">{{ director }}</div>
+            <director-item v-for="director in directors" :director="director" :key="director.id"></director-item>
         </div>
     </div>
 </template>
@@ -32,9 +32,9 @@ import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
 import { SortOrder } from "../types/types";
-import type { Vote, SortType } from "../types/types";
+import type { Vote, Person, SortType } from "../types/types";
 
-export default class VoteItemComponent extends mixins(StoreMixin) {
+export default class DirectorsListComponent extends mixins(StoreMixin) {
     searchLine: string = "";
 
     sortTypes: SortType[] = [
@@ -91,21 +91,22 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     }
 
     created() {
-        const directors = {};
         this.films.forEach((film) =>
-            film.directors.forEach((director) => {
-                const key = director.id.toString();
-                if (directors[key]) {
-                    directors[key].films.push(film.displayTitle);
+            film.directors.forEach((directorRecord: Person) => {
+                const director = this.getDirector(directorRecord.id);
+
+                if (director) {
+                    director.films.push(film.displayTitle);
                 } else {
-                    directors[key] = {
-                        name: director.name,
-                        films: [film.displayTitle],
-                    };
+                    this.addDirector({
+                        id: directorRecord.id,
+                        name: directorRecord.name,
+                        films: [film.id],
+                    });
                 }
             })
         );
-        console.log(directors);
+        console.log(this.directors.filter((director: Person) => director.films.length > 1));
     }
 }
 </script>

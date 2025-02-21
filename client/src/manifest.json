@@ -3,5 +3,6 @@
     "votes-list": "votesList",
     "statistic-page": "statisticPage",
     "tabs-menu": "tabsMenu",
-    "directors-list": "directorsList"
+    "directors-list": "directorsList",
+    "director-item": "directorItem"
 }
