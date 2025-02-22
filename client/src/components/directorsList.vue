@@ -51,7 +51,7 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
         {
             order: SortOrder.Ascending,
             attribute: "averageVote",
-            title: "С лучших",
+            title: "С худших",
         },
     ];
 
@@ -113,8 +113,8 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
     gap: 1rem
 
 .director-items
-    display: flex
-    flex-direction: column
+    display: grid
+    grid-template-columns: repeat(4, 1fr)
     gap: 1rem
 
 .directors-list-toolbar

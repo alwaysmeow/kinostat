@@ -1,13 +1,8 @@
 <template>
     <div :class="['director-item', cssValueClass]">
-        <div class="director-info">
-            <img class="person-photo" :src="photoSrc" />
-            <div class="director-credits">
-                <div class="director-name">{{ director?.name }}</div>
-                <div class="director-year dark-text">
-                    {{ director?.id }}
-                </div>
-            </div>
+        <img class="person-photo" :src="photoSrc" />
+        <div class="director-credits">
+            <div class="director-name">{{ director?.name }}</div>
         </div>
         <div class="director-value-circle">{{ averageVote }}</div>
     </div>
@@ -67,8 +62,14 @@ export default class DirectorItemComponent extends mixins(
 <style lang="sass">
 .director-item
     display: flex
+    width: 100%
+    height: 100%
+    flex-direction: column
     align-items: center
-    justify-content: space-between
+    justify-content: center
+
+    gap: 0.5rem
+    height: max-content
 
     border: 1px solid grey
     border-radius: 5px
@@ -81,41 +82,21 @@ export default class DirectorItemComponent extends mixins(
         .director-value-circle
             background-color: var(--value-color)
 
-        .director-credits
-            transform: translateY(0)
+.person-photo
+    width: 100%
+    border-radius: 5px
+    aspect-ratio: 2 / 3
 
-            .director-year
-                opacity: 100%
-
-.director-info
+.director-credits
     display: flex
-    flex-direction: row
+    flex-direction: column
     align-items: center
-    gap: 2rem
-    height: 10rem
+    justify-content: center
+    height: 5rem
 
-    .person-photo
-        border-radius: 5px
-        height: 100%
-
-    .director-credits
-        display: flex
-        flex-direction: column
-        justify-items: left
-        text-align: left
-
-        transform: translateY(25%)
-        transition: 0.5s
-
-        text-wrap: pretty
-
-        .director-name
-            font-weight: bold
-            font-size: 1.2rem
-
-        .director-id
-            opacity: 0%
-            transition: 0.5s
+    .director-name
+        width: 90%
+        font-weight: bold
 
 .director-value-circle
     height: 3rem
@@ -125,7 +106,7 @@ export default class DirectorItemComponent extends mixins(
     align-items: center
     justify-content: center
 
-    margin: 2rem
+    margin-bottom: 1rem
 
     border: 1px solid var(--value-color)
     border-radius: 100%
