@@ -45,7 +45,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     align-items: center
     justify-content: space-between
 
-    border: 1px solid grey
+    background-color: var(--neutral-shade-one)
     border-radius: 5px
 
     transition: 0.5s

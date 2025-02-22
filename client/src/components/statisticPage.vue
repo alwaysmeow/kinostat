@@ -127,9 +127,9 @@ export default class StatisticPageComponent extends mixins(
     top: 5vh
 
     height: 80vh
-    width: 15vw
+    width: 10vw
 
 .tab-content
-    margin-right: 20vw
-    width: 50vw
+    margin-right: 15vw
+    width: 70vw
 </style>

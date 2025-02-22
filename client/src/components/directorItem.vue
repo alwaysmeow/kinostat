@@ -4,7 +4,7 @@
         <div class="director-credits">
             <div class="director-name">{{ director?.name }}</div>
         </div>
-        <div class="director-value-circle">{{ averageVote }}</div>
+        <div class="director-avg-value">{{ averageVote }}</div>
     </div>
 </template>
 
@@ -71,20 +71,20 @@ export default class DirectorItemComponent extends mixins(
     gap: 0.5rem
     height: max-content
 
-    border: 1px solid grey
+    background-color: var(--neutral-shade-one)
     border-radius: 5px
 
     transition: 0.5s
 
     user-select: none
 
-    &:hover
-        .director-value-circle
-            background-color: var(--value-color)
+    &:hover .director-avg-value
+        color: var(--main-text-color)
+        background-color: var(--value-color)
 
 .person-photo
     width: 100%
-    border-radius: 5px
+    border-radius: 5px 5px 0 0
     aspect-ratio: 2 / 3
 
 .director-credits
@@ -93,23 +93,22 @@ export default class DirectorItemComponent extends mixins(
     align-items: center
     justify-content: center
     height: 5rem
+    width: 100%
 
     .director-name
-        width: 90%
         font-weight: bold
+        margin: 0 15px
 
-.director-value-circle
-    height: 3rem
-    width: 3rem
-
+.director-avg-value
     display: flex
     align-items: center
     justify-content: center
 
-    margin-bottom: 1rem
+    width: 100%
+    padding: 0.2rem
 
-    border: 1px solid var(--value-color)
-    border-radius: 100%
+    color: var(--value-color)
+    border-radius: 0 0 5px 5px
 
     font-weight: bold
     font-size: 1.2rem
