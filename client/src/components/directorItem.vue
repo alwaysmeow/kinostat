@@ -53,7 +53,6 @@ export default class DirectorItemComponent extends mixins(
     }
 
     async created() {
-        this.setAverageVote();
         const director = await this.getPersonQuery(this.$props.id);
 
         if (director) {
@@ -61,22 +60,6 @@ export default class DirectorItemComponent extends mixins(
                 photo: director.img.photo.x2 || director.img.photo.x1,
             });
         }
-    }
-
-    setAverageVote() {
-        const votes: number[] =
-            this.director?.films
-                .map(
-                    (filmId) =>
-                        this.votes.find((vote) => vote.filmId === filmId)
-                            ?.value || 0
-                )
-                .filter((item) => item) || [];
-        const avgVote = votes.reduce((a, b) => a + b, 0) / votes.length;
-
-        this.setDirectorAttributes(this.$props.id, {
-            averageVote: avgVote,
-        });
     }
 }
 </script>

@@ -103,24 +103,6 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
 
         return [...this.sortedDirectors].filter(filterFunction);
     }
-
-    created() {
-        this.films.forEach((film) =>
-            film.directors.forEach((directorRecord: Person) => {
-                const director = this.getDirector(directorRecord.id);
-
-                if (director) {
-                    director.films.push(film.id);
-                } else {
-                    this.addDirector({
-                        id: directorRecord.id,
-                        name: directorRecord.name,
-                        films: [film.id],
-                    });
-                }
-            })
-        );
-    }
 }
 </script>
 

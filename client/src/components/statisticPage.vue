@@ -18,7 +18,7 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import QueryMixin from "../mixins/query.mixin";
-import type { Vote } from "../types/types";
+import type { Vote, Person } from "../types/types";
 
 type PropsType = {
     userId: number;
@@ -44,25 +44,71 @@ export default class StatisticPageComponent extends mixins(
     };
 
     async created() {
+        const timeout = 10;
         const votes: Vote[] = await this.getVotes(this.$props.userId);
         this.setVotes(votes);
-        await this.getFilms(votes);
+        await this.getFilms(timeout);
+        await this.getDirectors(timeout);
     }
 
     isTab(tab: number): boolean {
         return tab === this.selectedTabIndex;
     }
 
-    async getFilms(votes: Vote[]) {
-        const timeout = 10;
-
-        for (var i = votes.length - 1; i >= 0; i--) {
-            const vote: Vote = votes[i];
+    async getFilms(timeout: number = 100) {
+        for (var i = this.votes.length - 1; i >= 0; i--) {
+            const vote: Vote = this.votes[i];
 
             const filmData = await this.getFilmQuery(vote.filmId);
 
             if (filmData) {
                 this.addFilm(filmData);
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, timeout));
+        }
+    }
+
+    async getDirectors(timeout: number = 100) {
+        this.films.forEach((film) =>
+            film.directors.forEach((directorRecord: Person) => {
+                const director = this.getDirector(directorRecord.id);
+
+                if (director) {
+                    director.films.push(film.id);
+                } else {
+                    this.addDirector({
+                        id: directorRecord.id,
+                        name: directorRecord.name,
+                        films: [film.id],
+                    });
+                }
+            })
+        );
+
+        this.directors.forEach(director => {
+            const votes: number[] =
+                director?.films
+                    .map(
+                        (filmId) =>
+                            this.votes.find((vote) => vote.filmId === filmId)
+                                ?.value || 0
+                    )
+                    .filter((item) => item) || [];
+            const avgVote = votes.reduce((a, b) => a + b, 0) / votes.length;
+
+            this.setDirectorAttributes(director.id, {
+                averageVote: avgVote,
+            });
+        })
+
+        for (var i = this.directors.length - 1; i >= 0; i--) {
+            const directorData = await this.getPersonQuery(this.directors[i].id)
+
+            if (directorData?.img?.photo?.x2) {
+                this.setDirectorAttributes(directorData.id, {
+                    photo: directorData.img.photo.x2 || directorData.img.photo.x1,
+                });
             }
 
             await new Promise((resolve) => setTimeout(resolve, timeout));
