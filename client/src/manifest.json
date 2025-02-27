@@ -4,5 +4,6 @@
     "statistic-page": "statisticPage",
     "tabs-menu": "tabsMenu",
     "directors-list": "directorsList",
-    "director-item": "directorItem"
+    "director-item": "directorItem",
+    "toolbar": "toolbar"
 }

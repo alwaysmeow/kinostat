@@ -34,4 +34,11 @@ export interface SortType {
     order: SortOrder,
     attribute: string,
     title: string,
+    type: string,
+}
+
+export interface iToolbar {
+    searchLine: string,
+    compareFunction?: (a: any, b: any) => number,
+    filterFunction?: (item: any) => boolean,
 }
