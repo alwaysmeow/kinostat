@@ -131,15 +131,14 @@ export default class StatisticPageComponent extends mixins(
     parsePhotos(timeout: number = 100) {
         const lists: ("directors" | "actors")[] = ["directors", "actors"];
 
+        for (var i = lists.length - 1; i >= 0; i--)
+            const list = this[lists[i]];
 
-        lists.forEach((listName) => {
-            const list: Person[] = this[listName];
-            
-            list.forEach(async (person: Person) => {
+            list.forEach((person: Person) => {
                 this.getPersonQuery(person.id)
                     .then((personData) => {
                         if (personData?.img?.photo?.x2) {
-                            this.setPersonAttributes(listName, personData.id, {
+                            this.setPersonAttributes(lists[i], personData.id, {
                                 photo:
                                     personData.img.photo.x2 ||
                                     personData.img.photo.x1,
@@ -153,7 +152,7 @@ export default class StatisticPageComponent extends mixins(
                             )
                     );
             });
-        });
+        };
     }
 }
 </script>

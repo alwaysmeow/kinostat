@@ -1,7 +1,7 @@
 <template>
     <div :class="['vote-item', cssValueClass]">
         <div class="vote-film-info">
-            <img class="vote-film-poster" :src="posterSrc"/>
+            <img class="vote-film-poster" loading="lazy" :src="posterSrc"/>
             <div class="vote-film-credits">
                 <div class="vote-film-name">{{ $props.vote.title }}</div>
                 <div class="vote-film-year dark-text">{{ $props.vote.year }}</div>

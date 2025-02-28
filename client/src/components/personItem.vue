@@ -1,6 +1,6 @@
 <template>
     <div :class="['person-item', cssValueClass]">
-        <img class="person-photo" :src="photoSrc" />
+        <img class="person-photo" loading="lazy" :src="photoSrc" />
         <div class="person-credits">
             <div class="person-name">{{ person?.name }}</div>
         </div>
