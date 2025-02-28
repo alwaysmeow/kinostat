@@ -16,7 +16,7 @@ import QueryMixin from "../mixins/query.mixin";
 
 type PropsType = {
     id: number;
-    list: 'directors' | 'actors';
+    list: "directors" | "actors";
 };
 
 @Options({
@@ -33,16 +33,20 @@ export default class DirectorItemComponent extends mixins(
 
     get person(): Person | undefined {
         switch (this.$props.list) {
-            case 'directors':
+            case "directors":
                 return this.getDirector(this.$props.id);
-            case 'actors':
+            case "actors":
                 return this.getActor(this.$props.id);
         }
     }
 
     get averageVote(): string {
-        const avgVote = (this.person?.averageVote || 0).toString();
-        return avgVote.length > 1 ? avgVote.slice(0, 3) : avgVote;
+        const format = (vote: number): string => {
+            const avgVoteString = (vote || 0).toString();
+            return avgVoteString.length > 1 ? avgVoteString.slice(0, 3) : avgVoteString;
+        }
+
+        return format(this.person?.averageVote);
     }
 
     get cssValueClass(): string {

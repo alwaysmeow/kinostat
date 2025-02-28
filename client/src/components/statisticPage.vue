@@ -49,10 +49,16 @@ export default class StatisticPageComponent extends mixins(
         const votes: Vote[] = await this.getVotes(this.$props.userId);
         this.setVotes(votes);
         await this.getFilms(timeout);
+
+        // freezing
         this.getDirectors();
         this.getActors();
+
+        // start votes setting
         this.setAverageVotes();
         await this.parsePersons();
+        // votes updating
+        this.setAverageVotes();
     }
 
     isTab(tab: number): boolean {
@@ -139,13 +145,18 @@ export default class StatisticPageComponent extends mixins(
                 const person = list[j];
                 const personData = await this.getPersonQuery(person.id);
 
-                if (personData?.img?.photo?.x2) {
-                    this.setPersonAttributes(listName, personData.id, {
-                        photo:
-                            personData.img.photo.x2 ||
-                            personData.img.photo.x1,
-                    });
-                }
+                const filmography =
+                    personData?.filmography
+                        .filter((film: Record<string, any>) => film.contextData.role === listName.slice(0, -1))
+                        .map((film: Record<string, any>) => film.id)
+                        .filter((id: number) =>
+                            this.votes.some((vote) => vote.filmId === id)
+                        ) || [];
+
+                this.setPersonAttributes(listName, personData?.id!, {
+                    photo: personData?.img.photo.x2 || personData?.img.photo.x1,
+                    films: filmography,
+                });
             }
         }
 
