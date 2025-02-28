@@ -75,7 +75,7 @@ export default class DirectorItemComponent extends mixins(
 
     user-select: none
 
-    &:hover .director-avg-value
+    &:hover .person-avg-value
         color: var(--main-text-color)
         background-color: var(--value-color)
 

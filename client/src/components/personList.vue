@@ -1,6 +1,5 @@
 <template>
     <div class="persons-list">
-        <h4>Режиссеры</h4>
         <toolbar v-model="toolbarSettings" :sort-types="sortTypes"></toolbar>
         <div class="person-items">
             <person-item

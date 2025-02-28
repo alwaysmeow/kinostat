@@ -1,6 +1,5 @@
 <template>
     <div class="votes-list">
-        <h4>Оценки</h4>
         <toolbar v-model="toolbarSettings" :sort-types="sortTypes"></toolbar>
         <div class="vote-items">
             <vote-item v-for="vote in votesList" :vote="vote" :key="vote.num" />

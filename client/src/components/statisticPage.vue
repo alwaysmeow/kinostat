@@ -52,7 +52,7 @@ export default class StatisticPageComponent extends mixins(
         this.getDirectors();
         this.getActors();
         this.setAverageVotes();
-        this.parsePhotos();
+        await this.parsePersons();
     }
 
     isTab(tab: number): boolean {
@@ -128,25 +128,28 @@ export default class StatisticPageComponent extends mixins(
         });
     }
 
-    parsePhotos() {
+    async parsePersons(timeout: number = 100) {
         const lists: ("directors" | "actors")[] = ["directors", "actors"];
 
-        lists.forEach((listName) => {
+        for (var i = 0; i < lists.length; i++) {
+            const listName = lists[i];
             const list: Person[] = this[listName];
-            
-            list.forEach(async (person: Person) => {
-                this.getPersonQuery(person.id)
-                    .then((personData) => {
-                        if (personData?.img?.photo?.x2) {
-                            this.setPersonAttributes(listName, personData.id, {
-                                photo:
-                                    personData.img.photo.x2 ||
-                                    personData.img.photo.x1,
-                            });
-                        }
-                    })
-            });
-        });
+
+            for (var j = 0; j < list.length; j++) {
+                const person = list[j];
+                const personData = await this.getPersonQuery(person.id);
+
+                if (personData?.img?.photo?.x2) {
+                    this.setPersonAttributes(listName, personData.id, {
+                        photo:
+                            personData.img.photo.x2 ||
+                            personData.img.photo.x1,
+                    });
+                }
+            }
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, timeout));
     }
 }
 </script>
