@@ -128,31 +128,25 @@ export default class StatisticPageComponent extends mixins(
         });
     }
 
-    parsePhotos(timeout: number = 100) {
+    parsePhotos() {
         const lists: ("directors" | "actors")[] = ["directors", "actors"];
 
-        for (var i = lists.length - 1; i >= 0; i--)
-            const list = this[lists[i]];
-
-            list.forEach((person: Person) => {
+        lists.forEach((listName) => {
+            const list: Person[] = this[listName];
+            
+            list.forEach(async (person: Person) => {
                 this.getPersonQuery(person.id)
                     .then((personData) => {
                         if (personData?.img?.photo?.x2) {
-                            this.setPersonAttributes(lists[i], personData.id, {
+                            this.setPersonAttributes(listName, personData.id, {
                                 photo:
                                     personData.img.photo.x2 ||
                                     personData.img.photo.x1,
                             });
                         }
                     })
-                    .then(
-                        () =>
-                            new Promise((resolve) =>
-                                setTimeout(resolve, timeout)
-                            )
-                    );
             });
-        };
+        });
     }
 }
 </script>
