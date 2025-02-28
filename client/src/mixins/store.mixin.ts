@@ -38,6 +38,19 @@ export default class StoreMixin extends Vue {
         return store.films.find(film => film.id === id);
     }
 
+    setPersonAttributes(list: 'directors' | 'actors', id: number, attributes: Partial<Person>): void {
+        const store = useStatistic();
+        const personIndex = store[list].findIndex(person => person.id === id);
+        if (personIndex !== -1) {
+            store.$patch((state) => {
+                state[list][personIndex] = {
+                    ...state[list][personIndex],
+                    ...attributes,
+                };
+            });
+        }
+    }
+
     addDirector(director: Person): void {
         const store = useStatistic();
         store.addDirector(director);
@@ -49,15 +62,20 @@ export default class StoreMixin extends Vue {
     }
 
     setDirectorAttributes(id: number, attributes: Partial<Person>): void {
+        this.setPersonAttributes('directors', id, attributes);
+    }
+
+    addActor(actor: Person): void {
         const store = useStatistic();
-        const directorIndex = store.directors.findIndex(director => director.id === id);
-        if (directorIndex !== -1) {
-            store.$patch((state) => {
-                state.directors[directorIndex] = {
-                    ...state.directors[directorIndex],
-                    ...attributes,
-                };
-            });
-        }
+        store.addActor(actor);
+    }
+
+    getActor(id: number): Person | undefined {
+        const store = useStatistic();
+        return store.actors.find(actor => actor.id === id);
+    }
+
+    setActorAttributes(id: number, attributes: Partial<Person>): void {
+        this.setPersonAttributes('actors', id, attributes);
     }
 }

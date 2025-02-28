@@ -1,26 +1,39 @@
 <template>
-    <div class="directors-list">
+    <div class="persons-list">
         <h4>Режиссеры</h4>
-        <toolbar
-            v-model="toolbarSettings"
-            :sort-types="sortTypes"
-        ></toolbar>
-        <div class="director-items">
-            <director-item v-for="director in directorsList" :id="director.id" :key="director.id"></director-item>
+        <toolbar v-model="toolbarSettings" :sort-types="sortTypes"></toolbar>
+        <div class="person-items">
+            <person-item
+                v-for="person in personList"
+                :id="person.id"
+                :list="$props.list"
+                :key="person.id"
+            ></person-item>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import { mixins } from "vue-class-component";
+import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
 import { SortOrder } from "../types/types";
 import type { Person, SortType, iToolbar } from "../types/types";
 
+type PropsType = {
+    list: "directors" | "actors";
+};
+
+@Options({
+    props: {
+        list: { type: String, required: true },
+    },
+})
 export default class DirectorsListComponent extends mixins(StoreMixin) {
+    declare $props: PropsType;
+
     toolbarSettings: iToolbar = {
-        searchLine: '',
+        searchLine: "",
     };
 
     sortTypes: SortType[] = [
@@ -44,19 +57,23 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
         },
     ];
 
-    get sortedDirectors(): Person[] {
-        const compare = this.toolbarSettings.compareFunction
-        if (compare) {
-            return [...this.directors].sort(compare);
-        }
-        return this.directors;
+    get persons(): Person[] {
+        return this[this.$props.list];
     }
 
-    get directorsList(): Person[] {
+    get sortedPersons(): Person[] {
+        const compare = this.toolbarSettings.compareFunction;
+        if (compare) {
+            return [...this.persons].sort(compare);
+        }
+        return this.persons;
+    }
+
+    get personList(): Person[] {
         const searchLine = this.toolbarSettings.searchLine;
         if (searchLine) {
-            const filterFunction = (director: Person): boolean => {
-                const fullname: string = director.name.toLocaleLowerCase();
+            const filterFunction = (person: Person): boolean => {
+                const fullname: string = person.name.toLocaleLowerCase();
                 const names: string[] = fullname.split(/[ ,.:]+/);
                 return (
                     names.some((word) => word.startsWith(searchLine)) ||
@@ -64,29 +81,22 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
                 );
             };
 
-            return [...this.sortedDirectors].filter(filterFunction);
+            return [...this.sortedPersons].filter(filterFunction);
         }
 
-        return this.sortedDirectors;
+        return this.sortedPersons;
     }
 }
 </script>
 
 <style lang="sass">
-.directors-list
+.persons-list
     display: flex
     flex-direction: column
     gap: 1rem
 
-.director-items
+.person-items
     display: grid
     grid-template-columns: repeat(4, 1fr)
     gap: 1rem
-
-.directors-list-toolbar
-    display: flex
-    gap: 1rem
-
-.directors-list-toolbar-input
-    width: 50%
 </style>

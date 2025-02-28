@@ -1,10 +1,10 @@
 <template>
-    <div :class="['director-item', cssValueClass]">
+    <div :class="['person-item', cssValueClass]">
         <img class="person-photo" :src="photoSrc" />
-        <div class="director-credits">
-            <div class="director-name">{{ director?.name }}</div>
+        <div class="person-credits">
+            <div class="person-name">{{ person?.name }}</div>
         </div>
-        <div class="director-avg-value">{{ averageVote }}</div>
+        <div class="person-avg-value">{{ averageVote }}</div>
     </div>
 </template>
 
@@ -16,11 +16,13 @@ import QueryMixin from "../mixins/query.mixin";
 
 type PropsType = {
     id: number;
+    list: 'directors' | 'actors';
 };
 
 @Options({
     props: {
         id: { type: Number, default: 0 },
+        list: { type: String, required: true },
     },
 })
 export default class DirectorItemComponent extends mixins(
@@ -29,12 +31,17 @@ export default class DirectorItemComponent extends mixins(
 ) {
     declare $props: PropsType;
 
-    get director(): Person | undefined {
-        return this.getDirector(this.$props.id);
+    get person(): Person | undefined {
+        switch (this.$props.list) {
+            case 'directors':
+                return this.getDirector(this.$props.id);
+            case 'actors':
+                return this.getActor(this.$props.id);
+        }
     }
 
     get averageVote(): string {
-        const avgVote = (this.director?.averageVote || 0).toString();
+        const avgVote = (this.person?.averageVote || 0).toString();
         return avgVote.length > 1 ? avgVote.slice(0, 3) : avgVote;
     }
 
@@ -44,23 +51,13 @@ export default class DirectorItemComponent extends mixins(
     }
 
     get photoSrc(): string {
-        return this.director?.photo;
-    }
-
-    async created() {
-        const director = await this.getPersonQuery(this.$props.id);
-
-        if (director) {
-            this.setDirectorAttributes(this.$props.id, {
-                photo: director.img.photo.x2 || director.img.photo.x1,
-            });
-        }
+        return this.person?.photo;
     }
 }
 </script>
 
 <style lang="sass">
-.director-item
+.person-item
     display: flex
     width: 100%
     height: 100%
@@ -87,7 +84,7 @@ export default class DirectorItemComponent extends mixins(
     border-radius: 5px 5px 0 0
     aspect-ratio: 2 / 3
 
-.director-credits
+.person-credits
     display: flex
     flex-direction: column
     align-items: center
@@ -95,11 +92,11 @@ export default class DirectorItemComponent extends mixins(
     height: 5rem
     width: 100%
 
-    .director-name
+    .person-name
         font-weight: bold
         margin: 0 15px
 
-.director-avg-value
+.person-avg-value
     display: flex
     align-items: center
     justify-content: center

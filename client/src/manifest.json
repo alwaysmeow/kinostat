@@ -3,7 +3,7 @@
     "votes-list": "votesList",
     "statistic-page": "statisticPage",
     "tabs-menu": "tabsMenu",
-    "directors-list": "directorsList",
-    "director-item": "directorItem",
+    "person-list": "personList",
+    "person-item": "personItem",
     "toolbar": "toolbar"
 }

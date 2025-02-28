@@ -9,7 +9,8 @@
 
         <div class="tab-content">
             <votes-list v-if="isTab(tabIndex.votes)" />
-            <directors-list v-if="isTab(tabIndex.directors)" />
+            <person-list list="directors" v-if="isTab(tabIndex.directors)" />
+            <person-list list="actors" v-if="isTab(tabIndex.actors)" />
         </div>
     </div>
 </template>
@@ -49,6 +50,7 @@ export default class StatisticPageComponent extends mixins(
         this.setVotes(votes);
         await this.getFilms(timeout);
         await this.getDirectors(timeout);
+        await this.getActors();
     }
 
     isTab(tab: number): boolean {
@@ -113,6 +115,43 @@ export default class StatisticPageComponent extends mixins(
 
             await new Promise((resolve) => setTimeout(resolve, timeout));
         }
+    }
+
+    async getActors() {
+        this.films.forEach((film) =>
+            film.actors.forEach((actorRecord: Person) => {
+                const actor = this.getActor(actorRecord.id);
+
+                if (actor) {
+                    actor.films.push(film.id);
+                } else if (actorRecord.name) {
+                    this.addActor({
+                        id: actorRecord.id,
+                        name: actorRecord.name,
+                        originalName: actorRecord.originalName,
+                        films: [film.id],
+                    });
+                }
+            })
+        );
+
+        this.actors.forEach(actor => {
+            const votes: number[] =
+                actor.films
+                    .map(
+                        (filmId) =>
+                            this.votes.find((vote) => vote.filmId === filmId)
+                                ?.value || 0
+                    )
+                    .filter((item) => item) || [];
+            const avgVote = votes.reduce((a, b) => a + b, 0) / votes.length;
+
+            this.setActorAttributes(actor.id, {
+                averageVote: avgVote,
+            });
+        })
+
+        console.log(this.actors);
     }
 }
 </script>
