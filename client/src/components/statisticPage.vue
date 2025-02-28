@@ -51,6 +51,7 @@ export default class StatisticPageComponent extends mixins(
         await this.getFilms(timeout);
         await this.getDirectors(timeout);
         await this.getActors();
+        this.setAverageVotes();
     }
 
     isTab(tab: number): boolean {
@@ -88,28 +89,15 @@ export default class StatisticPageComponent extends mixins(
             })
         );
 
-        this.directors.forEach(director => {
-            const votes: number[] =
-                director?.films
-                    .map(
-                        (filmId) =>
-                            this.votes.find((vote) => vote.filmId === filmId)
-                                ?.value || 0
-                    )
-                    .filter((item) => item) || [];
-            const avgVote = votes.reduce((a, b) => a + b, 0) / votes.length;
-
-            this.setDirectorAttributes(director.id, {
-                averageVote: avgVote,
-            });
-        })
-
         for (var i = this.directors.length - 1; i >= 0; i--) {
-            const directorData = await this.getPersonQuery(this.directors[i].id)
+            const directorData = await this.getPersonQuery(
+                this.directors[i].id
+            );
 
             if (directorData?.img?.photo?.x2) {
                 this.setDirectorAttributes(directorData.id, {
-                    photo: directorData.img.photo.x2 || directorData.img.photo.x1,
+                    photo:
+                        directorData.img.photo.x2 || directorData.img.photo.x1,
                 });
             }
 
@@ -134,24 +122,24 @@ export default class StatisticPageComponent extends mixins(
                 }
             })
         );
+    }
 
-        this.actors.forEach(actor => {
-            const votes: number[] =
-                actor.films
-                    .map(
-                        (filmId) =>
-                            this.votes.find((vote) => vote.filmId === filmId)
-                                ?.value || 0
-                    )
-                    .filter((item) => item) || [];
-            const avgVote = votes.reduce((a, b) => a + b, 0) / votes.length;
+    setAverageVotes() {
+        const lists: ('directors' | 'actors')[] = ['directors', 'actors'];
 
-            this.setActorAttributes(actor.id, {
-                averageVote: avgVote,
+        lists.forEach((listName) => {
+            const list: Person[] = this[listName];
+            list.forEach((person) => {
+                const votes: number[] = this.votes
+                    .filter((vote) => person.films.includes(vote.filmId))
+                    .map((vote) => vote.value);
+                const avgVote = votes.reduce((a, b) => a + b, 0) / votes.length;
+
+                this.setPersonAttributes(listName, person.id, {
+                    averageVote: avgVote,
+                });
             });
-        })
-
-        console.log(this.actors);
+        });
     }
 }
 </script>
