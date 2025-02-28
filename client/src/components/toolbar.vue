@@ -31,19 +31,18 @@ import type { SortType, iToolbar } from "../types/types";
 
 type PropsType = {
     modelValue: iToolbar;
-    sortTypes: SortType[],
-    type: string,
+    sortTypes: SortType[];
+    type: string;
 };
 
 @Options({
     props: {
         modelValue: { type: Object, required: true },
         sortTypes: { type: Array<SortType>, default: [] },
-        type: { type: String, default: 'default' },
+        type: { type: String, default: "default" },
     },
     emits: ["update:modelValue"],
 })
-
 export default class ToolbarComponent extends mixins(StoreMixin) {
     declare $props: PropsType;
 
@@ -61,22 +60,33 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
 
     setCompareFunction(value: number) {
         const sortType = this.$props.sortTypes[value];
-        if (sortType.type === 'string') {
-            const attr = sortType.attribute;
-            this.$props.modelValue.compareFunction = (a: any, b: any) => a[attr].localeCompare(b[attr], 'ru');
-        } else {
-            this.$props.modelValue.compareFunction = (a: any, b: any) => {
-                const aValue = a[sortType.attribute];
-                const bValue = b[sortType.attribute];
 
-                if (aValue < bValue) {
-                    return sortType.order === SortOrder.Ascending ? -1 : 1;
-                }
-                if (aValue > bValue) {
-                    return sortType.order === SortOrder.Ascending ? 1 : -1;
-                }
-                return 0;
-            };
+        const compare = (a: number, b: number) => {
+            if (a < b) {
+                return sortType.order === SortOrder.Ascending ? -1 : 1;
+            }
+            if (a > b) {
+                return sortType.order === SortOrder.Ascending ? 1 : -1;
+            }
+            return 0;
+        };
+
+        switch (sortType.type) {
+            case "string":
+                const attr = sortType.attribute;
+                this.$props.modelValue.compareFunction = (a: any, b: any) =>
+                    a[attr].localeCompare(b[attr], "ru");
+                break;
+            case "length":
+                this.$props.modelValue.compareFunction = (a: any, b: any) =>
+                    compare(
+                        a[sortType.attribute].length,
+                        b[sortType.attribute].length
+                    );
+                break;
+            default:
+                this.$props.modelValue.compareFunction = (a: any, b: any) =>
+                    compare(a[sortType.attribute], b[sortType.attribute]);
         }
     }
 }

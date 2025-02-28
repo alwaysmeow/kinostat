@@ -54,6 +54,12 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
             title: "С худших",
             type: "number",
         },
+        {
+            order: SortOrder.Descending,
+            attribute: "films",
+            title: "По количеству оценок",
+            type: "length",
+        },
     ];
 
     get persons(): Person[] {
