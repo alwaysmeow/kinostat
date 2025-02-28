@@ -49,9 +49,10 @@ export default class StatisticPageComponent extends mixins(
         const votes: Vote[] = await this.getVotes(this.$props.userId);
         this.setVotes(votes);
         await this.getFilms(timeout);
-        await this.getDirectors(timeout);
-        await this.getActors();
+        this.getDirectors();
+        this.getActors();
         this.setAverageVotes();
+        this.parsePhotos();
     }
 
     isTab(tab: number): boolean {
@@ -72,7 +73,7 @@ export default class StatisticPageComponent extends mixins(
         }
     }
 
-    async getDirectors(timeout: number = 100) {
+    getDirectors() {
         this.films.forEach((film) =>
             film.directors.forEach((directorRecord: Person) => {
                 const director = this.getDirector(directorRecord.id);
@@ -88,24 +89,9 @@ export default class StatisticPageComponent extends mixins(
                 }
             })
         );
-
-        for (var i = this.directors.length - 1; i >= 0; i--) {
-            const directorData = await this.getPersonQuery(
-                this.directors[i].id
-            );
-
-            if (directorData?.img?.photo?.x2) {
-                this.setDirectorAttributes(directorData.id, {
-                    photo:
-                        directorData.img.photo.x2 || directorData.img.photo.x1,
-                });
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, timeout));
-        }
     }
 
-    async getActors() {
+    getActors() {
         this.films.forEach((film) =>
             film.actors.forEach((actorRecord: Person) => {
                 const actor = this.getActor(actorRecord.id);
@@ -125,7 +111,7 @@ export default class StatisticPageComponent extends mixins(
     }
 
     setAverageVotes() {
-        const lists: ('directors' | 'actors')[] = ['directors', 'actors'];
+        const lists: ("directors" | "actors")[] = ["directors", "actors"];
 
         lists.forEach((listName) => {
             const list: Person[] = this[listName];
@@ -138,6 +124,34 @@ export default class StatisticPageComponent extends mixins(
                 this.setPersonAttributes(listName, person.id, {
                     averageVote: avgVote,
                 });
+            });
+        });
+    }
+
+    parsePhotos(timeout: number = 100) {
+        const lists: ("directors" | "actors")[] = ["directors", "actors"];
+
+
+        lists.forEach((listName) => {
+            const list: Person[] = this[listName];
+            
+            list.forEach(async (person: Person) => {
+                this.getPersonQuery(person.id)
+                    .then((personData) => {
+                        if (personData?.img?.photo?.x2) {
+                            this.setPersonAttributes(listName, personData.id, {
+                                photo:
+                                    personData.img.photo.x2 ||
+                                    personData.img.photo.x1,
+                            });
+                        }
+                    })
+                    .then(
+                        () =>
+                            new Promise((resolve) =>
+                                setTimeout(resolve, timeout)
+                            )
+                    );
             });
         });
     }
