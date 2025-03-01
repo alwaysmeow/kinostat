@@ -43,7 +43,7 @@ export interface iToolbar {
     filterFunction?: (item: any) => boolean,
 }
 
-export enum TabStatus {
+export enum InfoTabStatus {
     None = "none",
     Filter = "filter",
     Film = "film",

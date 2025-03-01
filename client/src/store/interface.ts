@@ -1,17 +1,17 @@
 import { defineStore } from "pinia";
-import { TabStatus } from "../types/types";
+import { InfoTabStatus } from "../types/types";
 
 interface InterfaceStore {
-    tabStatus: TabStatus;
+    infoTabStatus: InfoTabStatus;
 }
 
 const useInterface = defineStore("interface", {
     state: (): InterfaceStore => ({
-        tabStatus: TabStatus.None,
+        infoTabStatus: InfoTabStatus.None,
     }),
     actions: {
-        setTabStatus(status: TabStatus) {
-            this.tabStatus = status;
+        setInfoTabStatus(status: InfoTabStatus) {
+            this.infoTabStatus = status;
         },
     },
 });

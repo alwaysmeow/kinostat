@@ -53,9 +53,8 @@ export default class StatisticPageComponent extends Vue {
 
     gap: 0.2rem
     padding: 1rem 0rem
-    margin: 1rem 0rem
 
-    border-right: 1px solid #FEFEFE
+    border-right: 1px solid var(--main-text-color)
 
 .tab-button
     user-select: none

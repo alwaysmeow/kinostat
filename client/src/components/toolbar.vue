@@ -36,7 +36,7 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
-import { SortOrder, TabStatus } from "../types/types";
+import { SortOrder, InfoTabStatus } from "../types/types";
 import type { SortType, iToolbar } from "../types/types";
 
 type PropsType = {
@@ -65,7 +65,7 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
     }
 
     get cssActiveFilterTabClass() {
-        if (this.tabStatus === TabStatus.Filter) {
+        if (this.infoTabStatus === InfoTabStatus.Filter) {
             return "toolbar-filter-active";
         }
         return "";
@@ -108,10 +108,10 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
     }
 
     handleFilter() {
-        this.setTabStatus(
-            this.tabStatus === TabStatus.Filter
-                ? TabStatus.None
-                : TabStatus.Filter
+        this.setInfoTabStatus(
+            this.infoTabStatus === InfoTabStatus.Filter
+                ? InfoTabStatus.None
+                : InfoTabStatus.Filter
         );
     }
 }

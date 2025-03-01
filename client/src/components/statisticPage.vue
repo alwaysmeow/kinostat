@@ -1,17 +1,26 @@
 <template>
     <h4>Статистика пользователя {{ $props.userId }}</h4>
     <div class="page-body">
-        <tabs-menu
-            class="tabs-menu"
-            v-model="selectedTabIndex"
-            :tabs-titles="tabsTitles"
-        ></tabs-menu>
+        <div class="page-right-space">
+            <tabs-menu
+                class="tabs-menu"
+                v-model="selectedTabIndex"
+                :tabs-titles="tabsTitles"
+            ></tabs-menu>
+        </div>
 
         <div class="tab-content">
             <votes-list v-if="isTab(tabIndex.votes)" />
             <person-list list="directors" v-if="isTab(tabIndex.directors)" />
             <person-list list="actors" v-if="isTab(tabIndex.actors)" />
         </div>
+
+        <div class="page-left-space">
+            <div :class="['info-tab', cssInfoTabVisibleClass]">
+                <filter-tab v-if="isInfoTab(InfoTabStatus.Filter)" />
+            </div>
+        </div>
+
     </div>
 </template>
 
@@ -19,7 +28,7 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import QueryMixin from "../mixins/query.mixin";
-import type { Vote, Person } from "../types/types";
+import { type Vote, type Person, InfoTabStatus } from "../types/types";
 
 type PropsType = {
     userId: number;
@@ -44,6 +53,15 @@ export default class StatisticPageComponent extends mixins(
         actors: 2,
     };
 
+    InfoTabStatus = InfoTabStatus;
+
+    get cssInfoTabVisibleClass() {
+        if (this.infoTabStatus === InfoTabStatus.None) {
+            return ""
+        }
+        return "visible"
+    }
+
     async created() {
         const timeout = 10;
         const votes: Vote[] = await this.getVotes(this.$props.userId);
@@ -63,6 +81,10 @@ export default class StatisticPageComponent extends mixins(
 
     isTab(tab: number): boolean {
         return tab === this.selectedTabIndex;
+    }
+
+    isInfoTab(status: InfoTabStatus): boolean {
+        return this.infoTabStatus === status;
     }
 
     async getFilms(timeout: number = 100) {
@@ -168,16 +190,34 @@ export default class StatisticPageComponent extends mixins(
 <style lang="sass">
 .page-body
     display: flex
-    gap: 5vw
+    gap: 5rem
+    padding: 2rem
+
+.page-left-space, .page-right-space
+    width: 20vw
+    margin: 5vh 0
 
 .tabs-menu
     position: sticky
     top: 5vh
 
-    height: 80vh
-    width: 10vw
+    height: 90vh
 
 .tab-content
-    margin-right: 15vw
-    width: 70vw
+    width: 60vw
+
+.info-tab
+    position: sticky
+    top: 5vh
+    height: 90vh
+
+    width: 20vw
+
+    border-left: 1px solid var(--main-text-color)
+    transform: translateX(calc(100% + 2rem))
+
+    transition: 0.2s
+
+    &.visible
+        transform: none
 </style>
