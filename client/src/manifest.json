@@ -6,5 +6,6 @@
     "person-list": "personList",
     "person-item": "personItem",
     "toolbar": "toolbar",
-    "filter-tab": "filterTab"
+    "filter-tab": "filterTab",
+    "filter-slider": "filterSlider"
 }

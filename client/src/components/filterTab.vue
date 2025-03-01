@@ -1,10 +1,10 @@
 <template>
     <div class="filter-tab">
         <h2>Фильтры</h2>
-        <div class="filter-vote-value-picker">
+        <div class="filter-vote-value-picker" v-if="isTab(TabIndex.Votes)">
             <div class="filter-vote-value-picker-grid">
                 <div
-                    v-for="index in selectedVoteValues.map((_, i) => i)"
+                    v-for="index in filterParams.selectedVoteValues.map((_, i) => i)"
                     :class="[
                         'filter-vote-value-circle',
                         `vote-value-${index + 1}`,
@@ -17,20 +17,36 @@
             </div>
         </div>
 
-        <div class="filter-year">
-            <div class="filter-label"> 
-                <div class="filter-label-name">Год выпуска</div>
-                <div class="filter-label-value">{{ `${yearRange[0]} - ${yearRange[1]}` }}</div>
-            </div>
-            <v-range-slider
-                class="filter-slider"
-                v-model="yearRange"
-                :min="minYear"
-                :max="maxYear"
-                :step="1"
-                hide-details
-            />
-        </div>
+        <filter-slider
+            v-if="isTab(TabIndex.Votes)"
+            v-model="filterParams.yearRange"
+            label="Год премьеры"
+            :min="minYear"
+            :max="maxYear"
+            :step="1"
+        ></filter-slider>
+
+        <filter-slider
+            v-if="isTab(TabIndex.Directors) || isTab(TabIndex.Actors)"
+            v-model="filterParams.voteRange"
+            label="Средняя оценка"
+            :step="0.1"
+        ></filter-slider>
+
+        <filter-slider
+            v-if="isTab(TabIndex.Directors) || isTab(TabIndex.Actors)"
+            v-model="filterParams.filmCountRange"
+            label="Оценено фильмов"
+        ></filter-slider>
+
+        <filter-slider
+            v-if="isTab(TabIndex.Directors) || isTab(TabIndex.Actors)"
+            v-model="filterParams.birthYearRange"
+            label="Год рождения"
+            :min="minYear"
+            :max="maxYear"
+            :step="1"
+        ></filter-slider>
 
         <div class="filter-buttons-block">
             <v-btn class="filter-button" elevation="0">Сбросить</v-btn>
@@ -42,7 +58,7 @@
 <script lang="ts">
 import { mixins, Options } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
-import type { TabIndex } from "../types/types";
+import { TabIndex } from "../types/types";
 
 type PropsType = {
     tabIndex: TabIndex;
@@ -55,21 +71,30 @@ type PropsType = {
 })
 export default class VoteItemComponent extends mixins(StoreMixin) {
     declare $props: PropsType;
-    selectedVoteValues: boolean[] = Array(10).fill(true);
+
     minYear: number = 1900;
     maxYear: number = (new Date()).getFullYear();
-    yearRange: number[] = [this.minYear, this.maxYear];
+
+    filterParams = {
+        selectedVoteValues: Array(10).fill(true),
+        yearRange: [this.minYear, this.maxYear],
+        voteRange: [1, 10],
+        filmCountRange: [1, 10],
+        birthYearRange: [this.minYear, this.maxYear],
+    }
+
+    TabIndex = TabIndex;
 
     isTab(tab: TabIndex): boolean {
         return this.$props.tabIndex === tab;
     }
 
     handleValueClick(index: number) {
-        this.selectedVoteValues[index] = !this.selectedVoteValues[index];
+        this.filterParams.selectedVoteValues[index] = !this.filterParams.selectedVoteValues[index];
     }
 
     cssValueSelectedClass(index: number): string {
-        if (this.selectedVoteValues[index]) {
+        if (this.filterParams.selectedVoteValues[index]) {
             return "active";
         }
         return "";
@@ -115,15 +140,6 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 
                 &.active
                     border-color: var(--value-color)
-    
-    .filter-label
-        display: flex
-        justify-content: space-between
-        margin: 0 8px
-        font-weight: bold
-
-        .filter-label-name
-            color: var(--secondary-text-color)
 
     .filter-buttons-block
         display: flex
