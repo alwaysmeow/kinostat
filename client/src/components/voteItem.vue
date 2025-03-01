@@ -100,7 +100,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 
     margin: 2rem
 
-    border: 1px solid var(--value-color)
+    border: 2px solid var(--value-color)
     border-radius: 100%
 
     font-weight: bold

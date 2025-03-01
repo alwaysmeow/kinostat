@@ -50,3 +50,9 @@ export enum InfoTabStatus {
     Director = "director",
     Actor = "actor"
 }
+
+export enum TabIndex {
+    Votes = 0,
+    Directors = 1,
+    Actors = 2,
+};

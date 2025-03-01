@@ -10,17 +10,19 @@
         </div>
 
         <div class="tab-content">
-            <votes-list v-if="isTab(tabIndex.votes)" />
-            <person-list list="directors" v-if="isTab(tabIndex.directors)" />
-            <person-list list="actors" v-if="isTab(tabIndex.actors)" />
+            <votes-list v-if="isTab(TabIndex.Votes)" />
+            <person-list list="directors" v-if="isTab(TabIndex.Directors)" />
+            <person-list list="actors" v-if="isTab(TabIndex.Actors)" />
         </div>
 
         <div class="page-left-space">
             <div :class="['info-tab', cssInfoTabVisibleClass]">
-                <filter-tab v-if="isInfoTab(InfoTabStatus.Filter)" />
+                <filter-tab
+                    :tab-index="selectedTabIndex"
+                    v-if="isInfoTab(InfoTabStatus.Filter)"
+                />
             </div>
         </div>
-
     </div>
 </template>
 
@@ -28,7 +30,7 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import QueryMixin from "../mixins/query.mixin";
-import { type Vote, type Person, InfoTabStatus } from "../types/types";
+import { type Vote, type Person, InfoTabStatus, TabIndex } from "../types/types";
 
 type PropsType = {
     userId: number;
@@ -47,19 +49,15 @@ export default class StatisticPageComponent extends mixins(
 
     selectedTabIndex: number = 0;
     tabsTitles: string[] = ["Оценки", "Режиссеры", "Актеры"];
-    tabIndex: Record<string, number> = {
-        votes: 0,
-        directors: 1,
-        actors: 2,
-    };
 
+    TabIndex = TabIndex;
     InfoTabStatus = InfoTabStatus;
 
     get cssInfoTabVisibleClass() {
         if (this.infoTabStatus === InfoTabStatus.None) {
-            return ""
+            return "";
         }
-        return "visible"
+        return "visible";
     }
 
     async created() {
@@ -79,8 +77,8 @@ export default class StatisticPageComponent extends mixins(
         this.setAverageVotes();
     }
 
-    isTab(tab: number): boolean {
-        return tab === this.selectedTabIndex;
+    isTab(tab: TabIndex): boolean {
+        return this.selectedTabIndex === tab;
     }
 
     isInfoTab(status: InfoTabStatus): boolean {
@@ -169,7 +167,10 @@ export default class StatisticPageComponent extends mixins(
 
                 const filmography =
                     personData?.filmography
-                        .filter((film: Record<string, any>) => film.contextData.role === listName.slice(0, -1))
+                        .filter(
+                            (film: Record<string, any>) =>
+                                film.contextData.role === listName.slice(0, -1)
+                        )
                         .map((film: Record<string, any>) => film.id)
                         .filter((id: number) =>
                             this.votes.some((vote) => vote.filmId === id)
