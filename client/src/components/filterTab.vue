@@ -93,7 +93,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
         .filter-vote-value-picker-grid
             display: grid
             grid-template-columns: repeat(5, 1fr)
-            gap: 1rem
+            gap: 0.5rem
 
             .filter-vote-value-circle
                 display: flex
@@ -113,11 +113,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 
                 transition: 0.3s
 
-                &:hover
-                    border-color: var(--value-color)
-
                 &.active
-                    background-color: var(--value-color)
                     border-color: var(--value-color)
     
     .filter-label
