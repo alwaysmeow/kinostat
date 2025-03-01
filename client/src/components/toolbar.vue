@@ -6,6 +6,7 @@
             prepend-inner-icon="$search"
             v-model="$props.modelValue.searchLine"
             variant="outlined"
+            density="comfortable"
             hide-details
         ></v-text-field>
         <v-select
@@ -16,9 +17,18 @@
             item-value="index"
             prepend-inner-icon="$sort"
             variant="outlined"
+            density="comfortable"
             hide-details
             @update:modelValue="setCompareFunction"
         ></v-select>
+        <v-btn
+            :class="['toolbar-input', 'toolbar-btn', cssActiveFilterTabClass]"
+            icon="$filter"
+            variant="flat"
+            density="comfortable"
+            hide-details
+            @click="handleFilter"
+        ></v-btn>
     </div>
 </template>
 
@@ -26,7 +36,7 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
-import { SortOrder } from "../types/types";
+import { SortOrder, TabStatus } from "../types/types";
 import type { SortType, iToolbar } from "../types/types";
 
 type PropsType = {
@@ -52,6 +62,13 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
 
     get sortTypeList() {
         return this.$props.sortTypes.map((item, index) => ({ ...item, index }));
+    }
+
+    get cssActiveFilterTabClass() {
+        if (this.tabStatus === TabStatus.Filter) {
+            return "toolbar-filter-active";
+        }
+        return "";
     }
 
     created() {
@@ -89,6 +106,14 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
                     compare(a[sortType.attribute], b[sortType.attribute]);
         }
     }
+
+    handleFilter() {
+        this.setTabStatus(
+            this.tabStatus === TabStatus.Filter
+                ? TabStatus.None
+                : TabStatus.Filter
+        );
+    }
 }
 </script>
 
@@ -98,5 +123,27 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
     gap: 1rem
 
 .toolbar-input
-    width: 50%
+    width: 30%
+    height: 100%
+    background-color: var(--neutral-shade-one)
+    border-radius: 1em
+
+    .v-field__outline
+        display: none
+
+    svg
+        fill: var(--main-text-color)
+
+button.v-btn.toolbar-btn
+    position: relative
+    top: 0
+    bottom: 0
+    height: auto
+    padding: 0 1.5em
+
+    &.toolbar-filter-active
+        background-color: var(--main-text-color)
+
+        svg
+            fill: var(--neutral-shade-one)
 </style>

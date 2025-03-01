@@ -42,3 +42,11 @@ export interface iToolbar {
     compareFunction?: (a: any, b: any) => number,
     filterFunction?: (item: any) => boolean,
 }
+
+export enum TabStatus {
+    None = "none",
+    Filter = "filter",
+    Film = "film",
+    Director = "director",
+    Actor = "actor"
+}

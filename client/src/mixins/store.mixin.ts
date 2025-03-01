@@ -1,6 +1,7 @@
 import { Vue } from "vue-class-component";
 import useStatistic from "../store/statistic";
-import type { Vote, Film, Person } from "../types/types";
+import type { Vote, Film, Person, TabStatus } from "../types/types";
+import useInterface from "../store/interface";
 
 export default class StoreMixin extends Vue {
     get votes(): Vote[] {
@@ -77,5 +78,15 @@ export default class StoreMixin extends Vue {
 
     setActorAttributes(id: number, attributes: Partial<Person>): void {
         this.setPersonAttributes('actors', id, attributes);
+    }
+
+    get tabStatus() {
+        const store = useInterface();
+        return store.tabStatus;
+    }
+
+    setTabStatus(status: TabStatus) {
+        const store = useInterface();
+        store.setTabStatus(status);
     }
 }

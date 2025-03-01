@@ -46,7 +46,7 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     justify-content: space-between
 
     background-color: var(--neutral-shade-one)
-    border-radius: 5px
+    border-radius: 1em
 
     transition: 0.5s
 
