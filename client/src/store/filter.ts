@@ -49,7 +49,56 @@ const useFilters = defineStore("filters", {
             this.filters = this.defaultFilters();
         },
         setFilters(filters: iFilters) {
-            this.filters = structuredClone(filters);
+            this.copyFilters(filters, this.filters);
+        },
+        fetchFilters(filters: iFilters) {
+            this.copyFilters(this.filters, filters);
+        },
+        copyFilters(sourceFilter: iFilters, targetFilter: iFilters) {
+            const copyFilterValues = <T>(source: T[], target: T[]) => {
+                for (let i = 0; i < source.length; i++) {
+                    target[i] = source[i];
+                }
+            };
+    
+            const filterMappings: { source: unknown[]; target: unknown[] }[] = [
+                {
+                    source: sourceFilter.selectedVoteValues,
+                    target: targetFilter.selectedVoteValues,
+                },
+                {
+                    source: sourceFilter.filmYearRange,
+                    target: targetFilter.filmYearRange,
+                },
+                {
+                    source: sourceFilter.directorBirthYearRange,
+                    target: targetFilter.directorBirthYearRange,
+                },
+                {
+                    source: sourceFilter.directorFilmCountRange,
+                    target: targetFilter.directorFilmCountRange,
+                },
+                {
+                    source: sourceFilter.directorVoteRange,
+                    target: targetFilter.directorVoteRange,
+                },
+                {
+                    source: sourceFilter.actorBirthYearRange,
+                    target: targetFilter.actorBirthYearRange,
+                },
+                {
+                    source: sourceFilter.actorFilmCountRange,
+                    target: targetFilter.actorFilmCountRange,
+                },
+                {
+                    source: sourceFilter.actorVoteRange,
+                    target: targetFilter.actorVoteRange,
+                },
+            ];
+    
+            filterMappings.forEach(({ source, target }) => {
+                copyFilterValues(source, target);
+            });
         },
     },
 });

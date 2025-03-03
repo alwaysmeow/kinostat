@@ -61,20 +61,20 @@ export default class StatisticPageComponent extends mixins(
     }
 
     async created() {
-        const timeout = 10;
-        const votes: Vote[] = await this.getVotes(this.$props.userId);
-        this.setVotes(votes);
-        await this.getFilms(timeout);
+        // const timeout = 10;
+        // const votes: Vote[] = await this.getVotes(this.$props.userId);
+        // this.setVotes(votes);
+        // await this.getFilms(timeout);
 
-        // freezing
-        this.getDirectors();
-        this.getActors();
+        // // freezing
+        // this.getDirectors();
+        // this.getActors();
 
-        // start votes setting
-        this.setAverageVotes();
-        await this.parsePersons();
-        // votes updating
-        this.setAverageVotes();
+        // // start votes setting
+        // this.setAverageVotes();
+        // await this.parsePersons();
+        // // votes updating
+        // this.setAverageVotes();
     }
 
     isTab(tab: TabIndex): boolean {

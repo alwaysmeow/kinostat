@@ -76,14 +76,20 @@
             <v-btn
                 class="filter-button"
                 elevation="0"
-                @click="handleResetFilters"
-                >Сбросить</v-btn
+                @click="handleApplyFilters"
+                >Применить</v-btn
             >
             <v-btn
                 class="filter-button"
                 elevation="0"
-                @click="handleApplyFilters"
-                >Применить</v-btn
+                @click="handleRollbackFilters"
+                >Откатить изменения</v-btn
+            >
+            <v-btn
+                class="filter-button"
+                elevation="0"
+                @click="handleResetFilters"
+                >Сбросить</v-btn
             >
         </div>
     </div>
@@ -115,7 +121,7 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
     TabIndex = TabIndex;
 
     created() {
-        // this.filterParams = this.getDefaultFilters();
+        this.fetchFilters(this.filterParams);
     }
 
     isTab(tab: TabIndex): boolean {
@@ -134,16 +140,17 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
         return "";
     }
 
-    handleResetFilters() {
-        if (true) {
-            this.filterParams = { ...this.filters };
-        } else {
-            this.setDefaultFilters();
-        }
-    }
-
     handleApplyFilters() {
         this.setFilters(this.filterParams);
+    }
+
+    handleRollbackFilters() {
+        this.fetchFilters(this.filterParams);
+    }
+
+    handleResetFilters() {
+        this.setDefaultFilters();
+        this.fetchFilters(this.filterParams);
     }
 }
 </script>
@@ -194,10 +201,10 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
 
     .filter-buttons-block
         display: flex
+        flex-direction: column
         gap: 1rem
 
         .filter-button
-            width: 50%
             background-color: var(--neutral-shade-one)
             border-radius: 1em
             font-weight: bold

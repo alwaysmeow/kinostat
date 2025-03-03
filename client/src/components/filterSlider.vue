@@ -49,7 +49,6 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     }
 
     set range(value) {
-        console.log(value);
         this.$emit('update:modelValue', value);
     }
 }

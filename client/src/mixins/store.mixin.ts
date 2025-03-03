@@ -1,6 +1,12 @@
 import { Vue } from "vue-class-component";
 import useStatistic from "../store/statistic";
-import type { Vote, Film, Person, InfoTabStatus, iFilters } from "../common/types";
+import type {
+    Vote,
+    Film,
+    Person,
+    InfoTabStatus,
+    iFilters,
+} from "../common/types";
 import useInterface from "../store/interface";
 import useFilters from "../store/filter";
 
@@ -37,12 +43,16 @@ export default class StoreMixin extends Vue {
 
     getFilm(id: number): Film | undefined {
         const store = useStatistic();
-        return store.films.find(film => film.id === id);
+        return store.films.find((film) => film.id === id);
     }
 
-    setPersonAttributes(list: 'directors' | 'actors', id: number, attributes: Partial<Person>): void {
+    setPersonAttributes(
+        list: "directors" | "actors",
+        id: number,
+        attributes: Partial<Person>
+    ): void {
         const store = useStatistic();
-        const personIndex = store[list].findIndex(person => person.id === id);
+        const personIndex = store[list].findIndex((person) => person.id === id);
         if (personIndex !== -1) {
             store.$patch((state) => {
                 state[list][personIndex] = {
@@ -60,11 +70,11 @@ export default class StoreMixin extends Vue {
 
     getDirector(id: number): Person | undefined {
         const store = useStatistic();
-        return store.directors.find(director => director.id === id);
+        return store.directors.find((director) => director.id === id);
     }
 
     setDirectorAttributes(id: number, attributes: Partial<Person>): void {
-        this.setPersonAttributes('directors', id, attributes);
+        this.setPersonAttributes("directors", id, attributes);
     }
 
     addActor(actor: Person): void {
@@ -74,11 +84,11 @@ export default class StoreMixin extends Vue {
 
     getActor(id: number): Person | undefined {
         const store = useStatistic();
-        return store.actors.find(actor => actor.id === id);
+        return store.actors.find((actor) => actor.id === id);
     }
 
     setActorAttributes(id: number, attributes: Partial<Person>): void {
-        this.setPersonAttributes('actors', id, attributes);
+        this.setPersonAttributes("actors", id, attributes);
     }
 
     get infoTabStatus() {
@@ -109,5 +119,10 @@ export default class StoreMixin extends Vue {
     setFilters(filters: iFilters) {
         const store = useFilters();
         store.setFilters(filters);
+    }
+
+    fetchFilters(filters: iFilters) {
+        const store = useFilters();
+        store.fetchFilters(filters);
     }
 }
