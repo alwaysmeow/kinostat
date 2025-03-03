@@ -1,29 +1,71 @@
 import { defineStore } from "pinia";
 import type { iFilters } from "../types/types";
 
-const defaultYearRange = [1895, (new Date()).getFullYear()]
-const defaultVoteRange = [1, 10]
+const CURRENT_YEAR = (new Date()).getFullYear();
+const THE_ARRIVAL_OF_THE_TRAIN_YEAR = 1895;
+const AUGUSTE_LUMIERE_BIRTH_YEAR = 1862;
 
-const defaultFilterStates: iFilters = {
+const DEFAULT_MAX_DIRECTOR_FILMS = 10;
+const DEFAULT_MAX_ACTOR_FILMS = 20;
+
+const startupFilters: iFilters = {
     selectedVoteValues: Array(10).fill(true),
-    filmYearRange: [...defaultYearRange],
+    filmYearRange: [THE_ARRIVAL_OF_THE_TRAIN_YEAR, CURRENT_YEAR],
 
-    directorVoteRange: [...defaultVoteRange],
-    directorFilmCountRange: [1, 10],
-    directorBirthYearRange: [...defaultYearRange],
+    directorVoteRange: [1, 10],
+    directorFilmCountRange: [1, DEFAULT_MAX_DIRECTOR_FILMS],
+    directorBirthYearRange: [AUGUSTE_LUMIERE_BIRTH_YEAR, CURRENT_YEAR],
 
-    actorVoteRange: [...defaultVoteRange],
-    actorFilmCountRange: [1, 10],
-    actorBirthYearRange: [...defaultYearRange],
+    actorVoteRange: [1, 10],
+    actorFilmCountRange: [1, DEFAULT_MAX_ACTOR_FILMS],
+    actorBirthYearRange: [AUGUSTE_LUMIERE_BIRTH_YEAR, CURRENT_YEAR],
+}
+
+interface iStore {
+    earliestFilm: number,
+
+    minDirectorBirthYear: number,
+    maxDirectorBirthYear: number,
+    maxDirectorFilms: number,
+
+    minActorBirthYear: number,
+    maxActorBirthYear: number,
+    maxActorFilms: number,
+
+    filters: iFilters,
 }
 
 const useFilters = defineStore("filters", {
-    state: (): iFilters => ({
-        ...defaultFilterStates,
+    state: (): iStore => ({
+        earliestFilm: 1895,
+
+        minDirectorBirthYear: 1875,
+        maxDirectorBirthYear: CURRENT_YEAR,
+        maxDirectorFilms: 10,
+    
+        minActorBirthYear: 1875,
+        maxActorBirthYear: CURRENT_YEAR,
+        maxActorFilms: 20,
+
+        filters: { ...startupFilters },
     }),
     actions: {
+        defaultFilters(): iFilters {
+            return {
+                selectedVoteValues: Array(10).fill(true),
+                filmYearRange: [this.earliestFilm, CURRENT_YEAR],
+            
+                directorVoteRange: [1, 10],
+                directorFilmCountRange: [1, this.maxDirectorFilms],
+                directorBirthYearRange: [this.minDirectorBirthYear, this.maxDirectorBirthYear],
+            
+                actorVoteRange: [1, 10],
+                actorFilmCountRange: [1, this.maxActorFilms],
+                actorBirthYearRange: [this.minActorBirthYear, this.maxActorBirthYear],
+            }
+        },
         setDefaultFilters() {
-            Object.assign(this, { ...defaultFilterStates, ...this });
+            this.filters = { ...this.defaultFilters() };
         },
     },
 });

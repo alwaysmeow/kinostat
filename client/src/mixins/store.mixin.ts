@@ -93,7 +93,7 @@ export default class StoreMixin extends Vue {
 
     get filters() {
         const store = useFilters();
-        return store;
+        return store.filters;
     }
 
     setDefaultFilters() {
