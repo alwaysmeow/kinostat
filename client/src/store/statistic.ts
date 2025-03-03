@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { Vote, Film, Person } from '../types/types';
+import type { Vote, Film, Person } from '../common/types';
 
 interface StatisticStore {
     votes: Vote[],

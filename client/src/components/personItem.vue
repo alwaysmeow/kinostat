@@ -11,7 +11,7 @@
 <script lang="ts">
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
-import type { Person } from "../types/types";
+import type { Person } from "../common/types";
 import QueryMixin from "../mixins/query.mixin";
 
 type PropsType = {

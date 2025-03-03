@@ -11,8 +11,8 @@
 import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
-import { SortOrder } from "../types/types";
-import type { Vote, SortType, iToolbar } from "../types/types";
+import { SortOrder } from "../common/types";
+import type { Vote, SortType, iToolbar } from "../common/types";
 
 export default class VotesListComponent extends mixins(StoreMixin) {
     toolbarSettings: iToolbar = {

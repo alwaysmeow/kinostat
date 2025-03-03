@@ -36,8 +36,8 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
-import { SortOrder, InfoTabStatus } from "../types/types";
-import type { SortType, iToolbar } from "../types/types";
+import { SortOrder, InfoTabStatus } from "../common/types";
+import type { SortType, iToolbar } from "../common/types";
 
 type PropsType = {
     modelValue: iToolbar;

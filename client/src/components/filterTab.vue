@@ -2,7 +2,7 @@
     <div class="filter-tab">
         <h2>Фильтры</h2>
 
-        <div v-if="isTab(TabIndex.Votes)">
+        <div v-if="isTab(TabIndex.Votes)" class="filter-tab-content">
             <div class="filter-vote-value-picker">
                 <div class="filter-vote-value-picker-grid">
                     <div
@@ -30,7 +30,7 @@
             ></filter-slider>
         </div>
 
-        <div v-if="isTab(TabIndex.Directors)">
+        <div v-if="isTab(TabIndex.Directors)" class="filter-tab-content">
             <filter-slider
                 v-model="filterParams.directorVoteRange"
                 label="Средняя оценка"
@@ -51,7 +51,7 @@
             ></filter-slider>
         </div>
 
-        <div v-if="isTab(TabIndex.Actors)">
+        <div v-if="isTab(TabIndex.Actors)" class="filter-tab-content">
             <filter-slider
                 v-model="filterParams.actorVoteRange"
                 label="Средняя оценка"
@@ -73,8 +73,18 @@
         </div>
 
         <div class="filter-buttons-block">
-            <v-btn class="filter-button" elevation="0">Сбросить</v-btn>
-            <v-btn class="filter-button" elevation="0">Применить</v-btn>
+            <v-btn
+                class="filter-button"
+                elevation="0"
+                @click="handleResetFilters"
+                >Сбросить</v-btn
+            >
+            <v-btn
+                class="filter-button"
+                elevation="0"
+                @click="handleApplyFilters"
+                >Применить</v-btn
+            >
         </div>
     </div>
 </template>
@@ -82,23 +92,8 @@
 <script lang="ts">
 import { mixins, Options } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
-import { TabIndex, type iFilters } from "../types/types";
-
-const defaultYearRange = [1895, new Date().getFullYear()];
-const defaultVoteRange = [1, 10];
-
-const defaultFilterStates: iFilters = {
-    selectedVoteValues: Array(10).fill(true),
-    filmYearRange: [...defaultYearRange],
-
-    directorVoteRange: [...defaultVoteRange],
-    directorFilmCountRange: [1, 10],
-    directorBirthYearRange: [...defaultYearRange],
-
-    actorVoteRange: [...defaultVoteRange],
-    actorFilmCountRange: [1, 10],
-    actorBirthYearRange: [...defaultYearRange],
-};
+import { TabIndex, type iFilters } from "../common/types";
+import { startupFilters } from "../common/const";
 
 type PropsType = {
     tabIndex: TabIndex;
@@ -109,18 +104,18 @@ type PropsType = {
         tabIndex: { type: Number, required: true },
     },
 })
-export default class VoteItemComponent extends mixins(StoreMixin) {
+export default class FilterTabComponent extends mixins(StoreMixin) {
     declare $props: PropsType;
 
-    minYear: number = 1900;
-    maxYear: number = new Date().getFullYear();
+    minYear: number = 1800;
+    maxYear: number = 2100;
 
-    filterParams: iFilters = defaultFilterStates;
+    filterParams: iFilters = startupFilters();
 
     TabIndex = TabIndex;
 
     created() {
-        this.filterParams = { ...this.filters };
+        // this.filterParams = this.getDefaultFilters();
     }
 
     isTab(tab: TabIndex): boolean {
@@ -138,6 +133,18 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
         }
         return "";
     }
+
+    handleResetFilters() {
+        if (true) {
+            this.filterParams = { ...this.filters };
+        } else {
+            this.setDefaultFilters();
+        }
+    }
+
+    handleApplyFilters() {
+        this.setFilters(this.filterParams);
+    }
 }
 </script>
 
@@ -148,6 +155,11 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 
     margin: 0 2rem
     gap: 2rem
+
+    .filter-tab-content
+        display: flex
+        flex-direction: column
+        gap: 2rem
 
     .filter-vote-value-picker
         display: flex

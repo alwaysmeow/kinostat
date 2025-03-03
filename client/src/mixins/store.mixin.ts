@@ -1,6 +1,6 @@
 import { Vue } from "vue-class-component";
 import useStatistic from "../store/statistic";
-import type { Vote, Film, Person, InfoTabStatus } from "../types/types";
+import type { Vote, Film, Person, InfoTabStatus, iFilters } from "../common/types";
 import useInterface from "../store/interface";
 import useFilters from "../store/filter";
 
@@ -96,8 +96,18 @@ export default class StoreMixin extends Vue {
         return store.filters;
     }
 
+    getDefaultFilters(): iFilters {
+        const store = useFilters();
+        return store.defaultFilters();
+    }
+
     setDefaultFilters() {
         const store = useFilters();
         store.setDefaultFilters();
+    }
+
+    setFilters(filters: iFilters) {
+        const store = useFilters();
+        store.setFilters(filters);
     }
 }

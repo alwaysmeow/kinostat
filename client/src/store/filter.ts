@@ -1,25 +1,6 @@
 import { defineStore } from "pinia";
-import type { iFilters } from "../types/types";
-
-const CURRENT_YEAR = (new Date()).getFullYear();
-const THE_ARRIVAL_OF_THE_TRAIN_YEAR = 1895;
-const AUGUSTE_LUMIERE_BIRTH_YEAR = 1862;
-
-const DEFAULT_MAX_DIRECTOR_FILMS = 10;
-const DEFAULT_MAX_ACTOR_FILMS = 20;
-
-const startupFilters: iFilters = {
-    selectedVoteValues: Array(10).fill(true),
-    filmYearRange: [THE_ARRIVAL_OF_THE_TRAIN_YEAR, CURRENT_YEAR],
-
-    directorVoteRange: [1, 10],
-    directorFilmCountRange: [1, DEFAULT_MAX_DIRECTOR_FILMS],
-    directorBirthYearRange: [AUGUSTE_LUMIERE_BIRTH_YEAR, CURRENT_YEAR],
-
-    actorVoteRange: [1, 10],
-    actorFilmCountRange: [1, DEFAULT_MAX_ACTOR_FILMS],
-    actorBirthYearRange: [AUGUSTE_LUMIERE_BIRTH_YEAR, CURRENT_YEAR],
-}
+import type { iFilters } from "../common/types";
+import { CURRENT_YEAR, startupFilters } from "../common/const";
 
 interface iStore {
     earliestFilm: number,
@@ -47,7 +28,7 @@ const useFilters = defineStore("filters", {
         maxActorBirthYear: CURRENT_YEAR,
         maxActorFilms: 20,
 
-        filters: { ...startupFilters },
+        filters: startupFilters(),
     }),
     actions: {
         defaultFilters(): iFilters {
@@ -65,7 +46,10 @@ const useFilters = defineStore("filters", {
             }
         },
         setDefaultFilters() {
-            this.filters = { ...this.defaultFilters() };
+            this.filters = this.defaultFilters();
+        },
+        setFilters(filters: iFilters) {
+            this.filters = structuredClone(filters);
         },
     },
 });

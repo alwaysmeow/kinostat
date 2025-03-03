@@ -16,8 +16,8 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
-import { SortOrder } from "../types/types";
-import type { Person, SortType, iToolbar } from "../types/types";
+import { SortOrder } from "../common/types";
+import type { Person, SortType, iToolbar } from "../common/types";
 
 type PropsType = {
     list: "directors" | "actors";

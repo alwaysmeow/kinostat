@@ -30,7 +30,7 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import QueryMixin from "../mixins/query.mixin";
-import { type Vote, type Person, InfoTabStatus, TabIndex } from "../types/types";
+import { type Vote, type Person, InfoTabStatus, TabIndex } from "../common/types";
 
 type PropsType = {
     userId: number;

@@ -1,5 +1,5 @@
 import { Vue } from "vue-class-component";
-import type { Vote, Film, Person } from "../types/types";
+import type { Vote, Film, Person } from "../common/types";
 
 export enum QueryObjectType {
     Film = "film",

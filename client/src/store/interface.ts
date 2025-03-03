@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { InfoTabStatus } from "../types/types";
+import { InfoTabStatus } from "../common/types";
 
 interface InterfaceStore {
     infoTabStatus: InfoTabStatus;
