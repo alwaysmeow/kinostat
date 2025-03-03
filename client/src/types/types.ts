@@ -56,3 +56,16 @@ export enum TabIndex {
     Directors = 1,
     Actors = 2,
 };
+
+export interface iFilters {
+    selectedVoteValues: boolean[],
+    filmYearRange: number[],
+
+    directorVoteRange: number[],
+    directorFilmCountRange: number[],
+    directorBirthYearRange: number[],
+
+    actorVoteRange: number[],
+    actorFilmCountRange: number[],
+    actorBirthYearRange: number[],
+}

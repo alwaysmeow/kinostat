@@ -2,6 +2,7 @@ import { Vue } from "vue-class-component";
 import useStatistic from "../store/statistic";
 import type { Vote, Film, Person, InfoTabStatus } from "../types/types";
 import useInterface from "../store/interface";
+import useFilters from "../store/filter";
 
 export default class StoreMixin extends Vue {
     get votes(): Vote[] {
@@ -88,5 +89,15 @@ export default class StoreMixin extends Vue {
     setInfoTabStatus(status: InfoTabStatus) {
         const store = useInterface();
         store.setInfoTabStatus(status);
+    }
+
+    get filters() {
+        const store = useFilters();
+        return store;
+    }
+
+    setDefaultFilters() {
+        const store = useFilters();
+        store.setDefaultFilters();
     }
 }
