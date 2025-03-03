@@ -1,52 +1,76 @@
 <template>
     <div class="filter-tab">
         <h2>Фильтры</h2>
-        <div class="filter-vote-value-picker" v-if="isTab(TabIndex.Votes)">
-            <div class="filter-vote-value-picker-grid">
-                <div
-                    v-for="index in filterParams.selectedVoteValues.map((_, i) => i)"
-                    :class="[
-                        'filter-vote-value-circle',
-                        `vote-value-${index + 1}`,
-                        cssValueSelectedClass(index),
-                    ]"
-                    @click="handleValueClick(index)"
-                >
-                    {{ index + 1 }}
+
+        <div v-if="isTab(TabIndex.Votes)">
+            <div class="filter-vote-value-picker">
+                <div class="filter-vote-value-picker-grid">
+                    <div
+                        v-for="index in filterParams.selectedVoteValues.map(
+                            (_, i) => i
+                        )"
+                        :class="[
+                            'filter-vote-value-circle',
+                            `vote-value-${index + 1}`,
+                            cssValueSelectedClass(index),
+                        ]"
+                        @click="handleValueClick(index)"
+                    >
+                        {{ index + 1 }}
+                    </div>
                 </div>
             </div>
+
+            <filter-slider
+                v-model="filterParams.filmYearRange"
+                label="Год премьеры"
+                :min="minYear"
+                :max="maxYear"
+                :step="1"
+            ></filter-slider>
         </div>
 
-        <filter-slider
-            v-if="isTab(TabIndex.Votes)"
-            v-model="filterParams.yearRange"
-            label="Год премьеры"
-            :min="minYear"
-            :max="maxYear"
-            :step="1"
-        ></filter-slider>
+        <div v-if="isTab(TabIndex.Directors)">
+            <filter-slider
+                v-model="filterParams.directorVoteRange"
+                label="Средняя оценка"
+                :step="0.1"
+            ></filter-slider>
 
-        <filter-slider
-            v-if="isTab(TabIndex.Directors) || isTab(TabIndex.Actors)"
-            v-model="filterParams.voteRange"
-            label="Средняя оценка"
-            :step="0.1"
-        ></filter-slider>
+            <filter-slider
+                v-model="filterParams.directorFilmCountRange"
+                label="Оценено фильмов"
+            ></filter-slider>
 
-        <filter-slider
-            v-if="isTab(TabIndex.Directors) || isTab(TabIndex.Actors)"
-            v-model="filterParams.filmCountRange"
-            label="Оценено фильмов"
-        ></filter-slider>
+            <filter-slider
+                v-model="filterParams.directorBirthYearRange"
+                label="Год рождения"
+                :min="minYear"
+                :max="maxYear"
+                :step="1"
+            ></filter-slider>
+        </div>
 
-        <filter-slider
-            v-if="isTab(TabIndex.Directors) || isTab(TabIndex.Actors)"
-            v-model="filterParams.birthYearRange"
-            label="Год рождения"
-            :min="minYear"
-            :max="maxYear"
-            :step="1"
-        ></filter-slider>
+        <div v-if="isTab(TabIndex.Actors)">
+            <filter-slider
+                v-model="filterParams.actorVoteRange"
+                label="Средняя оценка"
+                :step="0.1"
+            ></filter-slider>
+
+            <filter-slider
+                v-model="filterParams.actorFilmCountRange"
+                label="Оценено фильмов"
+            ></filter-slider>
+
+            <filter-slider
+                v-model="filterParams.actorBirthYearRange"
+                label="Год рождения"
+                :min="minYear"
+                :max="maxYear"
+                :step="1"
+            ></filter-slider>
+        </div>
 
         <div class="filter-buttons-block">
             <v-btn class="filter-button" elevation="0">Сбросить</v-btn>
@@ -58,7 +82,23 @@
 <script lang="ts">
 import { mixins, Options } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
-import { TabIndex } from "../types/types";
+import { TabIndex, type iFilters } from "../types/types";
+
+const defaultYearRange = [1895, new Date().getFullYear()];
+const defaultVoteRange = [1, 10];
+
+const defaultFilterStates: iFilters = {
+    selectedVoteValues: Array(10).fill(true),
+    filmYearRange: [...defaultYearRange],
+
+    directorVoteRange: [...defaultVoteRange],
+    directorFilmCountRange: [1, 10],
+    directorBirthYearRange: [...defaultYearRange],
+
+    actorVoteRange: [...defaultVoteRange],
+    actorFilmCountRange: [1, 10],
+    actorBirthYearRange: [...defaultYearRange],
+};
 
 type PropsType = {
     tabIndex: TabIndex;
@@ -73,24 +113,23 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     declare $props: PropsType;
 
     minYear: number = 1900;
-    maxYear: number = (new Date()).getFullYear();
+    maxYear: number = new Date().getFullYear();
 
-    filterParams = {
-        selectedVoteValues: Array(10).fill(true),
-        yearRange: [this.minYear, this.maxYear],
-        voteRange: [1, 10],
-        filmCountRange: [1, 10],
-        birthYearRange: [this.minYear, this.maxYear],
-    }
+    filterParams: iFilters = defaultFilterStates;
 
     TabIndex = TabIndex;
+
+    created() {
+        this.filterParams = { ...this.filters };
+    }
 
     isTab(tab: TabIndex): boolean {
         return this.$props.tabIndex === tab;
     }
 
     handleValueClick(index: number) {
-        this.filterParams.selectedVoteValues[index] = !this.filterParams.selectedVoteValues[index];
+        this.filterParams.selectedVoteValues[index] =
+            !this.filterParams.selectedVoteValues[index];
     }
 
     cssValueSelectedClass(index: number): string {

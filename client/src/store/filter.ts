@@ -6,15 +6,15 @@ const defaultVoteRange = [1, 10]
 
 const defaultFilterStates: iFilters = {
     selectedVoteValues: Array(10).fill(true),
-    filmYearRange: defaultYearRange,
+    filmYearRange: [...defaultYearRange],
 
-    directorVoteRange: defaultVoteRange,
+    directorVoteRange: [...defaultVoteRange],
     directorFilmCountRange: [1, 10],
-    directorBirthYearRange: defaultYearRange,
+    directorBirthYearRange: [...defaultYearRange],
 
-    actorVoteRange: defaultVoteRange,
+    actorVoteRange: [...defaultVoteRange],
     actorFilmCountRange: [1, 10],
-    actorBirthYearRange: defaultYearRange,
+    actorBirthYearRange: [...defaultYearRange],
 }
 
 const useFilters = defineStore("filters", {
