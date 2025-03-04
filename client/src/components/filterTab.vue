@@ -42,13 +42,14 @@
                 label="Оценено фильмов"
             ></filter-slider>
 
+            <!-- Commented due to Issue #1
             <filter-slider
                 v-model="filterParams.directorBirthYearRange"
                 label="Год рождения"
                 :min="minDirectorsBirthYears"
                 :max="maxDirectorsBirthYears"
                 :step="1"
-            ></filter-slider>
+            ></filter-slider> -->
         </div>
 
         <div v-if="isTab(TabIndex.Actors)" class="filter-tab-content">
@@ -63,13 +64,14 @@
                 label="Оценено фильмов"
             ></filter-slider>
 
+            <!-- Commented due to Issue #1
             <filter-slider
                 v-model="filterParams.actorBirthYearRange"
                 label="Год рождения"
                 :min="minActorsBirthYears"
                 :max="maxActorsBirthYears"
                 :step="1"
-            ></filter-slider>
+            ></filter-slider> -->
         </div>
 
         <div class="filter-buttons-block">
