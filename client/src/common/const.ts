@@ -1,11 +1,11 @@
 import type { iFilters } from "./types";
 
 export const CURRENT_YEAR = (new Date()).getFullYear();
-const THE_ARRIVAL_OF_THE_TRAIN_YEAR = 1895;
-const AUGUSTE_LUMIERE_BIRTH_YEAR = 1862;
+export const THE_ARRIVAL_OF_THE_TRAIN_YEAR = 1895;
+export const AUGUSTE_LUMIERE_BIRTH_YEAR = 1862;
 
-const DEFAULT_MAX_DIRECTOR_FILMS = 10;
-const DEFAULT_MAX_ACTOR_FILMS = 20;
+export const DEFAULT_MAX_DIRECTOR_FILMS = 10;
+export const DEFAULT_MAX_ACTOR_FILMS = 20;
 
 export const startupFilters = (): iFilters => ({
     selectedVoteValues: Array(10).fill(true),

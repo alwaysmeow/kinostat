@@ -24,8 +24,8 @@
             <filter-slider
                 v-model="filterParams.filmYearRange"
                 label="Год премьеры"
-                :min="minYear"
-                :max="maxYear"
+                :min="earliestFilmYear"
+                :max="currentYear"
                 :step="1"
             ></filter-slider>
         </div>
@@ -45,8 +45,8 @@
             <filter-slider
                 v-model="filterParams.directorBirthYearRange"
                 label="Год рождения"
-                :min="minYear"
-                :max="maxYear"
+                :min="minDirectorsBirthYears"
+                :max="maxDirectorsBirthYears"
                 :step="1"
             ></filter-slider>
         </div>
@@ -66,8 +66,8 @@
             <filter-slider
                 v-model="filterParams.actorBirthYearRange"
                 label="Год рождения"
-                :min="minYear"
-                :max="maxYear"
+                :min="minActorsBirthYears"
+                :max="maxActorsBirthYears"
                 :step="1"
             ></filter-slider>
         </div>
@@ -99,7 +99,14 @@
 import { mixins, Options } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import { TabIndex, type iFilters } from "../common/types";
-import { startupFilters } from "../common/const";
+import {
+    startupFilters,
+    AUGUSTE_LUMIERE_BIRTH_YEAR,
+    CURRENT_YEAR,
+    THE_ARRIVAL_OF_THE_TRAIN_YEAR,
+    DEFAULT_MAX_ACTOR_FILMS,
+    DEFAULT_MAX_DIRECTOR_FILMS,
+} from "../common/const";
 
 type PropsType = {
     tabIndex: TabIndex;
@@ -113,8 +120,17 @@ type PropsType = {
 export default class FilterTabComponent extends mixins(StoreMixin) {
     declare $props: PropsType;
 
-    minYear: number = 1800;
-    maxYear: number = 2100;
+    earliestFilmYear: number = THE_ARRIVAL_OF_THE_TRAIN_YEAR;
+    currentYear: number = CURRENT_YEAR;
+
+    minActorsBirthYears: number = AUGUSTE_LUMIERE_BIRTH_YEAR;
+    maxActorsBirthYears: number = CURRENT_YEAR;
+
+    minDirectorsBirthYears: number = AUGUSTE_LUMIERE_BIRTH_YEAR;
+    maxDirectorsBirthYears: number = CURRENT_YEAR;
+
+    maxActorsFilms: number = DEFAULT_MAX_ACTOR_FILMS;
+    maxDirectorFilms: number = DEFAULT_MAX_DIRECTOR_FILMS;
 
     filterParams: iFilters = startupFilters();
 
@@ -122,6 +138,21 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
 
     created() {
         this.fetchFilters(this.filterParams);
+
+        const {
+            earliestFilmYear,
+            actorsBirthYears,
+            directorsBirthYears,
+            maxActorsFilms,
+            maxDirectorFilms,
+        } = this.getFilterRanges();
+
+        this.earliestFilmYear = earliestFilmYear;
+        [this.minActorsBirthYears, this.maxActorsBirthYears] = actorsBirthYears;
+        [this.minDirectorsBirthYears, this.maxDirectorsBirthYears] =
+            directorsBirthYears;
+        this.maxActorsFilms = maxActorsFilms;
+        this.maxDirectorFilms = maxDirectorFilms;
     }
 
     isTab(tab: TabIndex): boolean {

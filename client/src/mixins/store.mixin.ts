@@ -125,4 +125,15 @@ export default class StoreMixin extends Vue {
         const store = useFilters();
         store.fetchFilters(filters);
     }
+
+    getFilterRanges() {
+        const store = useFilters();
+        return {
+            earliestFilmYear: store.earliestFilmYear,
+            actorsBirthYears: [store.minActorBirthYear, store.maxActorBirthYear],
+            directorsBirthYears: [store.minDirectorBirthYear, store.maxDirectorBirthYear],
+            maxActorsFilms: store.maxDirectorFilms,
+            maxDirectorFilms: store.maxDirectorFilms,
+        }
+    }
 }

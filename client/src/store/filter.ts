@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
 import type { iFilters } from "../common/types";
-import { CURRENT_YEAR, startupFilters } from "../common/const";
+import { AUGUSTE_LUMIERE_BIRTH_YEAR, CURRENT_YEAR, DEFAULT_MAX_DIRECTOR_FILMS, startupFilters, THE_ARRIVAL_OF_THE_TRAIN_YEAR } from "../common/const";
 
 interface iStore {
-    earliestFilm: number,
+    earliestFilmYear: number,
 
     minDirectorBirthYear: number,
     maxDirectorBirthYear: number,
@@ -18,15 +18,15 @@ interface iStore {
 
 const useFilters = defineStore("filters", {
     state: (): iStore => ({
-        earliestFilm: 1895,
+        earliestFilmYear: THE_ARRIVAL_OF_THE_TRAIN_YEAR,
 
-        minDirectorBirthYear: 1875,
+        minDirectorBirthYear: AUGUSTE_LUMIERE_BIRTH_YEAR,
         maxDirectorBirthYear: CURRENT_YEAR,
-        maxDirectorFilms: 10,
+        maxDirectorFilms: DEFAULT_MAX_DIRECTOR_FILMS,
     
-        minActorBirthYear: 1875,
+        minActorBirthYear: AUGUSTE_LUMIERE_BIRTH_YEAR,
         maxActorBirthYear: CURRENT_YEAR,
-        maxActorFilms: 20,
+        maxActorFilms: DEFAULT_MAX_DIRECTOR_FILMS,
 
         filters: startupFilters(),
     }),
@@ -34,7 +34,7 @@ const useFilters = defineStore("filters", {
         defaultFilters(): iFilters {
             return {
                 selectedVoteValues: Array(10).fill(true),
-                filmYearRange: [this.earliestFilm, CURRENT_YEAR],
+                filmYearRange: [this.earliestFilmYear, CURRENT_YEAR],
             
                 directorVoteRange: [1, 10],
                 directorFilmCountRange: [1, this.maxDirectorFilms],
