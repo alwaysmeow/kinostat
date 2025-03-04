@@ -3,7 +3,7 @@
         <toolbar v-model="toolbarSettings" :sort-types="sortTypes"></toolbar>
         <div class="person-items">
             <person-item
-                v-for="person in personList"
+                v-for="person in searchFilteredPersons"
                 :id="person.id"
                 :list="$props.list"
                 :key="person.id"
@@ -66,15 +66,43 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
         return this[this.$props.list];
     }
 
+    get filteredPersons(): Person[] {
+        let filterFunction: (person: Person) => boolean;
+
+        if (this.$props.list === "directors") {
+            filterFunction = (person: Person): boolean => {
+                return (
+                    person.films.length >= this.filters.directorFilmCountRange[0] &&
+                    person.films.length <= this.filters.directorFilmCountRange[1] &&
+                    person.averageVote >= this.filters.directorVoteRange[0] &&
+                    person.averageVote <= this.filters.directorVoteRange[1]
+                    // and birth year
+                );
+            };
+        } else {
+            filterFunction = (person: Person): boolean => {
+                return (
+                    person.films.length >= this.filters.actorFilmCountRange[0] &&
+                    person.films.length <= this.filters.actorFilmCountRange[1] &&
+                    person.averageVote >= this.filters.actorVoteRange[0] &&
+                    person.averageVote <= this.filters.actorVoteRange[1]
+                    // and birth year
+                );
+            };
+        }
+
+        return [...this.persons].filter(filterFunction);
+    }
+
     get sortedPersons(): Person[] {
         const compare = this.toolbarSettings.compareFunction;
         if (compare) {
-            return [...this.persons].sort(compare);
+            return [...this.filteredPersons].sort(compare);
         }
-        return this.persons;
+        return this.filteredPersons;
     }
 
-    get personList(): Person[] {
+    get searchFilteredPersons(): Person[] {
         const searchLine = this.toolbarSettings.searchLine;
         if (searchLine) {
             const filterFunction = (person: Person): boolean => {

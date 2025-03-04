@@ -2,7 +2,7 @@
     <div class="votes-list">
         <toolbar v-model="toolbarSettings" :sort-types="sortTypes"></toolbar>
         <div class="vote-items">
-            <vote-item v-for="vote in votesList" :vote="vote" :key="vote.num" />
+            <vote-item v-for="vote in searchFilteredVotes" :vote="vote" :key="vote.num" />
         </div>
     </div>
 </template>
@@ -52,15 +52,26 @@ export default class VotesListComponent extends mixins(StoreMixin) {
         },
     ];
 
+    get filteredVotes(): Vote[] {
+        const filterFunction = (vote: Vote) => {
+            return (
+                vote.year >= this.filters.filmYearRange[0] &&
+                vote.year <= this.filters.filmYearRange[1] &&
+                this.filters.selectedVoteValues[vote.value - 1]
+            )
+        }
+        return [...this.votes].filter(filterFunction);
+    }   
+
     get sortedVotes(): Vote[] {
         const compare = this.toolbarSettings.compareFunction;
         if (compare) {
-            return [...this.votes].sort(compare);
+            return [...this.filteredVotes].sort(compare);
         }
-        return this.votes;
+        return this.filteredVotes;
     }
 
-    get votesList(): Vote[] {
+    get searchFilteredVotes(): Vote[] {
         const searchLine = this.toolbarSettings.searchLine;
         if (searchLine) {
             const filterFunction = (vote: Vote): boolean => {
