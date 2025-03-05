@@ -9,14 +9,8 @@ import (
 	"regexp"
 
 	"kinostat-server/packages/cache"
+	"kinostat-server/packages/filters"
 )
-
-func isFileExist(path string) bool {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return false
-	}
-	return true
-}
 
 func GetVotes(userID int) ([]map[string]interface{}, error) {
 	votesURL := fmt.Sprintf("https://www.kinopoisk.ru/graph_data/last_vote_data/340/last_vote_%d__all.json", userID)
@@ -96,6 +90,18 @@ func GetObject(objectType string, objectId int) (map[string]interface{}, error) 
 
 	if _, ok := object["captcha"]; ok {
 		return nil, fmt.Errorf("captcha detected in response, skipping file save")
+	}
+
+	switch objectType {
+	case "film":
+		filmData, err := filters.FilmData(object)
+		if err != nil {
+			return nil, fmt.Errorf("can't filter film data")
+		}
+		newBody, err := json.Marshal(filmData)
+		if err == nil {
+			body = newBody
+		}
 	}
 
 	err = cache.SaveJSON(objectType, objectId, body)

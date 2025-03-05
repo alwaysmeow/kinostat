@@ -91,6 +91,6 @@ func FilmData(rawData map[string]interface{}) (map[string]interface{}, error) {
 	}
 
 	return map[string]interface{}{
-		"film": film,
+		"film": result,
 	}, nil
 }
