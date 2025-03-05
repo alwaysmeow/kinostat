@@ -72,7 +72,7 @@ export default class VotesListComponent extends mixins(StoreMixin) {
     }
 
     get searchFilteredVotes(): Vote[] {
-        const searchLine = this.toolbarSettings.searchLine;
+        const searchLine = this.toolbarSettings.searchLine.trim().toLocaleLowerCase();
         if (searchLine) {
             const filterFunction = (vote: Vote): boolean => {
                 const title: string = vote.title.toLocaleLowerCase();
