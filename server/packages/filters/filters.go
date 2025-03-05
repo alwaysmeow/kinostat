@@ -84,9 +84,9 @@ func FilmData(rawData map[string]interface{}) (map[string]interface{}, error) {
 		}
 
 		if list == "actors" {
-			result[list] = partialMaps(personList, []string{"id", "roleDetails"})
+			result[list] = partialMaps(personList, []string{"id", "name", "originalName", "roleDetails"})
 		} else {
-			result[list] = partialMaps(personList, []string{"id"})
+			result[list] = partialMaps(personList, []string{"id", "name"})
 		}
 	}
 
