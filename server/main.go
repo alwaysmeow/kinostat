@@ -3,21 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"kinostat-server/packages/cache"
 	"kinostat-server/packages/queries"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/joho/godotenv"
 )
-
-func isFileExist(path string) bool {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return false
-	}
-	return true
-}
 
 func votesHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
@@ -59,26 +52,20 @@ func objectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cacheFilePath := fmt.Sprintf("./cache/%s/%d.json", objectType, objectId)
+	w.Header().Set("Content-Type", "application/json")
 
-	if isFileExist(cacheFilePath) {
-		data, err := os.ReadFile(cacheFilePath)
-		if err != nil {
-			http.Error(w, "Failed to read cache", http.StatusInternalServerError)
-			return
-		}
+	data, err := cache.ExtractJSON(objectType, objectId)
 
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(data)
-	} else {
+	if err != nil {
 		object, err := queries.GetObject(objectType, objectId)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(object)
+	} else {
+		w.Write(data)
 	}
 }
 

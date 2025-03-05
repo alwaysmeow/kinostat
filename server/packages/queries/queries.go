@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+
+	"kinostat-server/packages/cache"
 )
 
 func isFileExist(path string) bool {
@@ -96,19 +98,10 @@ func GetObject(objectType string, objectId int) (map[string]interface{}, error) 
 		return nil, fmt.Errorf("captcha detected in response, skipping file save")
 	}
 
-	cacheFilePath := fmt.Sprintf("./cache/%s/%d.json", objectType, objectId)
-
-	if !isFileExist(cacheFilePath) {
-		cacheDir := fmt.Sprintf("./cache/%s", objectType)
-		if err := os.MkdirAll(cacheDir, 0755); err != nil {
-			return nil, fmt.Errorf("failed to create cache directory: %v", err)
-		}
-
-		err = os.WriteFile(cacheFilePath, body, 0644) // 0644 — access rights
-		if err != nil {
-			// fmt.Printf("File saving error: %v\n", err)
-			return nil, fmt.Errorf("failed to create cache directory: %v", err)
-		}
+	err = cache.SaveJSON(objectType, objectId, body)
+	if err != nil {
+		fmt.Printf("File saving error: %v\n", err)
+		return nil, fmt.Errorf("failed to create cache directory: %v", err)
 	}
 
 	return object, nil
