@@ -94,3 +94,34 @@ func FilmData(rawData map[string]interface{}) (map[string]interface{}, error) {
 		"film": result,
 	}, nil
 }
+
+func PersonData(rawData map[string]interface{}) (map[string]interface{}, error) {
+	person, err := extractAttribute(rawData, "person")
+	if err != nil {
+		return nil, err
+	}
+
+	result := partialMap(person, []string{"id", "name", "originalName", "img"})
+
+	filmography, err := extractListAttribute(person, "filmography")
+
+	if err != nil {
+		return nil, err
+	}
+
+	filmography = partialMaps(filmography, []string{"id", "contextData"})
+	var filteredFilmography []map[string]interface{}
+
+	for _, film := range filmography {
+		contextData, _ := extractAttribute(film, "contextData")
+		if contextData["role"] != "cameo" {
+			filteredFilmography = append(filteredFilmography, film)
+		}
+	}
+
+	result["filmography"] = filteredFilmography
+
+	return map[string]interface{}{
+		"person": result,
+	}, nil
+}

@@ -102,6 +102,15 @@ func GetObject(objectType string, objectId int) (map[string]interface{}, error) 
 		if err == nil {
 			body = newBody
 		}
+	case "person":
+		personData, err := filters.PersonData(object)
+		if err != nil {
+			return nil, fmt.Errorf("can't filter person data")
+		}
+		newBody, err := json.Marshal(personData)
+		if err == nil {
+			body = newBody
+		}
 	}
 
 	err = cache.SaveJSON(objectType, objectId, body)
