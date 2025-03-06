@@ -4,10 +4,11 @@
             class="toolbar-input"
             clearable
             prepend-inner-icon="$search"
-            v-model="$props.modelValue.searchLine"
+            v-model="searchLine"
             variant="outlined"
             density="comfortable"
             hide-details
+            @update:modelValue="onSearchLineChange"
         ></v-text-field>
         <v-select
             class="toolbar-input"
@@ -113,6 +114,10 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
                 ? InfoTabStatus.None
                 : InfoTabStatus.Filter
         );
+    }
+
+    onSearchLineChange(value: string) {
+        this.$props.modelValue.searchLine = value?.trim().toLocaleLowerCase() || '';
     }
 }
 </script>

@@ -103,7 +103,7 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
     }
 
     get searchFilteredPersons(): Person[] {
-        const searchLine = this.toolbarSettings.searchLine.trim().toLocaleLowerCase();
+        const searchLine = this.toolbarSettings.searchLine;
         if (searchLine) {
             const filterFunction = (person: Person): boolean => {
                 const fullname: string = person.name.toLocaleLowerCase();
