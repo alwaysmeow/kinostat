@@ -38,6 +38,7 @@ func extractAttribute(source *map[string]interface{}, attrName string) (map[stri
 
 	return result, nil
 }
+
 func extractListAttribute(source *map[string]interface{}, attrName string) ([]map[string]interface{}, error) {
 	data, ok := (*source)[attrName]
 	if !ok {
