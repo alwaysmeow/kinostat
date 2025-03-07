@@ -94,7 +94,7 @@ func GetObject(objectType string, objectId int) (map[string]interface{}, error) 
 
 	switch objectType {
 	case "film":
-		filmData, err := filters.FilmData(object)
+		filmData, err := filters.FilmData(&object)
 		if err != nil {
 			return nil, fmt.Errorf("can't filter film data")
 		}
@@ -103,7 +103,7 @@ func GetObject(objectType string, objectId int) (map[string]interface{}, error) 
 			body = newBody
 		}
 	case "person":
-		personData, err := filters.PersonData(object)
+		personData, err := filters.PersonData(&object)
 		if err != nil {
 			return nil, fmt.Errorf("can't filter person data")
 		}
