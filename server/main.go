@@ -105,7 +105,16 @@ func actorsHandler(w http.ResponseWriter, r *http.Request) {
 		value := vote["value"].(float64)
 		votesMap[id] = int(value)
 
-		film, err := queries.GetObject("film", id)
+		data, err := cache.ExtractJSON("film", id)
+		var film map[string]interface{}
+		json.Unmarshal(data, &film)
+
+		if err != nil {
+			film, err = queries.GetObject("film", id)
+			if err != nil {
+				continue
+			}
+		}
 
 		if err == nil {
 			film = film["film"].(map[string]interface{})
@@ -121,13 +130,24 @@ func actorsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var actors []map[string]interface{}
 	for id := range actorsIds {
-		person, err := queries.GetObject("person", id)
+
+		data, err := cache.ExtractJSON("person", id)
+		var person map[string]interface{}
+		json.Unmarshal(data, &person)
+
+		if err != nil {
+			person, err = queries.GetObject("person", id)
+			if err != nil {
+				continue
+			}
+		}
 
 		if err != nil {
 			continue
 		}
 
-		actors = append(actors, person["person"].(map[string]interface{}))
+		actor := person["person"].(map[string]interface{})
+		actors = append(actors, actor)
 	}
 
 	statistic.SetAverageVotes(&actors, &votesMap, "actor")
