@@ -71,20 +71,8 @@ export default class StatisticPageComponent extends mixins(
         this.setVotes(votes);
         await this.getFilms(timeout);
 
-        // // freezing
-        // this.getDirectors();
-        // this.getActors();
-
-        // // start votes setting
-        // this.setAverageVotes();
-        // await this.parsePersons();
-        // // votes updating
-        // this.setAverageVotes();
-
-        this.getActors();
-
-        // const directors = await this.getDirectorsQuery(this.$props.userId);
-        // directors.forEach(director => this.addDirector(director))
+        this.getPersonList("actor");
+        this.getPersonList("director");
     }
 
     isTab(tab: TabIndex): boolean {
@@ -109,35 +97,27 @@ export default class StatisticPageComponent extends mixins(
         }
     }
 
-    getDirectors() {
-        this.films.forEach((film) =>
-            film.directors.forEach((directorRecord: Person) => {
-                const director = this.getDirector(directorRecord.id);
+    async getPersonList(list: "director" | "actor") {
+        let persons;
+        let addPerson;
 
-                if (director) {
-                    director.films.push(film.id);
-                } else {
-                    this.addDirector({
-                        id: directorRecord.id,
-                        name: directorRecord.name,
-                        films: [film.id],
-                    });
-                }
-            })
-        );
-    }
+        if (list === "director") {
+            persons = await this.getDirectorsQuery(this.$props.userId);
+            addPerson = this.addDirector;
+        } else {
+            persons = await this.getActorsQuery(this.$props.userId);
+            addPerson = this.addActor;
+        }
 
-    async getActors() {
-        const actors = await this.getActorsQuery(this.$props.userId);
-        actors.forEach((actor) => {
-            if (actor.name) {
-                const { filmography, img, ...rest } = actor;
-                const actorItem: Person = {
+        persons.forEach((person) => {
+            if (person.name) {
+                const { filmography, img, ...rest } = person;
+                const personItem: Person = {
                     ...rest,
                     films:
                         filmography
                             .filter(
-                                (film: any) => film.contextData.role === "actor"
+                                (film: any) => film.contextData.role === list
                             )
                             .map((film: any) => film.id)
                             .filter((id: number) =>
@@ -145,76 +125,9 @@ export default class StatisticPageComponent extends mixins(
                             ) || [],
                     photo: img.photo.x2 || img.photo.x1,
                 };
-                this.addActor(actorItem);
+                addPerson(personItem);
             }
         });
-
-        // this.films.forEach((film) =>
-        //     film.actors.forEach((actorRecord: Person) => {
-        //         const actor = this.getActor(actorRecord.id);
-
-        //         if (actor) {
-        //             actor.films.push(film.id);
-        //         } else if (actorRecord.name) {
-        //             this.addActor({
-        //                 id: actorRecord.id,
-        //                 name: actorRecord.name,
-        //                 originalName: actorRecord.originalName,
-        //                 films: [film.id],
-        //             });
-        //         }
-        //     })
-        // );
-    }
-
-    setAverageVotes() {
-        const lists: ("directors" | "actors")[] = ["directors", "actors"];
-
-        lists.forEach((listName) => {
-            const list: Person[] = this[listName];
-            list.forEach((person) => {
-                const votes: number[] = this.votes
-                    .filter((vote) => person.films.includes(vote.filmId))
-                    .map((vote) => vote.value);
-                const avgVote = votes.reduce((a, b) => a + b, 0) / votes.length;
-
-                this.setPersonAttributes(listName, person.id, {
-                    averageVote: avgVote,
-                });
-            });
-        });
-    }
-
-    async parsePersons(timeout: number = 100) {
-        const lists: ("directors" | "actors")[] = ["directors", "actors"];
-
-        for (var i = 0; i < lists.length; i++) {
-            const listName = lists[i];
-            const list: Person[] = this[listName];
-
-            for (var j = 0; j < list.length; j++) {
-                const person = list[j];
-                const personData = await this.getPersonQuery(person.id);
-
-                const filmography =
-                    personData?.filmography
-                        .filter(
-                            (film: Record<string, any>) =>
-                                film.contextData.role === listName.slice(0, -1)
-                        )
-                        .map((film: Record<string, any>) => film.id)
-                        .filter((id: number) =>
-                            this.votes.some((vote) => vote.filmId === id)
-                        ) || [];
-
-                this.setPersonAttributes(listName, personData?.id!, {
-                    photo: personData?.img.photo.x2 || personData?.img.photo.x1,
-                    films: filmography,
-                });
-            }
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, timeout));
     }
 }
 </script>
