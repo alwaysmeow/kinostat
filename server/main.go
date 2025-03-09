@@ -71,11 +71,6 @@ func objectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
 func actorsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	userIDStr := query.Get("user_id")
@@ -161,8 +156,6 @@ func actorsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(actors)
 }
 
-<<<<<<< Updated upstream
-=======
 func directorsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	userIDStr := query.Get("user_id")
@@ -247,8 +240,6 @@ func directorsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(directors)
 }
 
->>>>>>> Stashed changes
->>>>>>> Stashed changes
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Print("No .env file found")
@@ -258,15 +249,9 @@ func init() {
 func main() {
 	http.HandleFunc("/api/votes", votesHandler)
 	http.HandleFunc("/api/object", objectHandler)
-<<<<<<< Updated upstream
-	http.HandleFunc("/api/actors", actorsHandler)
-=======
-<<<<<<< Updated upstream
-=======
 	http.HandleFunc("/api/actors", actorsHandler)
 	http.HandleFunc("/api/directors", directorsHandler)
->>>>>>> Stashed changes
->>>>>>> Stashed changes
+
 	fmt.Println("Server is hosting on 8080 port")
 	http.ListenAndServe(":8080", nil)
 }
