@@ -71,6 +71,11 @@ func objectHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
 func actorsHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	userIDStr := query.Get("user_id")
@@ -156,6 +161,94 @@ func actorsHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(actors)
 }
 
+<<<<<<< Updated upstream
+=======
+func directorsHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	userIDStr := query.Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "user_id is necessary", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	votes, err := queries.GetVotes(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	votesMap := make(map[int]int)
+	directorsIds := make(map[int]bool)
+
+	for _, vote := range votes {
+		parts := strings.Split(vote["url"].(string), "/")
+		id, err := strconv.Atoi(parts[len(parts)-2])
+
+		if err != nil {
+			continue
+		}
+
+		value := vote["value"].(float64)
+		votesMap[id] = int(value)
+
+		data, err := cache.ExtractJSON("film", id)
+		var film map[string]interface{}
+		json.Unmarshal(data, &film)
+
+		if err != nil {
+			film, err = queries.GetObject("film", id)
+			if err != nil {
+				continue
+			}
+		}
+
+		if err == nil {
+			film = film["film"].(map[string]interface{})
+			directorsInterfaces := film["directors"].([]interface{})
+
+			for _, actorInterface := range directorsInterfaces {
+				actor := actorInterface.(map[string]interface{})
+				actorId := actor["id"].(float64)
+				directorsIds[int(actorId)] = true
+			}
+		}
+	}
+
+	var directors []map[string]interface{}
+	for id := range directorsIds {
+		data, err := cache.ExtractJSON("person", id)
+		var person map[string]interface{}
+		json.Unmarshal(data, &person)
+
+		if err != nil {
+			person, err = queries.GetObject("person", id)
+			if err != nil {
+				continue
+			}
+		}
+
+		if err != nil {
+			continue
+		}
+
+		director := person["person"].(map[string]interface{})
+		directors = append(directors, director)
+	}
+
+	statistic.SetAverageVotes(&directors, &votesMap, "director")
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(directors)
+}
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Print("No .env file found")
@@ -165,7 +258,15 @@ func init() {
 func main() {
 	http.HandleFunc("/api/votes", votesHandler)
 	http.HandleFunc("/api/object", objectHandler)
+<<<<<<< Updated upstream
 	http.HandleFunc("/api/actors", actorsHandler)
+=======
+<<<<<<< Updated upstream
+=======
+	http.HandleFunc("/api/actors", actorsHandler)
+	http.HandleFunc("/api/directors", directorsHandler)
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 	fmt.Println("Server is hosting on 8080 port")
 	http.ListenAndServe(":8080", nil)
 }
