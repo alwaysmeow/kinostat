@@ -30,7 +30,12 @@
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import QueryMixin from "../mixins/query.mixin";
-import { type Vote, type Person, InfoTabStatus, TabIndex } from "../common/types";
+import {
+    type Vote,
+    type Person,
+    InfoTabStatus,
+    TabIndex,
+} from "../common/types";
 
 type PropsType = {
     userId: number;
@@ -66,15 +71,20 @@ export default class StatisticPageComponent extends mixins(
         this.setVotes(votes);
         await this.getFilms(timeout);
 
-        // freezing
-        this.getDirectors();
+        // // freezing
+        // this.getDirectors();
+        // this.getActors();
+
+        // // start votes setting
+        // this.setAverageVotes();
+        // await this.parsePersons();
+        // // votes updating
+        // this.setAverageVotes();
+
         this.getActors();
 
-        // start votes setting
-        this.setAverageVotes();
-        await this.parsePersons();
-        // votes updating
-        this.setAverageVotes();
+        // const directors = await this.getDirectorsQuery(this.$props.userId);
+        // directors.forEach(director => this.addDirector(director))
     }
 
     isTab(tab: TabIndex): boolean {
@@ -117,23 +127,44 @@ export default class StatisticPageComponent extends mixins(
         );
     }
 
-    getActors() {
-        this.films.forEach((film) =>
-            film.actors.forEach((actorRecord: Person) => {
-                const actor = this.getActor(actorRecord.id);
+    async getActors() {
+        const actors = await this.getActorsQuery(this.$props.userId);
+        actors.forEach((actor) => {
+            if (actor.name) {
+                const { filmography, img, ...rest } = actor;
+                const actorItem: Person = {
+                    ...rest,
+                    films:
+                        filmography
+                            .filter(
+                                (film: any) => film.contextData.role === "actor"
+                            )
+                            .map((film: any) => film.id)
+                            .filter((id: number) =>
+                                this.votes.some((vote) => vote.filmId === id)
+                            ) || [],
+                    photo: img.photo.x2 || img.photo.x1,
+                };
+                this.addActor(actorItem);
+            }
+        });
 
-                if (actor) {
-                    actor.films.push(film.id);
-                } else if (actorRecord.name) {
-                    this.addActor({
-                        id: actorRecord.id,
-                        name: actorRecord.name,
-                        originalName: actorRecord.originalName,
-                        films: [film.id],
-                    });
-                }
-            })
-        );
+        // this.films.forEach((film) =>
+        //     film.actors.forEach((actorRecord: Person) => {
+        //         const actor = this.getActor(actorRecord.id);
+
+        //         if (actor) {
+        //             actor.films.push(film.id);
+        //         } else if (actorRecord.name) {
+        //             this.addActor({
+        //                 id: actorRecord.id,
+        //                 name: actorRecord.name,
+        //                 originalName: actorRecord.originalName,
+        //                 films: [film.id],
+        //             });
+        //         }
+        //     })
+        // );
     }
 
     setAverageVotes() {

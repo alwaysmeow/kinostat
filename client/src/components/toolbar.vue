@@ -93,7 +93,7 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
             case "string":
                 const attr = sortType.attribute;
                 this.$props.modelValue.compareFunction = (a: any, b: any) =>
-                    a[attr].localeCompare(b[attr], "ru");
+                    a[attr]?.localeCompare(b[attr], "ru") || 0;
                 break;
             case "length":
                 this.$props.modelValue.compareFunction = (a: any, b: any) =>
@@ -117,7 +117,8 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
     }
 
     onSearchLineChange(value: string) {
-        this.$props.modelValue.searchLine = value?.trim().toLocaleLowerCase() || '';
+        this.$props.modelValue.searchLine =
+            value?.trim().toLocaleLowerCase() || "";
     }
 }
 </script>

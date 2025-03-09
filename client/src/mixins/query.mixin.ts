@@ -68,4 +68,16 @@ export default class QueryMixin extends Vue {
 
         return votes;
     }
+
+    async getActorsQuery(userId: number): Promise<Person[]> {
+        const URL = `api/actors?user_id=${userId}`;
+        const response = await fetch(URL);
+        return response.json();
+    }
+
+    async getDirectorsQuery(userId: number): Promise<Person[]> {
+        const URL = `api/directors?user_id=${userId}`;
+        const response = await fetch(URL);
+        return response.json();
+    }
 }
