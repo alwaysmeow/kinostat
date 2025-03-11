@@ -1,11 +1,6 @@
 <template>
     <div class="votes-list">
-        <calendar-heatmap
-            dark-mode
-            :values="activityData"
-            :end-date="calendarEndDate"
-            :round="3"
-        />
+        <votes-heatmap />
         <toolbar v-model="toolbarSettings" :sort-types="sortTypes"></toolbar>
         <div class="vote-items">
             <vote-item
@@ -23,8 +18,6 @@ import StoreMixin from "../mixins/store.mixin";
 
 import { SortOrder } from "../common/types";
 import type { Vote, SortType, iToolbar } from "../common/types";
-
-type ActivityData = { date: string; count: number }[];
 
 export default class VotesListComponent extends mixins(StoreMixin) {
     toolbarSettings: iToolbar = {
@@ -63,31 +56,6 @@ export default class VotesListComponent extends mixins(StoreMixin) {
             type: "number",
         },
     ];
-
-    get calendarEndDate(): Date {
-        return new Date();
-    }
-
-    get activityData(): ActivityData {
-        const data: ActivityData = [];
-        this.votes.forEach((vote) => {
-            const [rawDateString] = vote.time.split(' ');
-            const [day, month, year] = rawDateString.split('.');
-            const dateString: string = `20${year}-${month}-${day}`; // won't work in 2100
-
-            const record = data.find((record) => record.date === dateString);
-
-            if (record) {
-                record.count++;
-            } else {
-                data.push({
-                    date: dateString,
-                    count: 1,
-                });
-            }
-        });
-        return data;
-    }
 
     get filteredVotes(): Vote[] {
         const filterFunction = (vote: Vote) => {
