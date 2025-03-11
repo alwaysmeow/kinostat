@@ -13,6 +13,7 @@
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
     "vue-class-component": "^8.0.0-rc.1",
+    "vue3-calendar-heatmap": "^2.0.5",
     "vuetify": "^3.7.12"
   },
   "devDependencies": {

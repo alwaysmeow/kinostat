@@ -1,15 +1,17 @@
 import { createApp } from "vue";
 import { createPinia } from "pinia";
-import vuetify from "./plugins/vuetify.ts";
+import VueCalendarHeatmap from 'vue3-calendar-heatmap'
 
 import App from "./App.vue";
-import registerComponents from "./registerComponents";
+import vuetify from "./plugins/vuetify.ts";
+import registerComponents from "./plugins/registerComponents.ts";
 import "./styles/style.sass";
 
 const app = createApp(App);
 
 const pinia = createPinia();
 app.use(pinia);
+app.use(VueCalendarHeatmap)
 
 app.use(vuetify);
 

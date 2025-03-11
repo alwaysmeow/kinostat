@@ -1,8 +1,18 @@
 <template>
     <div class="votes-list">
+        <calendar-heatmap
+            dark-mode
+            :values="activityData"
+            :end-date="calendarEndDate"
+            :round="3"
+        />
         <toolbar v-model="toolbarSettings" :sort-types="sortTypes"></toolbar>
         <div class="vote-items">
-            <vote-item v-for="vote in searchFilteredVotes" :vote="vote" :key="vote.num" />
+            <vote-item
+                v-for="vote in searchFilteredVotes"
+                :vote="vote"
+                :key="vote.num"
+            />
         </div>
     </div>
 </template>
@@ -13,6 +23,8 @@ import StoreMixin from "../mixins/store.mixin";
 
 import { SortOrder } from "../common/types";
 import type { Vote, SortType, iToolbar } from "../common/types";
+
+type ActivityData = { date: string; count: number }[];
 
 export default class VotesListComponent extends mixins(StoreMixin) {
     toolbarSettings: iToolbar = {
@@ -52,16 +64,41 @@ export default class VotesListComponent extends mixins(StoreMixin) {
         },
     ];
 
+    get calendarEndDate(): Date {
+        return new Date();
+    }
+
+    get activityData(): ActivityData {
+        const data: ActivityData = [];
+        this.votes.forEach((vote) => {
+            const [rawDateString] = vote.time.split(' ');
+            const [day, month, year] = rawDateString.split('.');
+            const dateString: string = `20${year}-${month}-${day}`; // won't work in 2100
+
+            const record = data.find((record) => record.date === dateString);
+
+            if (record) {
+                record.count++;
+            } else {
+                data.push({
+                    date: dateString,
+                    count: 1,
+                });
+            }
+        });
+        return data;
+    }
+
     get filteredVotes(): Vote[] {
         const filterFunction = (vote: Vote) => {
             return (
                 vote.year >= this.filters.filmYearRange[0] &&
                 vote.year <= this.filters.filmYearRange[1] &&
                 this.filters.selectedVoteValues[vote.value - 1]
-            )
-        }
+            );
+        };
         return [...this.votes].filter(filterFunction);
-    }   
+    }
 
     get sortedVotes(): Vote[] {
         const compare = this.toolbarSettings.compareFunction;
