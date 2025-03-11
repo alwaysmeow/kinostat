@@ -114,15 +114,6 @@ export default class StatisticPageComponent extends mixins(
                 const { filmography, img, ...rest } = person;
                 const personItem: Person = {
                     ...rest,
-                    films:
-                        filmography
-                            .filter(
-                                (film: any) => film.contextData.role === list
-                            )
-                            .map((film: any) => film.id)
-                            .filter((id: number) =>
-                                this.votes.some((vote) => vote.filmId === id)
-                            ) || [],
                     photo: img.photo.x2 || img.photo.x1,
                 };
                 addPerson(personItem);
