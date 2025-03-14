@@ -1,11 +1,11 @@
 import { Vue } from "vue-class-component";
 import useStatistic from "../store/statistic";
-import type {
-    Vote,
-    Film,
-    Person,
+import {
+    type Vote,
+    type Film,
+    type Person,
     InfoTabStatus,
-    iFilters,
+    type iFilters,
 } from "../common/types";
 import useInterface from "../store/interface";
 import useFilters from "../store/filter";
@@ -96,9 +96,26 @@ export default class StoreMixin extends Vue {
         return store.infoTabStatus;
     }
 
+    get selectedPersonId() {
+        const store = useInterface();
+        if (
+            store.infoTabStatus === InfoTabStatus.Actor ||
+            store.infoTabStatus === InfoTabStatus.Director
+        ) {
+            return store.selectedPersonId;
+        } else {
+            return null;
+        }
+    }
+
     setInfoTabStatus(status: InfoTabStatus) {
         const store = useInterface();
         store.setInfoTabStatus(status);
+    }
+
+    setSelectedPersonId(id: number | null) {
+        const store = useInterface();
+        store.setSelectedPersonId(id);
     }
 
     get filters() {
@@ -130,10 +147,16 @@ export default class StoreMixin extends Vue {
         const store = useFilters();
         return {
             earliestFilmYear: store.earliestFilmYear,
-            actorsBirthYears: [store.minActorBirthYear, store.maxActorBirthYear],
-            directorsBirthYears: [store.minDirectorBirthYear, store.maxDirectorBirthYear],
+            actorsBirthYears: [
+                store.minActorBirthYear,
+                store.maxActorBirthYear,
+            ],
+            directorsBirthYears: [
+                store.minDirectorBirthYear,
+                store.maxDirectorBirthYear,
+            ],
             maxActorsFilms: store.maxDirectorFilms,
             maxDirectorFilms: store.maxDirectorFilms,
-        }
+        };
     }
 }

@@ -8,5 +8,6 @@
     "toolbar": "toolbar",
     "filter-tab": "filterTab",
     "filter-slider": "filterSlider",
-    "votes-heatmap": "votesHeatmap"
+    "votes-heatmap": "votesHeatmap",
+    "person-tab": "personTab"
 }

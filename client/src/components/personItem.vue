@@ -1,5 +1,5 @@
 <template>
-    <div :class="['person-item', cssValueClass]">
+    <div :class="['person-item', cssValueClass]" @click="onClick">
         <img class="person-photo" loading="lazy" :src="photoSrc" />
         <div class="person-credits">
             <div class="person-name">{{ person?.name }}</div>
@@ -11,7 +11,7 @@
 <script lang="ts">
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
-import type { Person } from "../common/types";
+import { InfoTabStatus, type Person } from "../common/types";
 import QueryMixin from "../mixins/query.mixin";
 
 type PropsType = {
@@ -43,8 +43,10 @@ export default class DirectorItemComponent extends mixins(
     get averageVote(): string {
         const format = (vote: number): string => {
             const avgVoteString = (vote || 0).toString();
-            return avgVoteString.length > 1 ? avgVoteString.slice(0, 3) : avgVoteString;
-        }
+            return avgVoteString.length > 1
+                ? avgVoteString.slice(0, 3)
+                : avgVoteString;
+        };
 
         return format(this.person?.averageVote);
     }
@@ -56,6 +58,18 @@ export default class DirectorItemComponent extends mixins(
 
     get photoSrc(): string {
         return this.person?.photo;
+    }
+
+    onClick() {
+        switch (this.$props.list) {
+            case "directors":
+                this.setInfoTabStatus(InfoTabStatus.Director);
+                break;
+            case "actors":
+                this.setInfoTabStatus(InfoTabStatus.Actor);
+                break;
+        }
+        this.setSelectedPersonId(this.$props.id);
     }
 }
 </script>
@@ -78,6 +92,7 @@ export default class DirectorItemComponent extends mixins(
     transition: 0.5s
 
     user-select: none
+    cursor: pointer
 
     &:hover .person-avg-value
         color: var(--main-text-color)
