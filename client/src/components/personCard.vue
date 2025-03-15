@@ -1,10 +1,19 @@
 <template>
     <div class="person-card">
         <h3>{{ person?.name }}</h3>
-        <img :src="person?.photo"/>
+        <img :src="person?.photo" />
+        <a
+            class="kinopoisk-link"
+            :href="`https://www.kinopoisk.ru/name/${person?.id}/`"
+            target="_blank"
+            rel="noopener noreferrer"
+        >    
+            <v-icon icon="$link" />
+            <span>Страница на Кинопоиске</span>
+        </a>
         <div class="person-contribution">
             <div v-for="id in person?.films" :key="id">
-                <film-contribution-item :id="id"/>
+                <film-contribution-item :id="id" />
             </div>
         </div>
     </div>
@@ -20,9 +29,11 @@ export default class PersonCardComponent extends mixins(StoreMixin) {
         const personId = this.selectedPersonId;
         switch (this.infoTabStatus) {
             case InfoTabStatus.Actor:
-                return this.actors.find(actor => actor.id === personId);
+                return this.actors.find((actor) => actor.id === personId);
             case InfoTabStatus.Director:
-                return this.directors.find(director => director.id === personId);
+                return this.directors.find(
+                    (director) => director.id === personId
+                );
         }
         return null;
     }
@@ -43,4 +54,17 @@ export default class PersonCardComponent extends mixins(StoreMixin) {
     .contribution-item
         padding: 0.5rem
         border-bottom: 1px solid var(--main-text-color)
+
+.kinopoisk-link
+    font-size: 0.8rem
+    font-weight: bold
+    color: var(--secondary-text-color)
+    white-space: nowrap
+
+    i
+        margin-right: 0.2rem
+        padding-bottom: 0.1rem
+
+    &:hover *
+        color: var(--kinopoisk-color)
 </style>
