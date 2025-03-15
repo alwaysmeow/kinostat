@@ -113,7 +113,7 @@ export default class StoreMixin extends Vue {
         store.setInfoTabStatus(status);
     }
 
-    setSelectedPersonId(id: number | null) {
+    setSelectedPersonId(id: number | null = null) {
         const store = useInterface();
         store.setSelectedPersonId(id);
     }

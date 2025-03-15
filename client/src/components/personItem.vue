@@ -61,15 +61,20 @@ export default class DirectorItemComponent extends mixins(
     }
 
     onClick() {
-        switch (this.$props.list) {
-            case "directors":
-                this.setInfoTabStatus(InfoTabStatus.Director);
-                break;
-            case "actors":
-                this.setInfoTabStatus(InfoTabStatus.Actor);
-                break;
+        if (this.selectedPersonId === this.$props.id) {
+            this.setSelectedPersonId();
+            this.setInfoTabStatus(InfoTabStatus.None);
+        } else {
+            switch (this.$props.list) {
+                case "directors":
+                    this.setInfoTabStatus(InfoTabStatus.Director);
+                    break;
+                case "actors":
+                    this.setInfoTabStatus(InfoTabStatus.Actor);
+                    break;
+            }
+            this.setSelectedPersonId(this.$props.id);
         }
-        this.setSelectedPersonId(this.$props.id);
     }
 }
 </script>

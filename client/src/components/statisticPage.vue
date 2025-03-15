@@ -21,7 +21,7 @@
                     :tab-index="selectedTabIndex"
                     v-if="isInfoTab(InfoTabStatus.Filter)"
                 />
-                <person-tab
+                <person-card
                     v-if="isInfoTab(InfoTabStatus.Actor) || isInfoTab(InfoTabStatus.Director)"
                 />
             </div>

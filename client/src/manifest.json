@@ -9,5 +9,6 @@
     "filter-tab": "filterTab",
     "filter-slider": "filterSlider",
     "votes-heatmap": "votesHeatmap",
-    "person-tab": "personTab"
+    "person-card": "personCard",
+    "film-contribution-item": "filmContributionItem"
 }
