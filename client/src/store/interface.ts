@@ -22,7 +22,7 @@ const useInterface = defineStore("interface", {
             this.infoTabStatus = InfoTabStatus.None;
             this.selectedObjectId = null;
         },
-        setInfoTab(status: InfoTabStatus, objectId: number) {
+        setInfoTab(status: InfoTabStatus, objectId: number | null) {
             this.infoTabStatus = status;
             this.selectedObjectId = objectId;
         },

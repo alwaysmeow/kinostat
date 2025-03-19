@@ -109,11 +109,11 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
     }
 
     handleFilter() {
-        this.setInfoTabStatus(
-            this.infoTabStatus === InfoTabStatus.Filter
-                ? InfoTabStatus.None
-                : InfoTabStatus.Filter
-        );
+        if (this.infoTabStatus === InfoTabStatus.Filter) {
+            this.setNoneInfoTab();
+        } else {
+            this.setInfoTab(InfoTabStatus.Filter);
+        }
     }
 
     onSearchLineChange(value: string) {
