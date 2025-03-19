@@ -96,16 +96,9 @@ export default class StoreMixin extends Vue {
         return store.infoTabStatus;
     }
 
-    get selectedPersonId() {
+    get selectedObjectId() {
         const store = useInterface();
-        if (
-            store.infoTabStatus === InfoTabStatus.Actor ||
-            store.infoTabStatus === InfoTabStatus.Director
-        ) {
-            return store.selectedPersonId;
-        } else {
-            return null;
-        }
+        return store.selectedObjectId;
     }
 
     setInfoTabStatus(status: InfoTabStatus) {
@@ -113,9 +106,9 @@ export default class StoreMixin extends Vue {
         store.setInfoTabStatus(status);
     }
 
-    setSelectedPersonId(id: number | null = null) {
+    setSelectedObjectId(id: number | null = null) {
         const store = useInterface();
-        store.setSelectedPersonId(id);
+        store.setSelectedObjectId(id);
     }
 
     get filters() {

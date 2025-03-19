@@ -1,5 +1,5 @@
 <template>
-    <div :class="['vote-item', cssValueClass]">
+    <div :class="['vote-item', cssValueClass]" @click="onClick">
         <div class="vote-film-info">
             <img class="vote-film-poster" loading="lazy" :src="posterSrc"/>
             <div class="vote-film-credits">
@@ -14,7 +14,7 @@
 <script lang="ts">
 import { Options, mixins } from "vue-class-component";
 import StoreMixin from '../mixins/store.mixin';
-import type { Vote } from '../common/types';
+import { InfoTabStatus, type Vote } from '../common/types';
 
 type PropsType = {
     vote: Vote;
@@ -35,6 +35,16 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     get posterSrc(): string {
         const film = this.getFilm(this.$props.vote.filmId);
         return film ? `${film.posterBaseUrl}/120x`: '';
+    }
+
+    onClick() {
+        if (this.selectedObjectId === this.$props.vote.filmId) {
+            this.setSelectedObjectId();
+            this.setInfoTabStatus(InfoTabStatus.None);
+        } else {
+            this.setSelectedObjectId(this.$props.vote.filmId);
+            this.setInfoTabStatus(InfoTabStatus.Film);
+        }
     }
 };
 </script>

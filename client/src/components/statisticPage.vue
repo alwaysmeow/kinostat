@@ -24,6 +24,9 @@
                 <person-card
                     v-if="isInfoTab(InfoTabStatus.Actor) || isInfoTab(InfoTabStatus.Director)"
                 />
+                <film-card
+                    v-if="isInfoTab(InfoTabStatus.Film)"
+                />
             </div>
         </div>
     </div>

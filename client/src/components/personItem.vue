@@ -61,8 +61,8 @@ export default class DirectorItemComponent extends mixins(
     }
 
     onClick() {
-        if (this.selectedPersonId === this.$props.id) {
-            this.setSelectedPersonId();
+        if (this.selectedObjectId === this.$props.id) {
+            this.setSelectedObjectId();
             this.setInfoTabStatus(InfoTabStatus.None);
         } else {
             switch (this.$props.list) {
@@ -73,7 +73,7 @@ export default class DirectorItemComponent extends mixins(
                     this.setInfoTabStatus(InfoTabStatus.Actor);
                     break;
             }
-            this.setSelectedPersonId(this.$props.id);
+            this.setSelectedObjectId(this.$props.id);
         }
     }
 }
