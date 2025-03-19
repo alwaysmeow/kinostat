@@ -51,17 +51,4 @@ export default class PersonCardComponent extends mixins(StoreMixin) {
     padding: 1rem
     
     user-select: none
-
-.kinopoisk-link
-    font-size: 0.8rem
-    font-weight: bold
-    color: var(--secondary-text-color)
-    white-space: nowrap
-
-    i
-        margin-right: 0.2rem
-        padding-bottom: 0.1rem
-
-    &:hover *
-        color: var(--kinopoisk-color)
 </style>
