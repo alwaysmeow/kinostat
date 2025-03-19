@@ -62,18 +62,16 @@ export default class DirectorItemComponent extends mixins(
 
     onClick() {
         if (this.selectedObjectId === this.$props.id) {
-            this.setSelectedObjectId();
-            this.setInfoTabStatus(InfoTabStatus.None);
+            this.setNoneInfoTab();
         } else {
             switch (this.$props.list) {
                 case "directors":
-                    this.setInfoTabStatus(InfoTabStatus.Director);
+                    this.setInfoTab(InfoTabStatus.Director, this.$props.id);
                     break;
                 case "actors":
-                    this.setInfoTabStatus(InfoTabStatus.Actor);
+                this.setInfoTab(InfoTabStatus.Actor, this.$props.id);
                     break;
             }
-            this.setSelectedObjectId(this.$props.id);
         }
     }
 }

@@ -39,11 +39,9 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
 
     onClick() {
         if (this.selectedObjectId === this.$props.vote.filmId) {
-            this.setSelectedObjectId();
-            this.setInfoTabStatus(InfoTabStatus.None);
+            this.setNoneInfoTab();
         } else {
-            this.setSelectedObjectId(this.$props.vote.filmId);
-            this.setInfoTabStatus(InfoTabStatus.Film);
+            this.setInfoTab(InfoTabStatus.Film, this.$props.vote.filmId);
         }
     }
 };

@@ -111,6 +111,26 @@ export default class StoreMixin extends Vue {
         store.setSelectedObjectId(id);
     }
 
+    setNoneInfoTab() {
+        const store = useInterface();
+        store.setNoneInfoTab();
+    }
+
+    setInfoTab(status: InfoTabStatus, objectId: number) {
+        const store = useInterface();
+        if (store.infoTabStatus === InfoTabStatus.None) {
+            store.setInfoTab(status, objectId);
+        }
+        if (status === store.infoTabStatus) {
+            store.setSelectedObjectId(objectId);
+        } else {
+            store.setNoneInfoTab();
+            setTimeout(() => {
+                store.setInfoTab(status, objectId);
+            }, 100)
+        }
+    }
+
     get filters() {
         const store = useFilters();
         return store.filters;
