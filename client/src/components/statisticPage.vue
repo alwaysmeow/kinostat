@@ -17,6 +17,9 @@
 
         <div class="page-left-space">
             <div :class="['info-tab', cssInfoTabVisibleClass]">
+                <div class="close-info-tab-btn" @click="closeInfoTab">
+                    <v-icon icon="$close"/>
+                </div>
                 <filter-tab
                     :tab-index="selectedTabIndex"
                     v-if="isInfoTab(InfoTabStatus.Filter)"
@@ -126,6 +129,10 @@ export default class StatisticPageComponent extends mixins(
             }
         });
     }
+
+    closeInfoTab() {
+        this.setNoneInfoTab();
+    }
 }
 </script>
 
@@ -162,4 +169,16 @@ export default class StatisticPageComponent extends mixins(
 
     &.visible
         transform: none
+    
+    .close-info-tab-btn
+        width: min-content
+        position: relative
+
+        left: 1rem
+
+        color: var(--secondary-text-color)
+
+        &:hover
+            color: var(--main-text-color)
+            cursor: pointer
 </style>
