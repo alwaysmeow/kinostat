@@ -1,5 +1,5 @@
 import { Vue } from "vue-class-component";
-import type { Vote, Film, Person, iCountry } from "../common/types";
+import type { Vote, Film, Person, Country } from "../common/types";
 
 export enum QueryObjectType {
     Film = "film",
@@ -8,7 +8,10 @@ export enum QueryObjectType {
 }
 
 export default class QueryMixin extends Vue {
-    async getObjectQuery<T>(objectType: QueryObjectType | string, id: number): Promise<T | null> {
+    async getObjectQuery<T>(
+        objectType: QueryObjectType | string,
+        id: number
+    ): Promise<T | null> {
         const URL = `api/object?type=${objectType}&id=${id}`;
 
         try {
@@ -19,18 +22,16 @@ export default class QueryMixin extends Vue {
                 );
             }
             const data = await response.json();
-            if (data.type === 'captcha') {
-                throw new Error(
-                    `Request ${URL} failed by timeout`
-                );
+            if (data.type === "captcha") {
+                throw new Error(`Request ${URL} failed by timeout`);
             }
             switch (objectType) {
                 case QueryObjectType.Film:
-                    return data.film
+                    return data.film;
                 case QueryObjectType.Person:
-                    return data.person
+                    return data.person;
                 default:
-                    return data
+                    return data;
             }
         } catch (error) {
             console.error(error);
@@ -56,7 +57,7 @@ export default class QueryMixin extends Vue {
             const [title, year] = item.alt
                 .split("(")
                 .map((str) => str.slice(0, -1));
-            const [,type,id] = item.url.split('/');
+            const [, type, id] = item.url.split("/");
             return {
                 ...item,
                 filmId: Number(id),
@@ -81,7 +82,7 @@ export default class QueryMixin extends Vue {
         return response.json();
     }
 
-    async getCountriesQuery(userId: number): Promise<Record<string, iCountry>> {
+    async getCountriesQuery(userId: number): Promise<Country[]> {
         const URL = `api/countries?user_id=${userId}`;
         const response = await fetch(URL);
         return response.json();

@@ -91,18 +91,14 @@ export default class CountriesTabComponent extends mixins(StoreMixin) {
     };
 
     get countriesCountData() {
-        const countries = Object.keys(this.countries);
-
         const result: [string, number][] = [];
         let restFilmCount = 0;
 
-        countries.forEach((name) => {
-            const filmsCount = this.countries[name].films.length;
-
-            if (filmsCount >= MINIMUM_FILMS_TO_SHOW_COUNTRY) {
-                result.push([name, filmsCount]);
+        this.countries.forEach((country) => {
+            if (country.films.length >= MINIMUM_FILMS_TO_SHOW_COUNTRY) {
+                result.push([country.name, country.films.length]);
             } else {
-                restFilmCount += filmsCount;
+                restFilmCount += country.films.length;
             }
         });
 
@@ -114,19 +110,11 @@ export default class CountriesTabComponent extends mixins(StoreMixin) {
     }
 
     get countriesVoteData() {
-        const countries = Object.keys(this.countries);
-
-        return countries
-            .sort(
-                (a, b) =>
-                    this.countries[b].films.length -
-                    this.countries[a].films.length
-            )
-            .map((name) => [
-                `${name} (${this.countries[name].films.length})`,
-                Number(
-                    this.countries[name].averageVote.toPrecision(3).toString()
-                ),
+        return this.countries
+            .sort((a, b) => a.films.length - b.films.length)
+            .map((country) => [
+                `${country.name} (${country.films.length})`,
+                Number(country.averageVote.toPrecision(3).toString()),
             ]);
     }
 }

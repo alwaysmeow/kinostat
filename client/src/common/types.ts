@@ -25,7 +25,8 @@ export interface Person {
     [key: string]: any,
 }
 
-export interface iCountry {
+export interface Country {
+    name: string
     films: number[],
     averageVote: number,
 }

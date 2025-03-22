@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import type { Vote, Film, Person, iCountry } from '../common/types';
+import type { Vote, Film, Person, Country } from '../common/types';
 
 interface StatisticStore {
     votes: Vote[],
     films: Film[],
     actors: Person[],
     directors: Person[],
-    countries: Record<string, iCountry>,
+    countries: Country[],
 }
 
 const useStatistic = defineStore('statistic', {
@@ -15,7 +15,7 @@ const useStatistic = defineStore('statistic', {
         films: [],
         actors: [],
         directors: [],
-        countries: {},
+        countries: [],
     }),
     actions: {
         setVotes(data: Vote[]) {

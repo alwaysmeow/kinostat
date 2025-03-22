@@ -311,17 +311,22 @@ func countriesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	for country, stat := range countriesMap {
-		filmsInterface, ok := stat["films"]
-		films := filmsInterface.([]int)
+	var result []map[string]any
 
-		if ok {
-			countriesMap[country]["averageVote"] = statistic.AverageVote(&films, &votesMap)
-		}
+	for country, stat := range countriesMap {
+		item := make(map[string]any)
+		item["name"] = country
+
+		films := stat["films"].([]int)
+
+		item["films"] = films
+		item["averageVote"] = statistic.AverageVote(&films, &votesMap)
+
+		result = append(result, item)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(countriesMap)
+	json.NewEncoder(w).Encode(result)
 }
 
 func init() {
