@@ -289,16 +289,25 @@ func countriesHandler(w http.ResponseWriter, r *http.Request) {
 			film = film["film"].(map[string]interface{})
 			filmCountries := film["countries"].([]interface{})
 
-			for _, country := range filmCountries {
-				country, _ := country.(string)
-				_, ok := countriesMap[country]
+			country, _ := filmCountries[0].(string)
+			_, ok := countriesMap[country]
 
-				if !ok {
-					countriesMap[country] = make(map[string]interface{})
-					countriesMap[country]["films"] = []int{}
-				}
-				countriesMap[country]["films"] = append(countriesMap[country]["films"].([]int), id)
+			if !ok {
+				countriesMap[country] = make(map[string]interface{})
+				countriesMap[country]["films"] = []int{}
 			}
+			countriesMap[country]["films"] = append(countriesMap[country]["films"].([]int), id)
+
+			// for _, country := range filmCountries {
+			// 	country, _ := country.(string)
+			// 	_, ok := countriesMap[country]
+
+			// 	if !ok {
+			// 		countriesMap[country] = make(map[string]interface{})
+			// 		countriesMap[country]["films"] = []int{}
+			// 	}
+			// 	countriesMap[country]["films"] = append(countriesMap[country]["films"].([]int), id)
+			// }
 		}
 	}
 

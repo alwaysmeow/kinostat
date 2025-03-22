@@ -8,7 +8,7 @@
         ></pie-chart>
         <bar-chart
             :data="countriesVoteData"
-            :colors="['#ff8040']"
+            :colors="['#ff8040', '#ffe040', '#ff405f']"
             :library="barChartOptions"
             :height="`${Object.keys(countries).length * 40}px`"
         ></bar-chart>
@@ -19,7 +19,7 @@
 import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 
-const MINIMUM_FILMS_TO_SHOW_COUNTRY = 5;
+const MINIMUM_FILMS_TO_SHOW_COUNTRY = 4;
 
 export default class CountriesTabComponent extends mixins(StoreMixin) {
     pieChartOptions = {
@@ -52,32 +52,33 @@ export default class CountriesTabComponent extends mixins(StoreMixin) {
     barChartOptions = {
         borderRadius: 5,
         scales: {
-          x: {
-            ticks: {
-              color: '#fff',
-                font: {
-                    size: 14,
-                    weight: 'bold',
+            x: {
+                ticks: {
+                    color: "#fff",
+                    font: {
+                        size: 14,
+                        weight: "bold",
+                    },
+                },
+                grid: {
+                    color: "#333333",
                 },
             },
-            grid: {
-              color: '#333333',
-            },
-          },
-          y: {
-            ticks: {
-              color: '#fff',
-                font: {
-                    size: 14,
+            y: {
+                ticks: {
+                    color: "#fff",
+                    font: {
+                        size: 14,
+                    },
                 },
             },
-          },
         },
         plugins: {
             datalabels: {
                 formatter: (value: number) => {
                     return value;
                 },
+                color: "#fff",
                 anchor: "end",
                 align: "end",
                 offset: 5,
@@ -115,10 +116,18 @@ export default class CountriesTabComponent extends mixins(StoreMixin) {
     get countriesVoteData() {
         const countries = Object.keys(this.countries);
 
-        return countries.map((name) => [
-            `${name} (${this.countries[name].films.length})`,
-            Number(this.countries[name].averageVote.toPrecision(3).toString()),
-        ]);
+        return countries
+            .sort(
+                (a, b) =>
+                    this.countries[b].films.length -
+                    this.countries[a].films.length
+            )
+            .map((name) => [
+                `${name} (${this.countries[name].films.length})`,
+                Number(
+                    this.countries[name].averageVote.toPrecision(3).toString()
+                ),
+            ]);
     }
 }
 </script>
