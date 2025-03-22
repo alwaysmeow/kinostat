@@ -111,7 +111,7 @@ export default class CountriesTabComponent extends mixins(StoreMixin) {
 
     get countriesVoteData() {
         return this.countries
-            .sort((a, b) => a.films.length - b.films.length)
+            .sort((a, b) => b.films.length - a.films.length)
             .map((country) => [
                 `${country.name} (${country.films.length})`,
                 Number(country.averageVote.toPrecision(3).toString()),
