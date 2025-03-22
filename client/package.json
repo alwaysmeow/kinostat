@@ -10,13 +10,17 @@
   },
   "dependencies": {
     "@mdi/js": "^7.4.47",
+    "chart.js": "^4.4.8",
+    "chartjs-plugin-datalabels": "^2.2.0",
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
+    "vue-chartkick": "^1.1.0",
     "vue-class-component": "^8.0.0-rc.1",
     "vue3-calendar-heatmap": "^2.0.5",
     "vuetify": "^3.7.12"
   },
   "devDependencies": {
+    "@types/vue-chartkick": "^0.5.4",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
     "sass": "^1.84.0",

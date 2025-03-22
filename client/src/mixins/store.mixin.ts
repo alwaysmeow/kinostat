@@ -6,6 +6,7 @@ import {
     type Person,
     InfoTabStatus,
     type iFilters,
+    type iCountry,
 } from "../common/types";
 import useInterface from "../store/interface";
 import useFilters from "../store/filter";
@@ -96,7 +97,7 @@ export default class StoreMixin extends Vue {
         this.setPersonAttributes("actors", id, attributes);
     }
 
-    setCountries(countries: Object) {
+    setCountries(countries: Record<string, iCountry>) {
         const store = useStatistic();
         store.countries = countries;
     }

@@ -25,6 +25,11 @@ export interface Person {
     [key: string]: any,
 }
 
+export interface iCountry {
+    films: number[],
+    averageVote: number,
+}
+
 export enum SortOrder {
     Ascending = 'asc',
     Descending = 'desc',
