@@ -1,14 +1,14 @@
 <template>
     <div class="tabs-menu">
         <div class="tabs-list">
-            <div
+            <h3
                 :class="['tab-button', cssStatusTabClass(index)]"
                 v-for="(title, index) in $props.tabsTitles"
                 :tabIndex="index"
                 @click="onTabSelect"
             >
                 {{ title }}
-            </div>
+            </h3>
         </div>
     </div>
 </template>
@@ -70,9 +70,11 @@ export default class StatisticPageComponent extends Vue {
 
     transition: 0.5s
 
+    color: var(--secondary-text-color)
+
     &.inactive:hover
-        background-color: var(--highlighted-tab-color)
+        color: var(--kinopoisk-color)
     
     &.active
-        background-color: var(--active-tab-color)
+        color: var(--main-text-color)
 </style>

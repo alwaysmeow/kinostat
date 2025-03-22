@@ -55,6 +55,9 @@ export enum TabIndex {
     Votes = 0,
     Directors = 1,
     Actors = 2,
+    Countries = 3,
+    Genres = 4,
+    Years = 5,
 };
 
 export interface iFilters {

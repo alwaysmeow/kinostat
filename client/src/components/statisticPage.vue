@@ -62,7 +62,7 @@ export default class StatisticPageComponent extends mixins(
     declare $props: PropsType;
 
     selectedTabIndex: number = 0;
-    tabsTitles: string[] = ["Оценки", "Режиссеры", "Актеры"];
+    tabsTitles: string[] = ["Оценки", "Режиссеры", "Актеры", "Cтраны", "Жанры", "Годы"];
 
     TabIndex = TabIndex;
     InfoTabStatus = InfoTabStatus;
