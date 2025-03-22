@@ -80,4 +80,10 @@ export default class QueryMixin extends Vue {
         const response = await fetch(URL);
         return response.json();
     }
+
+    async getCountriesQuery(userId: number): Promise<Object> {
+        const URL = `api/countries?user_id=${userId}`;
+        const response = await fetch(URL);
+        return response.json();
+    }
 }

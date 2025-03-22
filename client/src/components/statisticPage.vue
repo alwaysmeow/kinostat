@@ -13,23 +13,25 @@
             <votes-list v-if="isTab(TabIndex.Votes)" />
             <person-list list="directors" v-if="isTab(TabIndex.Directors)" />
             <person-list list="actors" v-if="isTab(TabIndex.Actors)" />
+            <countries-tab v-if="isTab(TabIndex.Countries)"/>
         </div>
 
         <div class="page-left-space">
             <div :class="['info-tab', cssInfoTabVisibleClass]">
                 <div class="close-info-tab-btn" @click="closeInfoTab">
-                    <v-icon icon="$close"/>
+                    <v-icon icon="$close" />
                 </div>
                 <filter-tab
                     :tab-index="selectedTabIndex"
                     v-if="isInfoTab(InfoTabStatus.Filter)"
                 />
                 <person-card
-                    v-if="isInfoTab(InfoTabStatus.Actor) || isInfoTab(InfoTabStatus.Director)"
+                    v-if="
+                        isInfoTab(InfoTabStatus.Actor) ||
+                        isInfoTab(InfoTabStatus.Director)
+                    "
                 />
-                <film-card
-                    v-if="isInfoTab(InfoTabStatus.Film)"
-                />
+                <film-card v-if="isInfoTab(InfoTabStatus.Film)" />
             </div>
         </div>
     </div>
@@ -62,7 +64,14 @@ export default class StatisticPageComponent extends mixins(
     declare $props: PropsType;
 
     selectedTabIndex: number = 0;
-    tabsTitles: string[] = ["Оценки", "Режиссеры", "Актеры", "Cтраны", "Жанры", "Годы"];
+    tabsTitles: string[] = [
+        "Оценки",
+        "Режиссеры",
+        "Актеры",
+        "Cтраны",
+        "Жанры",
+        "Годы",
+    ];
 
     TabIndex = TabIndex;
     InfoTabStatus = InfoTabStatus;
@@ -80,6 +89,7 @@ export default class StatisticPageComponent extends mixins(
         this.setVotes(votes);
         await this.getFilms(timeout);
 
+        this.getCountries();
         this.getPersonList("actor");
         this.getPersonList("director");
     }
@@ -130,6 +140,10 @@ export default class StatisticPageComponent extends mixins(
         });
     }
 
+    async getCountries() {
+        this.setCountries(await this.getCountriesQuery(this.$props.userId));
+    }
+
     closeInfoTab() {
         this.setNoneInfoTab();
     }
@@ -169,7 +183,7 @@ export default class StatisticPageComponent extends mixins(
 
     &.visible
         transform: none
-    
+
     .close-info-tab-btn
         width: min-content
         position: relative

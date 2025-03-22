@@ -31,6 +31,11 @@ export default class StoreMixin extends Vue {
         return store.directors;
     }
 
+    get countries() {
+        const store = useStatistic();
+        return store.countries;
+    }
+
     setVotes(data: Vote[]): void {
         const store = useStatistic();
         store.setVotes(data);
@@ -89,6 +94,11 @@ export default class StoreMixin extends Vue {
 
     setActorAttributes(id: number, attributes: Partial<Person>): void {
         this.setPersonAttributes("actors", id, attributes);
+    }
+
+    setCountries(countries: Object) {
+        const store = useStatistic();
+        store.countries = countries;
     }
 
     get infoTabStatus() {

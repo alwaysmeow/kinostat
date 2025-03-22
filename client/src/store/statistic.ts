@@ -6,6 +6,7 @@ interface StatisticStore {
     films: Film[],
     actors: Person[],
     directors: Person[],
+    countries: Object,
 }
 
 const useStatistic = defineStore('statistic', {
@@ -14,6 +15,7 @@ const useStatistic = defineStore('statistic', {
         films: [],
         actors: [],
         directors: [],
+        countries: {},
     }),
     actions: {
         setVotes(data: Vote[]) {
