@@ -29,7 +29,7 @@ func getFilmIdList(filmography *[]interface{}, votesMap *map[int]int, role strin
 	return filmIds
 }
 
-func averageVote(filmIds *[]int, votesMap *map[int]int) float64 {
+func AverageVote(filmIds *[]int, votesMap *map[int]int) float64 {
 	sum := 0
 	count := 0
 
@@ -53,6 +53,10 @@ func SetAverageVotes(persons *[]map[string]interface{}, votesMap *map[int]int, r
 		filmography, _ := person["filmography"].([]interface{})
 		filmIds := getFilmIdList(&filmography, votesMap, role)
 		(*persons)[index]["films"] = filmIds
-		(*persons)[index]["averageVote"] = averageVote(&filmIds, votesMap)
+		(*persons)[index]["averageVote"] = AverageVote(&filmIds, votesMap)
 	}
+}
+
+func CountriesStatistic(films *[]interface{}) {
+
 }
