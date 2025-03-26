@@ -329,6 +329,86 @@ func countriesHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(result)
 }
 
+func genresHandler(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+	userIDStr := query.Get("user_id")
+	if userIDStr == "" {
+		http.Error(w, "user_id is necessary", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := strconv.Atoi(userIDStr)
+	if err != nil {
+		http.Error(w, "Invalid user_id", http.StatusBadRequest)
+		return
+	}
+
+	votes, err := queries.GetVotes(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	votesMap := make(map[int]int)
+	genresMap := make(map[string]map[string]interface{})
+
+	for _, vote := range votes {
+		parts := strings.Split(vote["url"].(string), "/")
+		id, err := strconv.Atoi(parts[len(parts)-2])
+
+		if err != nil {
+			continue
+		}
+
+		value := vote["value"].(float64)
+		votesMap[id] = int(value)
+
+		data, err := cache.ExtractJSON("film", id)
+		var film map[string]interface{}
+		json.Unmarshal(data, &film)
+
+		if err != nil {
+			film, err = queries.GetObject("film", id)
+			if err != nil {
+				continue
+			}
+		}
+
+		if err == nil {
+			film = film["film"].(map[string]interface{})
+			filmGenres := film["genres"].([]interface{})
+
+			for _, genre := range filmGenres {
+				genre, _ := genre.(string)
+				_, ok := genresMap[genre]
+
+				if !ok {
+					genresMap[genre] = make(map[string]interface{})
+					genresMap[genre]["films"] = []int{}
+				}
+				genresMap[genre]["films"] = append(genresMap[genre]["films"].([]int), id)
+			}
+		}
+	}
+
+	var result []map[string]any
+
+	for genre, stat := range genresMap {
+		item := make(map[string]any)
+		item["name"] = genre
+
+		films := stat["films"].([]int)
+
+		item["films"] = films
+		item["averageVote"] = statistic.AverageVote(&films, &votesMap)
+
+		result = append(result, item)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Print("No .env file found")
@@ -341,6 +421,7 @@ func main() {
 	http.HandleFunc("/api/actors", actorsHandler)
 	http.HandleFunc("/api/directors", directorsHandler)
 	http.HandleFunc("/api/countries", countriesHandler)
+	http.HandleFunc("/api/genres", genresHandler)
 
 	fmt.Println("Server is hosting on 8080 port")
 	http.ListenAndServe(":8080", nil)
