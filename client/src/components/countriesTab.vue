@@ -18,78 +18,11 @@
 <script lang="ts">
 import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
+import ChartMixin from "../mixins/chart.mixin";
 
 const MINIMUM_FILMS_TO_SHOW_COUNTRY = 4;
 
-export default class CountriesTabComponent extends mixins(StoreMixin) {
-    pieChartOptions = {
-        cutout: "50%",
-        radius: "70%",
-        elements: {
-            arc: {
-                borderWidth: 0,
-            },
-        },
-        plugins: {
-            datalabels: {
-                font: {
-                    size: 14,
-                    weight: "bold",
-                },
-                formatter: (value: number, context: any) => {
-                    return `${
-                        context.chart.data.labels[context.dataIndex]
-                    } (${value})`;
-                },
-                anchor: "end",
-                align: "end",
-                offset: 20,
-                clip: false,
-            },
-        },
-    };
-
-    barChartOptions = {
-        borderRadius: 5,
-        scales: {
-            x: {
-                ticks: {
-                    color: "#fff",
-                    font: {
-                        size: 14,
-                        weight: "bold",
-                    },
-                },
-                grid: {
-                    color: "#333333",
-                },
-            },
-            y: {
-                ticks: {
-                    color: "#fff",
-                    font: {
-                        size: 14,
-                    },
-                },
-            },
-        },
-        plugins: {
-            datalabels: {
-                formatter: (value: number) => {
-                    return value;
-                },
-                color: "#fff",
-                anchor: "end",
-                align: "end",
-                offset: 5,
-                clip: false,
-            },
-            tooltip: {
-                enabled: false,
-            },
-        },
-    };
-
+export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin) {
     get countriesCountData() {
         const result: [string, number][] = [];
         let restFilmCount = 0;

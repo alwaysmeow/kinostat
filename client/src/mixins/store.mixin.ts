@@ -37,6 +37,11 @@ export default class StoreMixin extends Vue {
         return store.countries;
     }
 
+    get genres() {
+        const store = useStatistic();
+        return store.genres;
+    }
+
     setVotes(data: Vote[]): void {
         const store = useStatistic();
         store.setVotes(data);
