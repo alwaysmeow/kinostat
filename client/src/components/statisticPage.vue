@@ -90,6 +90,7 @@ export default class StatisticPageComponent extends mixins(
         await this.getFilms(timeout);
 
         this.getCountries();
+        this.getGenres();
         this.getPersonList("actor");
         this.getPersonList("director");
     }
@@ -142,6 +143,10 @@ export default class StatisticPageComponent extends mixins(
 
     async getCountries() {
         this.setCountries(await this.getCountriesQuery(this.$props.userId));
+    }
+
+    async getGenres() {
+        this.setGenres(await this.getGenresQuery(this.$props.userId));
     }
 
     closeInfoTab() {

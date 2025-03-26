@@ -6,7 +6,7 @@ import {
     type Person,
     InfoTabStatus,
     type iFilters,
-    type Country,
+    type FilmAttribute,
 } from "../common/types";
 import useInterface from "../store/interface";
 import useFilters from "../store/filter";
@@ -97,9 +97,14 @@ export default class StoreMixin extends Vue {
         this.setPersonAttributes("actors", id, attributes);
     }
 
-    setCountries(countries: Country[]) {
+    setCountries(countries: FilmAttribute[]) {
         const store = useStatistic();
         store.countries = countries;
+    }
+
+    setGenres(genres: FilmAttribute[]) {
+        const store = useStatistic();
+        store.genres = genres;
     }
 
     get infoTabStatus() {

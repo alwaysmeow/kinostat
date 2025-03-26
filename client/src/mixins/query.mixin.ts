@@ -1,5 +1,5 @@
 import { Vue } from "vue-class-component";
-import type { Vote, Film, Person, Country } from "../common/types";
+import type { Vote, Film, Person, FilmAttribute } from "../common/types";
 
 export enum QueryObjectType {
     Film = "film",
@@ -82,8 +82,14 @@ export default class QueryMixin extends Vue {
         return response.json();
     }
 
-    async getCountriesQuery(userId: number): Promise<Country[]> {
+    async getCountriesQuery(userId: number): Promise<FilmAttribute[]> {
         const URL = `api/countries?user_id=${userId}`;
+        const response = await fetch(URL);
+        return response.json();
+    }
+
+    async getGenresQuery(userId: number): Promise<FilmAttribute[]> {
+        const URL = `api/genres?user_id=${userId}`;
         const response = await fetch(URL);
         return response.json();
     }
