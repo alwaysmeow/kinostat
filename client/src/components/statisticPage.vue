@@ -15,6 +15,7 @@
             <person-list list="actors" v-if="isTab(TabIndex.Actors)" />
             <countries-tab v-if="isTab(TabIndex.Countries)"/>
             <genres-tab v-if="isTab(TabIndex.Genres)"/>
+            <years-tab v-if="isTab(TabIndex.Years)"/>
         </div>
 
         <div class="page-left-space">

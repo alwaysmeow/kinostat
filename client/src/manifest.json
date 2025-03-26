@@ -13,5 +13,6 @@
     "film-contribution-item": "filmContributionItem",
     "film-card": "filmCard",
     "countries-tab": "countriesTab",
-    "genres-tab": "genresTab"
+    "genres-tab": "genresTab",
+    "years-tab": "yearsTab"
 }
