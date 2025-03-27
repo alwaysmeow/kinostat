@@ -1,5 +1,10 @@
 <template>
     <div class="votes-list">
+        <!-- <line-chart
+            :data="votesCountData"
+            :colors="['#ff8040', '#ffe040', '#ff405f']"
+            :library="lineChartOptions"
+        ></line-chart> -->
         <votes-heatmap />
         <toolbar v-model="toolbarSettings" :sort-types="sortTypes"></toolbar>
         <div class="vote-items">
@@ -15,11 +20,12 @@
 <script lang="ts">
 import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
+import ChartMixin from "../mixins/chart.mixin";
 
 import { SortOrder } from "../common/types";
 import type { Vote, SortType, iToolbar } from "../common/types";
 
-export default class VotesListComponent extends mixins(StoreMixin) {
+export default class VotesListComponent extends mixins(StoreMixin, ChartMixin) {
     toolbarSettings: iToolbar = {
         searchLine: "",
     };
@@ -93,6 +99,16 @@ export default class VotesListComponent extends mixins(StoreMixin) {
         }
 
         return this.sortedVotes;
+    }
+
+    get votesCountData() {
+        const result = Array(10).fill(0)
+
+        this.votes.forEach((vote) => {
+            result[vote.value - 1]++;
+        });
+
+        return result.map((value, index) => [index + 1, value]);
     }
 }
 </script>
