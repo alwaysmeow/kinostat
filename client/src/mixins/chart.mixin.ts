@@ -70,4 +70,19 @@ export default class ChartMixin extends Vue {
             },
         },
     };
+
+    lineChartOptions = {
+        scales: {
+          x: {
+            type: 'linear',
+            offset: false,
+            bounds: 'data',
+          }
+        },
+        plugins: {
+          datalabels: {
+            display: false,
+          }
+        },
+    };
 }
