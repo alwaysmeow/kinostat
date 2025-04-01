@@ -1,15 +1,21 @@
 <template>
     <div class="genres-tab">
-        <line-chart
-            :data="yearsCountData"
-            :colors="['#ff8040', '#ffe040', '#ff405f']"
-            :library="lineChartOptions"
-        ></line-chart>
-        <line-chart
-            :data="yearsVoteData"
-            :colors="['#ff8040', '#ffe040', '#ff405f']"
-            :library="lineChartOptions"
-        ></line-chart>
+        <div>
+            <h3>Количество оценок</h3>
+            <line-chart
+                :data="yearsCountData"
+                :colors="['#ff8040', '#ffe040', '#ff405f']"
+                :library="lineChartOptions"
+            ></line-chart>
+        </div>
+        <div>
+            <h3>Средняя оценка</h3>
+            <line-chart
+                :data="yearsVoteData"
+                :colors="['#ff8040', '#ffe040', '#ff405f']"
+                :library="lineChartOptions"
+            ></line-chart>
+        </div>
     </div>
 </template>
 
@@ -72,4 +78,13 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
 }
 </script>
 
-<style lang="sass"></style>
+<style lang="sass">
+.genres-tab
+    display: flex
+    flex-direction: column
+    gap: 2rem
+
+    h3
+        margin: 1rem
+        text-align: left
+</style>
