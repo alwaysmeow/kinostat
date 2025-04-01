@@ -20,20 +20,30 @@ import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import ChartMixin from "../mixins/chart.mixin";
 
-const MINIMUM_FILMS_TO_SHOW_COUNTRY = 4;
+const MINIMUM_PRECENT_TO_SHOW_COUNTRY = 0.03;
 
-export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin) {
+export default class CountriesTabComponent extends mixins(
+    StoreMixin,
+    ChartMixin
+) {
     get countriesCountData() {
-        const result: [string, number][] = [];
+        let result: [string, number][] = [];
+        const allFilmCount = this.votes.length;
         let restFilmCount = 0;
 
         this.countries.forEach((country) => {
-            if (country.films.length >= MINIMUM_FILMS_TO_SHOW_COUNTRY) {
+            if (country.films.length / allFilmCount >= MINIMUM_PRECENT_TO_SHOW_COUNTRY) {
                 result.push([country.name, country.films.length]);
             } else {
                 restFilmCount += country.films.length;
             }
         });
+
+        if (result?.length % 3 === 0) {
+            const [countryToRest] = result.slice(-1);
+            restFilmCount += countryToRest[1];
+            result = result.slice(0, -1);
+        }
 
         if (restFilmCount) {
             result.push(["Другие", restFilmCount]);
