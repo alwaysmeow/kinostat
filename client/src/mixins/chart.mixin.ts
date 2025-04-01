@@ -77,6 +77,11 @@ export default class ChartMixin extends Vue {
             type: 'linear',
             offset: false,
             bounds: 'data',
+          },
+          y: {
+            grid: {
+                color: "#333333",
+            },
           }
         },
         plugins: {
