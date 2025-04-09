@@ -179,7 +179,7 @@ export default class StatisticPageComponent extends mixins(
 .info-tab
     position: sticky
     top: 5vh
-    height: 90vh
+    height: 80vh
 
     width: 20vw
 
@@ -194,6 +194,7 @@ export default class StatisticPageComponent extends mixins(
     .close-info-tab-btn
         width: min-content
         position: relative
+        margin-bottom: 1rem
 
         left: 1rem
 

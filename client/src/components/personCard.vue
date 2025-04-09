@@ -1,7 +1,7 @@
 <template>
     <div class="person-card">
+        <img class="person-card-photo" :src="person?.photo" />
         <h3>{{ person?.name }}</h3>
-        <img :src="person?.photo" />
         <a
             class="kinopoisk-link"
             :href="`https://www.kinopoisk.ru/name/${person?.id}/`"
@@ -46,6 +46,11 @@ export default class PersonCardComponent extends mixins(StoreMixin) {
     flex-direction: column
     gap: 1rem
     padding: 0 2rem
+    overflow: scroll
+    height: 100%
+
+.person-card-photo
+    border-radius: 5px
 
 .person-contribution
     display: flex
