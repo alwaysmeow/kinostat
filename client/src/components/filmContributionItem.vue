@@ -1,6 +1,6 @@
 <template>
     <div :class="['contribution-item', cssValueClass]">
-        <div>
+        <div class="contribution-title" @click="onClick">
             {{ film.title }}
         </div>
         <div class="contribution-vote-value">
@@ -12,6 +12,7 @@
 <script lang="ts">
 import { mixins, Options } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
+import { InfoTabStatus } from "../common/types";
 
 type PropsType = {
     id: number,
@@ -38,6 +39,10 @@ export default class FilmContributionItemComponent extends mixins(StoreMixin) {
     get cssValueClass(): string {
         return `vote-value-${this.film.value}`;
     }
+
+    onClick() {
+        this.setInfoTab(InfoTabStatus.Film, this.$props.id);
+    }
 }
 </script>
 
@@ -48,6 +53,10 @@ export default class FilmContributionItemComponent extends mixins(StoreMixin) {
     align-items: center
 
     text-align: left
+
+.contribution-title:hover
+    color: var(--kinopoisk-color)
+    cursor: pointer
 
 .contribution-vote-value
     font-weight: bold
