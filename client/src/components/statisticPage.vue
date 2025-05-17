@@ -23,17 +23,20 @@
                 <div class="close-info-tab-btn" @click="closeInfoTab">
                     <v-icon icon="$close" />
                 </div>
-                <filter-tab
-                    :tab-index="selectedTabIndex"
-                    v-if="isInfoTab(InfoTabStatus.Filter)"
-                />
-                <person-card
-                    v-if="
-                        isInfoTab(InfoTabStatus.Actor) ||
-                        isInfoTab(InfoTabStatus.Director)
-                    "
-                />
-                <film-card v-if="isInfoTab(InfoTabStatus.Film)" />
+
+                <div class="info-tab-content">
+                    <filter-tab
+                        :tab-index="selectedTabIndex"
+                        v-if="isInfoTab(InfoTabStatus.Filter)"
+                    />
+                    <person-card
+                        v-if="
+                            isInfoTab(InfoTabStatus.Actor) ||
+                            isInfoTab(InfoTabStatus.Director)
+                        "
+                    />
+                    <film-card v-if="isInfoTab(InfoTabStatus.Film)" />
+                </div>
             </div>
         </div>
     </div>
@@ -179,7 +182,7 @@ export default class StatisticPageComponent extends mixins(
 .info-tab
     position: sticky
     top: 5vh
-    height: 80vh
+    height: 90vh
 
     width: 20vw
 
@@ -192,10 +195,12 @@ export default class StatisticPageComponent extends mixins(
         transform: none
 
     .close-info-tab-btn
-        width: min-content
-        position: relative
-        margin-bottom: 1rem
+        display: flex
+        justify-content: start
+        align-items: top
 
+        height: 5vh
+        position: relative
         left: 1rem
 
         color: var(--secondary-text-color)
@@ -203,4 +208,7 @@ export default class StatisticPageComponent extends mixins(
         &:hover
             color: var(--main-text-color)
             cursor: pointer
+    
+    .info-tab-content
+        height: 85vh
 </style>
