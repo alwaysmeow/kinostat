@@ -13,9 +13,33 @@ import (
 )
 
 func GetVotes(userID int) ([]map[string]interface{}, error) {
-	votesURL := fmt.Sprintf("https://www.kinopoisk.ru/graph_data/last_vote_data/340/last_vote_%d__all.json", userID)
+	url := fmt.Sprintf("https://www.kinopoisk.ru/graph_data/last_vote_data/340/last_vote_%d__all.json", userID)
 
-	resp, err := http.Get(votesURL)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+
+	req.Header.Set("accept", "application/json")
+	req.Header.Set("content-type", "application/json")
+	req.Header.Set("uber-trace-id", "1ad7474d212c3d1d:d40bfd4021bb91e3:0:1")
+	req.Header.Set("x-requested-with", "XMLHttpRequest")
+	req.Header.Set("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36")
+	req.Header.Set("referrer", "https://www.kinopoisk.ru/")
+
+	cookie, exists := os.LookupEnv("KINOPOISK_COOKIE")
+	if exists {
+		req.Header.Set("cookie", cookie)
+	}
+
+	xRequestId, exists := os.LookupEnv("KINOPOISK_X_REQUEST_ID")
+	if exists {
+		req.Header.Set("x-request-id", xRequestId)
+	}
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("request execution error: %v", err)
 	}
