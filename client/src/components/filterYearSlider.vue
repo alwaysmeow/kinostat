@@ -3,9 +3,7 @@
         <div class="filter-label">
             <div class="filter-label-name">{{ $props.label }}</div>
             <div class="filter-label-value">
-                {{
-                    `${$props.modelValue[0]} - ${$props.modelValue[1]}`
-                }}
+                {{ `${range[0]} - ${range[1]}` }}
             </div>
         </div>
         <v-range-slider
@@ -32,7 +30,7 @@ type PropsType = {
 @Options({
     props: {
         modelValue: { type: Array<Number>, default: [] },
-        label: { type: String, default: '' },
+        label: { type: String, default: "" },
     },
     emits: ["update:modelValue"],
 })
@@ -43,26 +41,33 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     indexRange: Array<number> = [];
 
     created() {
-        this.years = Array.from(new Set(this.votes?.map(vote => vote.year))).sort();
+        this.years = Array.from(
+            new Set(this.votes?.map((vote) => vote.year))
+        ).sort();
     }
 
     get range() {
-        const [min, max] = this.$props.modelValue;
+        if (
+            this.years[this.indexRange[0]] !== this.$props.modelValue[0] &&
+            this.years[this.indexRange[1]] !== this.$props.modelValue[1]
+        ) {
+            const [min, max] = this.$props.modelValue;
 
-        this.indexRange = [
-            this.years.findIndex(y => y === min) || 0,
-            this.years.findIndex(y => y === max) || this.years.length - 1,
-        ];
+            this.indexRange = [
+                this.years.findIndex((y) => y === min) || 0,
+                this.years.findIndex((y) => y === max) || this.years.length - 1,
+            ];
+        }
 
         return this.$props.modelValue;
     }
 
     set range(value) {
-        this.$emit('update:modelValue', value);
+        this.$emit("update:modelValue", value);
     }
 
     onRangeInput() {
-        this.range = this.indexRange.map(index => this.years[index]);
+        this.range = this.indexRange.map((index) => this.years[index]);
     }
 }
 </script>
