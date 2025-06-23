@@ -4,7 +4,7 @@
             <div class="filter-label-name">{{ $props.label }}</div>
             <div class="filter-label-value">
                 {{
-                    `${range[0]} - ${range[1]}`
+                    `${$props.modelValue[0]} - ${$props.modelValue[1]}`
                 }}
             </div>
         </div>
