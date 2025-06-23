@@ -8,6 +8,7 @@
     "toolbar": "toolbar",
     "filter-tab": "filterTab",
     "filter-slider": "filterSlider",
+    "filter-year-slider": "filterYearSlider",
     "votes-heatmap": "votesHeatmap",
     "person-card": "personCard",
     "film-contribution-item": "filmContributionItem",

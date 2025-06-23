@@ -4,16 +4,17 @@
             <div class="filter-label-name">{{ $props.label }}</div>
             <div class="filter-label-value">
                 {{
-                    `${$props.modelValue[0]} - ${$props.modelValue[1]}`
+                    `${range[0]} - ${range[1]}`
                 }}
             </div>
         </div>
         <v-range-slider
             class="filter-slider"
-            v-model="range"
-            :min="$props.min"
-            :max="$props.max"
-            :step="$props.step"
+            v-model="indexRange"
+            :min="0"
+            :max="years.length - 1"
+            :step="1"
+            @update:modelValue="onRangeInput"
             hide-details
         />
     </div>
@@ -26,30 +27,42 @@ import StoreMixin from "../mixins/store.mixin";
 type PropsType = {
     modelValue: number[];
     label: string;
-    min: number;
-    max: number;
-    step: number;
 };
 
 @Options({
     props: {
         modelValue: { type: Array<Number>, default: [] },
         label: { type: String, default: '' },
-        min: { type: Number, default: 1 },
-        max: { type: Number, default: 10 },
-        step: { type: Number, default: 1 },
     },
     emits: ["update:modelValue"],
 })
 export default class VoteItemComponent extends mixins(StoreMixin) {
     declare $props: PropsType;
 
+    years: Array<number> = [];
+    indexRange: Array<number> = [];
+
+    created() {
+        this.years = Array.from(new Set(this.votes?.map(vote => vote.year))).sort();
+    }
+
     get range() {
+        const [min, max] = this.$props.modelValue;
+
+        this.indexRange = [
+            this.years.findIndex(y => y === min) || 0,
+            this.years.findIndex(y => y === max) || this.years.length - 1,
+        ];
+
         return this.$props.modelValue;
     }
 
     set range(value) {
         this.$emit('update:modelValue', value);
+    }
+
+    onRangeInput() {
+        this.range = this.indexRange.map(index => this.years[index]);
     }
 }
 </script>

@@ -21,13 +21,21 @@
                 </div>
             </div>
 
-            <filter-slider
+            <!-- <filter-slider
                 v-model="filterParams.filmYearRange"
                 label="Год премьеры"
                 :min="earliestFilmYear"
                 :max="currentYear"
                 :step="1"
-            ></filter-slider>
+            ></filter-slider> -->
+
+            <filter-year-slider
+                v-model="filterParams.filmYearRange"
+                label="Год премьеры"
+                :min="earliestFilmYear"
+                :max="currentYear"
+                :step="1"
+            ></filter-year-slider>
         </div>
 
         <div v-if="isTab(TabIndex.Directors)" class="filter-tab-content">
