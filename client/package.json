@@ -15,14 +15,19 @@
     "@mdi/js": "^7.4.47",
     "chart.js": "^4.4.8",
     "chartjs-plugin-datalabels": "^2.2.0",
+    "d3-geo": "^3.1.2",
     "pinia": "^3.0.1",
+    "topojson-client": "^3.1.0",
     "vue": "^3.5.13",
     "vue-chartkick": "^1.1.0",
     "vue-class-component": "^8.0.0-rc.1",
     "vue3-calendar-heatmap": "^2.0.5",
-    "vuetify": "^3.7.12"
+    "vuetify": "^3.7.12",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
+    "@types/d3-geo": "^3.1.1",
+    "@types/topojson-client": "^3.1.5",
     "@types/vue-chartkick": "^0.5.4",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",

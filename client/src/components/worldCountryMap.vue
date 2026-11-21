@@ -1,0 +1,595 @@
+<template>
+    <section class="country-atlas-card">
+        <header class="country-atlas-header">
+            <div>
+                <span class="country-atlas-kicker">Personal film geography</span>
+                <h3>World map</h3>
+                <p>{{ mappedCountries.length }} countries across {{ totalFilms }} country credits</p>
+            </div>
+            <div class="country-atlas-mode" aria-label="Map metric">
+                <button :class="{ active: mode === 'rating' }" @click="mode = 'rating'">Rating</button>
+                <button :class="{ active: mode === 'count' }" @click="mode = 'count'">Films</button>
+            </div>
+        </header>
+
+        <div class="country-atlas-timeline">
+            <div class="country-atlas-timeline-copy">
+                <span>Political map</span>
+                <strong>{{ timeline === 0 ? "1990 · Soviet Union" : "Present day" }}</strong>
+            </div>
+            <div class="country-atlas-slider-wrap">
+                <div class="country-atlas-slider-track">
+                    <i :class="{ present: timeline === 1 }"></i>
+                    <input
+                        v-model.number="timeline"
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="1"
+                        aria-label="Political map period"
+                    />
+                </div>
+                <div class="country-atlas-slider-labels">
+                    <button :class="{ active: timeline === 0 }" @click="timeline = 0">
+                        <span>1990</span>
+                        <small>Soviet Union</small>
+                    </button>
+                    <button :class="{ active: timeline === 1 }" @click="timeline = 1">
+                        <span>Present</span>
+                        <small>Modern borders</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div ref="mapRoot" class="country-atlas-map" @mouseleave="hoveredCountry = null">
+            <svg viewBox="0 35 1000 390" role="img" aria-label="Film production countries map">
+                <defs>
+                    <pattern id="historical-country-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(28)">
+                        <rect width="8" height="8" fill="rgba(235, 94, 35, 0.04)" />
+                        <line x1="0" y1="0" x2="0" y2="8" stroke="rgba(255, 112, 47, 0.58)" stroke-width="2" />
+                    </pattern>
+                    <filter id="map-country-glow" x="-30%" y="-30%" width="160%" height="160%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#ff5c1b" flood-opacity=".35" />
+                    </filter>
+                </defs>
+
+                <g class="country-atlas-graticule" aria-hidden="true">
+                    <path v-for="latitude in [-60, -30, 0, 30, 60]" :key="`lat-${latitude}`" :d="latitudeLine(latitude)" />
+                    <path v-for="longitude in [-120, -60, 0, 60, 120]" :key="`lon-${longitude}`" :d="longitudeLine(longitude)" />
+                </g>
+
+                <g class="country-atlas-land">
+                    <path
+                        v-for="feature in mapFeatures"
+                        :key="feature.id"
+                        :d="feature.path"
+                        :fill="countryFill(feature.country)"
+                        :class="{
+                            available: Boolean(feature.country),
+                            hovered: hoveredCountry?.name === feature.country?.name,
+                            replaced: showHistorical && feature.sovietSuccessor,
+                        }"
+                        @mousemove="feature.country && showTooltip(feature.country, $event)"
+                        @click="feature.country && selectCountry(feature.country)"
+                    />
+                </g>
+
+                <Transition name="historical-layer">
+                    <g v-if="showHistorical" class="country-atlas-historical" aria-label="Historical country: Soviet Union">
+                        <path
+                            class="country-atlas-historical-shape"
+                            :d="sovietUnionPath"
+                            :fill="historicalCountry ? countryFill(historicalCountry) : '#a55a3a'"
+                            @mousemove="historicalCountry && showTooltip(historicalCountry, $event)"
+                            @click="historicalCountry && selectCountry(historicalCountry)"
+                        />
+                        <g
+                            class="country-atlas-historical-marker"
+                            transform="translate(687 130)"
+                            @mousemove="historicalCountry && showTooltip(historicalCountry, $event)"
+                            @click="historicalCountry && selectCountry(historicalCountry)"
+                        >
+                            <circle r="17" />
+                            <text text-anchor="middle" y="4">USSR</text>
+                        </g>
+                    </g>
+                </Transition>
+
+                <g class="country-atlas-special-markers">
+                    <g
+                        v-for="marker in specialMarkers"
+                        :key="marker.country.name"
+                        :transform="`translate(${marker.x} ${marker.y})`"
+                        @mousemove="showTooltip(marker.country, $event)"
+                        @click="selectCountry(marker.country)"
+                    >
+                        <circle r="6" />
+                        <circle r="2" />
+                    </g>
+                </g>
+            </svg>
+
+            <Transition name="map-tooltip">
+                <div
+                    v-if="hoveredCountry"
+                    class="country-atlas-tooltip"
+                    :style="{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }"
+                >
+                    <span>{{ hoveredCountry.name }}</span>
+                    <strong>{{ hoveredCountry.averageVote.toFixed(1) }}</strong>
+                    <small>{{ hoveredCountry.films.length }} films · click to open</small>
+                </div>
+            </Transition>
+        </div>
+
+        <footer class="country-atlas-legend">
+            <div class="country-atlas-scale">
+                <span>{{ mode === "rating" ? "Lower rated" : "Fewer films" }}</span>
+                <i :class="mode"></i>
+                <span>{{ mode === "rating" ? "Higher rated" : "More films" }}</span>
+            </div>
+            <div v-if="showHistorical" class="country-atlas-history-key">
+                <i></i>
+                Historical country · shown over present-day borders
+            </div>
+        </footer>
+    </section>
+</template>
+
+<script setup lang="ts">
+import { computed, ref } from "vue";
+import { feature, merge } from "topojson-client";
+import { geoEquirectangular, geoPath } from "d3-geo";
+import worldAtlas from "world-atlas/countries-110m.json";
+import type { FilmAttribute } from "../common/types";
+
+type MapMode = "rating" | "count";
+type Position = [number, number];
+type MapFeature = {
+    id: string | number;
+    path: string;
+    name: string;
+    country?: FilmAttribute;
+    sovietSuccessor: boolean;
+};
+
+const props = defineProps<{ countries: FilmAttribute[] }>();
+const emit = defineEmits<{ select: [country: FilmAttribute] }>();
+const mapRoot = ref<HTMLElement | null>(null);
+const mode = ref<MapMode>("rating");
+const timeline = ref<0 | 1>(1);
+const hoveredCountry = ref<FilmAttribute | null>(null);
+const tooltip = ref({ x: 0, y: 0 });
+
+const aliases: Record<string, string> = {
+    "United States": "United States of America",
+    "Czech Republic": "Czechia",
+    "Republic of Korea": "South Korea",
+};
+const historicalNames = new Set(["Soviet Union"]);
+const sovietSuccessors = new Set([
+    "Armenia", "Azerbaijan", "Belarus", "Estonia", "Georgia", "Kazakhstan", "Kyrgyzstan",
+    "Latvia", "Lithuania", "Moldova", "Russia", "Tajikistan", "Turkmenistan", "Ukraine", "Uzbekistan",
+]);
+const ratingColors = [
+    "#e93c3c", "#e84d45", "#e75e4d", "#e5805e", "#e0c37f",
+    "#a8b97c", "#70af79", "#38a576", "#1ca074", "#009b72",
+];
+
+const countryByName = computed(() => new Map(
+    props.countries
+        .filter((country) => !historicalNames.has(country.name))
+        .map((country) => [aliases[country.name] ?? country.name, country]),
+));
+const historicalCountry = computed(() => props.countries.find((country) => country.name === "Soviet Union"));
+const showHistorical = computed(() => timeline.value === 0 && Boolean(historicalCountry.value));
+const mappedCountries = computed(() => props.countries.filter((country) => !historicalNames.has(country.name)));
+const totalFilms = computed(() => props.countries.reduce((sum, country) => sum + country.films.length, 0));
+const maxFilmCount = computed(() => Math.max(...mappedCountries.value.map((country) => country.films.length), 1));
+
+const atlasFeatures = feature(
+    worldAtlas as any,
+    (worldAtlas as any).objects.countries,
+) as any;
+const projection = geoEquirectangular()
+    .scale(1000 / (2 * Math.PI))
+    .translate([500, 250]);
+const pathGenerator = geoPath(projection);
+const atlasGeometries = (worldAtlas as any).objects.countries.geometries as any[];
+
+const mapFeatures = computed<MapFeature[]>(() => atlasFeatures.features.map((item: any) => ({
+    id: item.id,
+    name: item.properties?.name ?? "",
+    path: pathGenerator(item) ?? "",
+    country: countryByName.value.get(item.properties?.name ?? ""),
+    sovietSuccessor: sovietSuccessors.has(item.properties?.name ?? ""),
+})));
+
+const sovietUnionGeometry = merge(
+    worldAtlas as any,
+    atlasGeometries.filter((item) => sovietSuccessors.has(item.properties?.name ?? "")),
+);
+const sovietUnionPath = pathGenerator(sovietUnionGeometry as any) ?? "";
+const specialMarkers = computed(() => [
+    { name: "Hong Kong", coordinates: [114.17, 22.32] as Position },
+].flatMap((marker) => {
+    const country = props.countries.find((item) => item.name === marker.name);
+    if (!country) return [];
+    const [x, y] = project(marker.coordinates);
+    return [{ country, x, y }];
+}));
+
+function project([longitude, latitude]: Position): Position {
+    return projection([longitude, latitude]) as Position;
+}
+
+function countryFill(country?: FilmAttribute) {
+    if (!country) return "#2a2a2a";
+    if (mode.value === "rating") {
+        return ratingColors[Math.max(0, Math.min(9, Math.round(country.averageVote) - 1))];
+    }
+    const intensity = Math.sqrt(country.films.length / maxFilmCount.value);
+    return `rgba(255, 91, 27, ${0.2 + intensity * 0.78})`;
+}
+
+function showTooltip(country: FilmAttribute, event: MouseEvent) {
+    hoveredCountry.value = country;
+    const bounds = mapRoot.value?.getBoundingClientRect();
+    if (!bounds) return;
+    tooltip.value = {
+        x: Math.min(event.clientX - bounds.left + 14, bounds.width - 190),
+        y: Math.max(event.clientY - bounds.top - 78, 8),
+    };
+}
+
+function selectCountry(country: FilmAttribute) {
+    emit("select", country);
+}
+
+function latitudeLine(latitude: number) {
+    const [, y] = project([0, latitude]);
+    return `M0,${y.toFixed(2)} H1000`;
+}
+
+function longitudeLine(longitude: number) {
+    const [x] = project([longitude, 0]);
+    return `M${x.toFixed(2)},0 V500`;
+}
+</script>
+
+<style lang="sass">
+.country-atlas-card
+    position: relative
+    padding: 1.5rem
+    border-radius: 1.5rem
+    overflow: hidden
+    background: radial-gradient(circle at 72% 10%, rgba(255, 91, 27, 0.09), transparent 32%), var(--neutral-shade-one)
+
+.country-atlas-header
+    position: relative
+    z-index: 2
+    display: flex
+    align-items: flex-start
+    justify-content: space-between
+    gap: 1rem
+
+    h3
+        margin: 0.2rem 0 0
+        font-size: 1.6rem
+
+    p
+        margin: 0.3rem 0 0
+        color: var(--secondary-text-color)
+
+.country-atlas-kicker
+    color: var(--kinopoisk-color)
+    font-size: 0.7rem
+    font-weight: 700
+    letter-spacing: 0.12em
+    text-transform: uppercase
+
+.country-atlas-mode
+    display: flex
+    padding: 0.25rem
+    border-radius: 0.9rem
+    background: var(--background-color)
+
+    button
+        padding: 0.55rem 0.9rem
+        border: 0
+        border-radius: 0.7rem
+        background: transparent
+        color: var(--secondary-text-color)
+        cursor: pointer
+
+        &.active
+            background: var(--neutral-shade-two)
+            color: var(--main-text-color)
+
+.country-atlas-timeline
+    position: relative
+    z-index: 2
+    display: grid
+    grid-template-columns: minmax(9rem, auto) minmax(15rem, 28rem)
+    align-items: center
+    justify-content: space-between
+    gap: 1.5rem
+    margin-top: 1.25rem
+    padding: 0.75rem 0.9rem
+    border: 1px solid rgba(255, 255, 255, 0.055)
+    border-radius: 1rem
+    background: rgba(24, 24, 24, 0.42)
+
+.country-atlas-timeline-copy
+    display: flex
+    flex-direction: column
+    gap: 0.1rem
+
+    span
+        color: var(--secondary-text-color)
+        font-size: 0.72rem
+
+    strong
+        font-size: 0.9rem
+
+.country-atlas-slider-wrap
+    position: relative
+    display: flex
+    flex-direction: column
+    gap: 0.45rem
+
+.country-atlas-slider-track
+    position: relative
+    height: 18px
+
+    &::before
+        content: ""
+        position: absolute
+        top: 8px
+        right: 7px
+        left: 7px
+        height: 2px
+        border-radius: 1rem
+        background: rgba(255, 255, 255, 0.15)
+
+    &::after
+        content: ""
+        position: absolute
+        top: 5px
+        right: 4px
+        width: 8px
+        height: 8px
+        border-radius: 50%
+        background: #555
+
+    i
+        position: absolute
+        z-index: 2
+        top: 2px
+        left: 0
+        width: 14px
+        height: 14px
+        border: 2px solid #292929
+        border-radius: 50%
+        background: #ff6a2a
+        box-shadow: 0 0 0 1px rgba(255, 106, 42, 0.55), 0 4px 14px rgba(0, 0, 0, 0.4)
+        transition: left 0.25s ease, transform 0.25s ease
+
+        &.present
+            left: 100%
+            transform: translateX(-100%)
+
+    input
+        position: absolute
+        z-index: 3
+        inset: 0
+        width: 100%
+        height: 18px
+        margin: 0
+        opacity: 0
+        cursor: pointer
+
+.country-atlas-slider-labels
+    display: flex
+    justify-content: space-between
+
+    button
+        display: flex
+        flex-direction: column
+        gap: 0.05rem
+        padding: 0
+        border: 0
+        background: transparent
+        color: var(--secondary-text-color)
+        text-align: left
+        cursor: pointer
+
+        &:last-child
+            text-align: right
+
+        &.active
+            color: var(--main-text-color)
+
+        span
+            font-size: 0.75rem
+            font-weight: 650
+
+        small
+            color: var(--secondary-text-color)
+            font-size: 0.65rem
+
+.country-atlas-map
+    position: relative
+    margin: 0.5rem -0.8rem 0
+
+    svg
+        display: block
+        width: 100%
+        max-height: 31rem
+
+.country-atlas-graticule path
+    fill: none
+    stroke: rgba(255, 255, 255, 0.035)
+    stroke-width: 1
+
+.country-atlas-land path
+    stroke: #1f1f1f
+    stroke-width: 1.15
+    vector-effect: non-scaling-stroke
+    transition: fill 0.22s ease, opacity 0.18s ease, filter 0.18s ease
+
+    &.available
+        cursor: pointer
+
+        &:hover,
+        &.hovered
+            opacity: 1
+            filter: url(#map-country-glow)
+            stroke: rgba(255, 255, 255, 0.75)
+            stroke-width: 1.7
+
+    &.replaced
+        opacity: 0
+        pointer-events: none
+
+.country-atlas-historical
+    .country-atlas-historical-shape
+        stroke: rgba(255, 135, 77, 0.95)
+        stroke-width: 1.5
+        vector-effect: non-scaling-stroke
+        cursor: pointer
+        transition: filter 0.18s ease, opacity 0.18s ease
+
+        &:hover
+            filter: url(#map-country-glow)
+            stroke: #ffb08b
+
+.historical-layer-enter-active,
+.historical-layer-leave-active
+    transition: opacity 0.28s ease
+
+.historical-layer-enter-from,
+.historical-layer-leave-to
+    opacity: 0
+
+.country-atlas-historical-marker
+    pointer-events: auto
+    cursor: pointer
+
+    circle
+        fill: #25211f
+        stroke: #ff6a2a
+        stroke-width: 2
+
+    text
+        fill: #ff8a57
+        font-size: 8px
+        font-weight: 800
+        letter-spacing: 0.04em
+
+    &:hover circle
+        fill: #3a2821
+
+.country-atlas-special-markers g
+    cursor: pointer
+
+    circle:first-child
+        fill: rgba(255, 91, 27, 0.15)
+        stroke: #ff6a2a
+        stroke-width: 1
+
+    circle:last-child
+        fill: #ff7b42
+
+    &:hover circle:first-child
+        fill: rgba(255, 91, 27, 0.45)
+
+.country-atlas-tooltip
+    position: absolute
+    z-index: 5
+    display: grid
+    grid-template-columns: minmax(0, 1fr) auto
+    gap: 0.15rem 1rem
+    width: 176px
+    padding: 0.7rem 0.8rem
+    border: 1px solid rgba(255, 255, 255, 0.08)
+    border-radius: 0.8rem
+    background: rgba(27, 27, 27, 0.94)
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35)
+    pointer-events: none
+    backdrop-filter: blur(10px)
+
+    span
+        overflow: hidden
+        font-weight: 650
+        text-overflow: ellipsis
+        white-space: nowrap
+
+    strong
+        color: var(--kinopoisk-color)
+
+    small
+        grid-column: 1 / -1
+        color: var(--secondary-text-color)
+
+.map-tooltip-enter-active,
+.map-tooltip-leave-active
+    transition: opacity 0.12s ease, transform 0.12s ease
+
+.map-tooltip-enter-from,
+.map-tooltip-leave-to
+    opacity: 0
+    transform: translateY(4px)
+
+.country-atlas-legend
+    display: flex
+    align-items: center
+    justify-content: space-between
+    gap: 1rem
+    color: var(--secondary-text-color)
+    font-size: 0.75rem
+
+.country-atlas-scale,
+.country-atlas-history-key
+    display: flex
+    align-items: center
+    gap: 0.55rem
+
+.country-atlas-scale i
+    display: block
+    width: 8rem
+    height: 0.35rem
+    border-radius: 1rem
+
+    &.rating
+        background: linear-gradient(90deg, #e84d45, #e0c37f, #009b72)
+
+    &.count
+        background: linear-gradient(90deg, rgba(255, 91, 27, 0.2), rgba(255, 91, 27, 0.98))
+
+.country-atlas-history-key i
+    width: 1.6rem
+    height: 0.7rem
+    border: 1px solid rgba(255, 112, 47, 0.45)
+    background: repeating-linear-gradient(118deg, transparent 0 4px, rgba(255, 112, 47, 0.65) 4px 6px)
+
+@media (max-width: 700px)
+    .country-atlas-card
+        padding: 1rem
+
+    .country-atlas-header,
+    .country-atlas-legend
+        align-items: stretch
+        flex-direction: column
+
+    .country-atlas-timeline
+        grid-template-columns: 1fr
+        gap: 0.65rem
+
+    .country-atlas-map
+        margin: 0.5rem -1.5rem 0
+
+    .country-atlas-history-key
+        display: none
+</style>

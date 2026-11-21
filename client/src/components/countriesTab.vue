@@ -20,6 +20,8 @@
             />
         </div>
 
+        <world-country-map :countries="countries" @select="openCountry" />
+
         <section class="countries-chart-card">
             <div class="countries-chart-header">
                 <div>
