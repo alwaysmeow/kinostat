@@ -13,6 +13,7 @@ export const tmdbMappingOverrides = new Map<string, TmdbMappingOverride>([
   ["https://letterboxd.com/film/the-professor-2018/", { tmdbId: 467956, mediaType: "movie" }], // The Professor (2018), with Johnny Depp
   ["https://letterboxd.com/film/adolescence-2025/", { tmdbId: 249042, mediaType: "tv" }], // Adolescence (2025)
   ["https://boxd.it/PNqo", { tmdbId: 1339713, mediaType: "movie" }], // Obsession (2025)
+  ["https://boxd.it/4C5U", { tmdbId: 144804, mediaType: "movie" }], // Living (2012), Russia
 ]);
 
 export function getTmdbMappingOverride(letterboxdUri: string) {

@@ -9,6 +9,7 @@ import { createApp } from "./app.js";
 import { createDatabase, type AppDatabase } from "./db.js";
 import { importLetterboxd } from "./services/letterboxd-import.js";
 import { syncLetterboxd } from "./services/letterboxd-sync.js";
+import { applyStoredRatingDateOverrides } from "./services/rating-date-overrides.js";
 
 let db: AppDatabase | undefined;
 const temporaryDirectories: string[] = [];
@@ -105,6 +106,31 @@ describe("Letterboxd-compatible API", () => {
       .get(`/api/object?type=film&id=${film.lastInsertRowid}`)
       .expect(200)).body.film;
     assert.deepEqual(details.genres, ["action", "adventure"]);
+  });
+
+  it("restores rating date overrides from the tracked CSV", () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "kinostat-overrides-test-"));
+    temporaryDirectories.push(directory);
+    const source = path.join(directory, "rating-date-overrides.csv");
+    fs.writeFileSync(source, [
+      "user_id,tmdb_media_type,tmdb_id,letterboxd_uri,rated_at,source",
+      "example,movie,123,https://boxd.it/example,2024-03-15,kinopoisk_export",
+    ].join("\n"));
+
+    db = createDatabase(":memory:");
+    db.prepare("INSERT INTO users (id, username) VALUES (?, ?)").run("example", "example");
+    const film = db.prepare(`INSERT INTO films
+      (tmdb_id, tmdb_media_type, title, year, letterboxd_uri)
+      VALUES (?, ?, ?, ?, ?)`)
+      .run(123, "movie", "Example", 2024, "https://boxd.it/example");
+    db.prepare(`INSERT INTO ratings (user_id, film_id, value, rated_at)
+      VALUES (?, ?, ?, ?)`)
+      .run("example", film.lastInsertRowid, 8, "2026-01-01");
+
+    assert.deepEqual(applyStoredRatingDateOverrides(db, source), { total: 1, matched: 1 });
+    const stored = db.prepare(`SELECT rated_at FROM rating_date_overrides
+      WHERE user_id = ? AND film_id = ?`).get("example", film.lastInsertRowid) as { rated_at: string };
+    assert.equal(stored.rated_at, "2024-03-15");
   });
 
   it("keeps actor cards limited to top-five cast while including their full filmography", async () => {

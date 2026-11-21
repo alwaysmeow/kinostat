@@ -6,6 +6,7 @@ import type { AppDatabase } from "../db.js";
 import { TmdbClient } from "./tmdb.js";
 import { getLetterboxdPoster } from "./letterboxd-poster.js";
 import { getTmdbMappingOverride } from "./tmdb-overrides.js";
+import { applyStoredRatingDateOverrides } from "./rating-date-overrides.js";
 
 interface CsvRow {
   Date?: string;
@@ -76,6 +77,7 @@ export async function importLetterboxd(db: AppDatabase, options: ImportOptions) 
     db.exec("DELETE FROM current_import_films");
   });
   saveRatings();
+  applyStoredRatingDateOverrides(db);
   db.prepare("UPDATE users SET full_import_at = ? WHERE id = ?")
     .run(new Date().toISOString(), userId);
 

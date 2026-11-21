@@ -8,6 +8,7 @@
 server/cache/**/*.json
 !**/example.json
 
-server/data/
+server/data/*
+!server/data/rating-date-overrides.csv
 server/dist/
 client/dist/

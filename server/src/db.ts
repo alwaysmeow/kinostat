@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { config } from "./config.js";
+import { applyStoredRatingDateOverrides } from "./services/rating-date-overrides.js";
 
 export type AppDatabase = Database.Database;
 
@@ -65,6 +66,7 @@ export function createDatabase(filename = config.databasePath): AppDatabase {
   }
   migrateGlobalTmdbIdUniqueness(db);
   mergeDuplicateFilms(db);
+  applyStoredRatingDateOverrides(db);
   return db;
 }
 
