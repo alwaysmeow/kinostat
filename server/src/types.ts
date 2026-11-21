@@ -9,6 +9,7 @@ export interface PersonSummary {
 export interface FilmRow {
   id: number;
   tmdb_id: number | null;
+  tmdb_media_type: "movie" | "tv";
   title: string;
   year: number;
   letterboxd_uri: string;

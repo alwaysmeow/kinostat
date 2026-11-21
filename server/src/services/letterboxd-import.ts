@@ -44,8 +44,8 @@ export async function importLetterboxd(db: AppDatabase, options: ImportOptions) 
     ON CONFLICT(id) DO UPDATE SET username = excluded.username`).run(userId, username);
 
   const insertFilm = db.prepare("INSERT INTO films (title, year, letterboxd_uri) VALUES (?, ?, ?)");
-  const findFilm = db.prepare("SELECT id, tmdb_id, poster_base_url, enriched_at FROM films WHERE letterboxd_uri = ?");
-  const findFilmByTitleYear = db.prepare("SELECT id, tmdb_id, poster_base_url, enriched_at FROM films WHERE lower(trim(title)) = lower(trim(?)) AND year = ? ORDER BY (tmdb_id IS NOT NULL) DESC, id ASC LIMIT 1");
+  const findFilm = db.prepare("SELECT id, tmdb_id, tmdb_media_type, poster_base_url, enriched_at FROM films WHERE letterboxd_uri = ?");
+  const findFilmByTitleYear = db.prepare("SELECT id, tmdb_id, tmdb_media_type, poster_base_url, enriched_at FROM films WHERE lower(trim(title)) = lower(trim(?)) AND year = ? ORDER BY (tmdb_id IS NOT NULL) DESC, id ASC LIMIT 1");
   const restoreImportedIdentity = db.prepare("UPDATE films SET title = ?, year = ? WHERE id = ?");
   const upsertRating = db.prepare(`INSERT INTO ratings (user_id, film_id, value, rated_at, watched_at)
     VALUES (?, ?, ?, ?, ?)
@@ -82,22 +82,22 @@ export async function importLetterboxd(db: AppDatabase, options: ImportOptions) 
   if (options.enrich) {
     const tmdb = new TmdbClient();
     if (!tmdb.enabled) throw new Error("TMDB_API_KEY is required when --enrich is used");
-    const update = db.prepare(`UPDATE films SET tmdb_id = ?, poster_base_url = COALESCE(poster_base_url, ?),
+    const update = db.prepare(`UPDATE films SET tmdb_id = ?, tmdb_media_type = ?, poster_base_url = COALESCE(poster_base_url, ?),
       countries_json = ?, genres_json = ?, actors_json = ?, directors_json = ?, enriched_at = CURRENT_TIMESTAMP
       WHERE id = ?`);
     const updateTmdbPoster = db.prepare("UPDATE films SET poster_base_url = ? WHERE id = ?");
     await mapWithConcurrency(ratings, 6, async (rating, index) => {
       const film = (findFilm.get(rating.uri) ?? findFilmByTitleYear.get(rating.title, rating.year)) as {
-        id: number; tmdb_id: number | null; poster_base_url: string | null; enriched_at: string | null;
+        id: number; tmdb_id: number | null; tmdb_media_type: "movie" | "tv"; poster_base_url: string | null; enriched_at: string | null;
       };
       if (film.enriched_at) {
         // RSS images come directly from Letterboxd and must never be replaced.
         // Older ZIP entries use TMDB; refresh those with the preferred English artwork.
         if (film.tmdb_id) {
-          const metadata = await tmdb.getFilm(film.tmdb_id, rating.year);
+          const metadata = await tmdb.getFilm(film.tmdb_id, rating.year, film.tmdb_media_type);
           const poster = metadata.posterBaseUrl
             ?? (!film.poster_base_url ? await getLetterboxdPoster(rating.uri) : null);
-          update.run(metadata.tmdbId, poster,
+          update.run(metadata.tmdbId, metadata.mediaType, poster,
             JSON.stringify(metadata.countries), JSON.stringify(metadata.genres),
             JSON.stringify(metadata.actors), JSON.stringify(metadata.directors), film.id);
           if (film.poster_base_url?.includes("image.tmdb.org") && poster) {
@@ -110,7 +110,7 @@ export async function importLetterboxd(db: AppDatabase, options: ImportOptions) 
       const metadata = await tmdb.findFilm(rating.title, rating.year);
       if (!metadata) return;
       const poster = metadata.posterBaseUrl ?? await getLetterboxdPoster(rating.uri);
-      update.run(metadata.tmdbId, poster,
+      update.run(metadata.tmdbId, metadata.mediaType, poster,
         JSON.stringify(metadata.countries), JSON.stringify(metadata.genres),
         JSON.stringify(metadata.actors), JSON.stringify(metadata.directors), film.id);
       enriched++;

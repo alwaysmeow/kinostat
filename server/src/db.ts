@@ -21,6 +21,7 @@ export function createDatabase(filename = config.databasePath): AppDatabase {
     CREATE TABLE IF NOT EXISTS films (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       tmdb_id INTEGER UNIQUE,
+      tmdb_media_type TEXT NOT NULL DEFAULT 'movie',
       title TEXT NOT NULL,
       year INTEGER NOT NULL,
       letterboxd_uri TEXT NOT NULL UNIQUE,
@@ -56,6 +57,10 @@ export function createDatabase(filename = config.databasePath): AppDatabase {
   const userColumns = db.prepare("PRAGMA table_info(users)").all() as Array<{ name: string }>;
   if (!userColumns.some((column) => column.name === "full_import_at")) {
     db.exec("ALTER TABLE users ADD COLUMN full_import_at TEXT");
+  }
+  const filmColumns = db.prepare("PRAGMA table_info(films)").all() as Array<{ name: string }>;
+  if (!filmColumns.some((column) => column.name === "tmdb_media_type")) {
+    db.exec("ALTER TABLE films ADD COLUMN tmdb_media_type TEXT NOT NULL DEFAULT 'movie'");
   }
   mergeDuplicateFilms(db);
   return db;

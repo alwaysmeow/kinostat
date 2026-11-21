@@ -11,6 +11,7 @@ interface RssItem {
   "letterboxd:memberRating"?: number | string;
   "letterboxd:watchedDate"?: string;
   "tmdb:movieId"?: number | string;
+  "tmdb:tvId"?: number | string;
 }
 
 export interface SyncOptions {
@@ -51,8 +52,9 @@ export async function syncLetterboxd(db: AppDatabase, options: SyncOptions) {
   }
 
   const insertFilm = db.prepare(`INSERT INTO films
-    (tmdb_id, title, year, letterboxd_uri, poster_base_url) VALUES (?, ?, ?, ?, ?)
+    (tmdb_id, tmdb_media_type, title, year, letterboxd_uri, poster_base_url) VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(tmdb_id) DO UPDATE SET title = excluded.title, year = excluded.year,
+      tmdb_media_type = excluded.tmdb_media_type,
       letterboxd_uri = excluded.letterboxd_uri,
       poster_base_url = COALESCE(excluded.poster_base_url, films.poster_base_url)`);
   const findFilm = db.prepare("SELECT id, enriched_at FROM films WHERE tmdb_id = ?");
@@ -63,7 +65,7 @@ export async function syncLetterboxd(db: AppDatabase, options: SyncOptions) {
 
   db.transaction(() => {
     for (const item of rated) {
-      insertFilm.run(item.tmdbId, item.title, item.year, item.uri, item.poster);
+      insertFilm.run(item.tmdbId, item.mediaType, item.title, item.year, item.uri, item.poster);
       const film = findFilm.get(item.tmdbId) as { id: number };
       upsertRating.run(userId, film.id, item.rating, item.watchedAt, item.watchedAt);
     }
@@ -80,7 +82,7 @@ export async function syncLetterboxd(db: AppDatabase, options: SyncOptions) {
       const film = findFilm.get(item.tmdbId) as { enriched_at: string | null };
       if (film.enriched_at) continue;
       options.onProgress?.(`[${index + 1}/${rated.length}] ${item.title} (${item.year})`);
-      const metadata = await tmdb.getFilm(item.tmdbId, item.year);
+      const metadata = await tmdb.getFilm(item.tmdbId, item.year, item.mediaType);
       update.run(metadata.posterBaseUrl,
         JSON.stringify(metadata.countries), JSON.stringify(metadata.genres),
         JSON.stringify(metadata.actors), JSON.stringify(metadata.directors), item.tmdbId);
@@ -107,7 +109,10 @@ function parseRss(xml: string): RssItem[] {
 
 function toRating(item: RssItem) {
   const rating = Number(item["letterboxd:memberRating"]);
-  const tmdbId = Number(item["tmdb:movieId"]);
+  const movieId = Number(item["tmdb:movieId"]);
+  const tvId = Number(item["tmdb:tvId"]);
+  const mediaType = Number.isInteger(movieId) && movieId > 0 ? "movie" as const : "tv" as const;
+  const tmdbId = mediaType === "movie" ? movieId : tvId;
   const year = Number(item["letterboxd:filmYear"]);
   const title = item["letterboxd:filmTitle"];
   if (!title || !Number.isFinite(rating) || rating <= 0 || !Number.isInteger(tmdbId) || !Number.isInteger(year)) return [];
@@ -115,6 +120,7 @@ function toRating(item: RssItem) {
     title,
     year,
     tmdbId,
+    mediaType,
     rating: Math.round(rating * 2),
     watchedAt: item["letterboxd:watchedDate"] ?? null,
     publishedAt: parseDate(item.pubDate),

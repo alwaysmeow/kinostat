@@ -4,11 +4,24 @@ import type { PersonSummary } from "../types.js";
 const baseUrl = "https://api.themoviedb.org/3";
 const imageBaseUrl = "https://image.tmdb.org/t/p";
 
-interface SearchResult { id: number; title: string; release_date?: string }
+type TmdbMediaType = "movie" | "tv";
+interface SearchResult {
+  id: number;
+  title?: string;
+  name?: string;
+  original_title?: string;
+  original_name?: string;
+  release_date?: string;
+  first_air_date?: string;
+  popularity?: number;
+  mediaType: TmdbMediaType;
+}
 interface MovieDetails {
   id: number;
-  title: string;
+  title?: string;
+  name?: string;
   release_date?: string;
+  first_air_date?: string;
   poster_path?: string | null;
   genres?: Array<{ name: string }>;
   production_countries?: Array<{ name: string }>;
@@ -30,6 +43,7 @@ interface TmdbImage {
 
 export interface TmdbFilm {
   tmdbId: number;
+  mediaType: TmdbMediaType;
   title: string;
   year: number;
   posterBaseUrl: string | null;
@@ -46,16 +60,25 @@ export class TmdbClient {
 
   async findFilm(title: string, year: number): Promise<TmdbFilm | null> {
     if (!this.apiKey) return null;
-    const search = await this.request<{ results: SearchResult[] }>("/search/movie", { query: title, year: String(year), language: "en-US" });
-    const exact = search.results.find((item) => item.title.toLocaleLowerCase() === title.toLocaleLowerCase() && yearOf(item.release_date) === year);
-    const candidate = exact ?? search.results.find((item) => yearOf(item.release_date) === year) ?? search.results[0];
+    const [movies, shows] = await Promise.all([
+      this.request<{ results: Omit<SearchResult, "mediaType">[] }>("/search/movie", { query: title, language: "en-US" }),
+      this.request<{ results: Omit<SearchResult, "mediaType">[] }>("/search/tv", { query: title, language: "en-US" }),
+    ]);
+    const candidates: SearchResult[] = [
+      ...movies.results.map((item) => ({ ...item, mediaType: "movie" as const })),
+      ...shows.results.map((item) => ({ ...item, mediaType: "tv" as const })),
+    ];
+    const candidate = candidates
+      .map((item) => ({ item, score: matchScore(item, title, year) }))
+      .filter(({ score }) => score >= 70)
+      .sort((left, right) => right.score - left.score)[0]?.item;
     if (!candidate) return null;
-    return this.getFilm(candidate.id, year);
+    return this.getFilm(candidate.id, year, candidate.mediaType);
   }
 
-  async getFilm(tmdbId: number, fallbackYear?: number): Promise<TmdbFilm> {
+  async getFilm(tmdbId: number, fallbackYear?: number, mediaType: TmdbMediaType = "movie"): Promise<TmdbFilm> {
     if (!this.apiKey) throw new Error("TMDB_API_KEY is not configured");
-    const movie = await this.request<MovieDetails>(`/movie/${tmdbId}`, {
+    const movie = await this.request<MovieDetails>(`/${mediaType}/${tmdbId}`, {
       append_to_response: "credits,images",
       include_image_language: "en,null",
       language: "en-US",
@@ -63,8 +86,9 @@ export class TmdbClient {
     const preferredPoster = choosePoster(movie.images?.posters) ?? movie.poster_path;
     return {
       tmdbId: movie.id,
-      title: movie.title,
-      year: yearOf(movie.release_date) ?? fallbackYear ?? 0,
+      mediaType,
+      title: movie.title ?? movie.name ?? "",
+      year: yearOf(movie.release_date ?? movie.first_air_date) ?? fallbackYear ?? 0,
       posterBaseUrl: preferredPoster ? `${imageBaseUrl}/original${preferredPoster}` : null,
       countries: movie.production_countries?.map((item) => item.name) ?? [],
       genres: movie.genres?.map((item) => item.name.toLocaleLowerCase()) ?? [],
@@ -100,6 +124,24 @@ export class TmdbClient {
     if (!response.ok) throw new Error(`TMDB ${pathname} failed: ${response.status} ${response.statusText}`);
     return response.json() as Promise<T>;
   }
+}
+
+function matchScore(item: SearchResult, expectedTitle: string, expectedYear: number) {
+  const expected = normalizeTitle(expectedTitle);
+  const titles = [item.title, item.name, item.original_title, item.original_name]
+    .filter((value): value is string => Boolean(value))
+    .map(normalizeTitle);
+  const exactTitle = titles.includes(expected);
+  const containsTitle = titles.some((title) => title.includes(expected) || expected.includes(title));
+  const resultYear = yearOf(item.release_date ?? item.first_air_date);
+  const yearDistance = resultYear === undefined ? 5 : Math.abs(resultYear - expectedYear);
+  return (exactTitle ? 100 : containsTitle ? 55 : 0)
+    + (yearDistance === 0 ? 20 : yearDistance === 1 ? 12 : yearDistance === 2 ? 4 : -20)
+    + Math.min(Number(item.popularity ?? 0), 20) / 10;
+}
+
+function normalizeTitle(value: string) {
+  return value.toLocaleLowerCase().normalize("NFKD").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
 }
 
 function choosePoster(posters: TmdbImage[] = []) {
