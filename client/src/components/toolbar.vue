@@ -129,7 +129,8 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
     gap: 1rem
 
 .toolbar-input
-    width: 30%
+    flex: 1 1 0
+    min-width: 0
     height: 100%
     background-color: var(--neutral-shade-one)
     border-radius: 1em
@@ -141,6 +142,7 @@ export default class ToolbarComponent extends mixins(StoreMixin) {
         fill: var(--main-text-color)
 
 button.v-btn.toolbar-btn
+    flex: 0 0 52px
     position: relative
     top: 0
     bottom: 0
@@ -152,4 +154,11 @@ button.v-btn.toolbar-btn
 
         svg
             fill: var(--neutral-shade-one)
+
+@media (max-width: 720px)
+    .toolbar
+        flex-wrap: wrap
+
+    .toolbar-input
+        flex-basis: calc(50% - 0.5rem)
 </style>

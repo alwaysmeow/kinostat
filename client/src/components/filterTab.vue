@@ -1,6 +1,6 @@
 <template>
     <div class="filter-tab">
-        <h2>Фильтры</h2>
+        <h2>Filters</h2>
 
         <div v-if="isTab(TabIndex.Votes)" class="filter-tab-content">
             <div class="filter-vote-value-picker">
@@ -23,7 +23,7 @@
 
             <!-- <filter-slider
                 v-model="filterParams.filmYearRange"
-                label="Год премьеры"
+                label="Release year"
                 :min="earliestFilmYear"
                 :max="currentYear"
                 :step="1"
@@ -31,7 +31,7 @@
 
             <filter-year-slider
                 v-model="filterParams.filmYearRange"
-                label="Год премьеры"
+                label="Release year"
                 :min="earliestFilmYear"
                 :max="currentYear"
                 :step="1"
@@ -41,19 +41,19 @@
         <div v-if="isTab(TabIndex.Directors)" class="filter-tab-content">
             <filter-slider
                 v-model="filterParams.directorVoteRange"
-                label="Средняя оценка"
+                label="Average rating"
                 :step="0.1"
             ></filter-slider>
 
             <filter-slider
                 v-model="filterParams.directorFilmCountRange"
-                label="Оценено фильмов"
+                label="Rated films"
             ></filter-slider>
 
             <!-- Commented due to Issue #1
             <filter-slider
                 v-model="filterParams.directorBirthYearRange"
-                label="Год рождения"
+                label="Birth year"
                 :min="minDirectorsBirthYears"
                 :max="maxDirectorsBirthYears"
                 :step="1"
@@ -63,19 +63,19 @@
         <div v-if="isTab(TabIndex.Actors)" class="filter-tab-content">
             <filter-slider
                 v-model="filterParams.actorVoteRange"
-                label="Средняя оценка"
+                label="Average rating"
                 :step="0.1"
             ></filter-slider>
 
             <filter-slider
                 v-model="filterParams.actorFilmCountRange"
-                label="Оценено фильмов"
+                label="Rated films"
             ></filter-slider>
 
             <!-- Commented due to Issue #1
             <filter-slider
                 v-model="filterParams.actorBirthYearRange"
-                label="Год рождения"
+                label="Birth year"
                 :min="minActorsBirthYears"
                 :max="maxActorsBirthYears"
                 :step="1"
@@ -87,19 +87,19 @@
                 class="filter-button"
                 elevation="0"
                 @click="handleApplyFilters"
-                >Применить</v-btn
+                >Apply</v-btn
             >
             <v-btn
                 class="filter-button"
                 elevation="0"
                 @click="handleRollbackFilters"
-                >Откатить изменения</v-btn
+                >Undo changes</v-btn
             >
             <v-btn
                 class="filter-button"
                 elevation="0"
                 @click="handleResetFilters"
-                >Сбросить</v-btn
+                >Reset</v-btn
             >
         </div>
     </div>

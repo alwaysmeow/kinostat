@@ -34,31 +34,31 @@ export default class VotesListComponent extends mixins(StoreMixin, ChartMixin) {
         {
             order: SortOrder.Descending,
             attribute: "num",
-            title: "С последней",
+            title: "Newest first",
             type: "number",
         },
         {
             order: SortOrder.Ascending,
             attribute: "num",
-            title: "С самой старой",
+            title: "Oldest first",
             type: "number",
         },
         {
             order: SortOrder.Ascending,
             attribute: "title",
-            title: "По алфавиту",
+            title: "Alphabetical",
             type: "string",
         },
         {
             order: SortOrder.Descending,
             attribute: "value",
-            title: "С лучших",
+            title: "Highest rated",
             type: "number",
         },
         {
             order: SortOrder.Ascending,
             attribute: "value",
-            title: "С худших",
+            title: "Lowest rated",
             type: "number",
         },
     ];

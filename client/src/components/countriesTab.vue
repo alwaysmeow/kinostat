@@ -46,7 +46,7 @@ export default class CountriesTabComponent extends mixins(
         }
 
         if (restFilmCount) {
-            result.push(["Другие", restFilmCount]);
+            result.push(["Other", restFilmCount]);
         }
 
         return result;

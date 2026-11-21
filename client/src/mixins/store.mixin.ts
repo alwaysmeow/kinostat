@@ -12,6 +12,14 @@ import useInterface from "../store/interface";
 import useFilters from "../store/filter";
 
 export default class StoreMixin extends Vue {
+    get userId(): string {
+        return useStatistic().userId;
+    }
+
+    setUserId(userId: string | number): void {
+        useStatistic().setUserId(userId);
+    }
+
     get votes(): Vote[] {
         const store = useStatistic();
         return store.votes;
@@ -50,6 +58,18 @@ export default class StoreMixin extends Vue {
     addFilm(film: Film): void {
         const store = useStatistic();
         store.addFilm(film);
+    }
+
+    setFilms(films: Film[]): void {
+        useStatistic().setFilms(films);
+    }
+
+    setActors(actors: Person[]): void {
+        useStatistic().setActors(actors);
+    }
+
+    setDirectors(directors: Person[]): void {
+        useStatistic().setDirectors(directors);
     }
 
     getFilm(id: number): Film | undefined {

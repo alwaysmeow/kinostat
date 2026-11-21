@@ -2,7 +2,7 @@ import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
-import { mdiMagnify, mdiSort, mdiFilter, mdiOpenInNew, mdiClose } from '@mdi/js';
+import { mdiMagnify, mdiSort, mdiFilter, mdiOpenInNew, mdiClose, mdiAccountCircle } from '@mdi/js';
 
 export default createVuetify({
     components,
@@ -16,6 +16,7 @@ export default createVuetify({
         filter: mdiFilter,
         link: mdiOpenInNew,
         close: mdiClose,
+        account: mdiAccountCircle,
       },
       sets: {
         mdi,

@@ -39,25 +39,25 @@ export default class DirectorsListComponent extends mixins(StoreMixin) {
         {
             order: SortOrder.Descending,
             attribute: "name",
-            title: "По алфавиту",
+            title: "Alphabetical",
             type: "string",
         },
         {
             order: SortOrder.Descending,
             attribute: "averageVote",
-            title: "С лучших",
+            title: "Highest rated",
             type: "number",
         },
         {
             order: SortOrder.Ascending,
             attribute: "averageVote",
-            title: "С худших",
+            title: "Lowest rated",
             type: "number",
         },
         {
             order: SortOrder.Descending,
             attribute: "films",
-            title: "По количеству оценок",
+            title: "Most rated films",
             type: "length",
         },
     ];

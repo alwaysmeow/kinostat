@@ -4,12 +4,12 @@
         <h3>{{ person?.name }}</h3>
         <a
             class="kinopoisk-link"
-            :href="`https://www.kinopoisk.ru/name/${person?.id}/`"
+            :href="`https://www.themoviedb.org/person/${person?.id}`"
             target="_blank"
             rel="noopener noreferrer"
         >    
             <v-icon icon="$link" />
-            <span>Страница на Кинопоиске</span>
+            <span>View on TMDB</span>
         </a>
         <div class="person-contribution">
             <div v-for="id in person?.films" :key="id">
@@ -20,11 +20,34 @@
 </template>
 
 <script lang="ts">
-import { mixins } from "vue-class-component";
+import { mixins, Options } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
+import QueryMixin from "../mixins/query.mixin";
 import { InfoTabStatus } from "../common/types";
 
-export default class PersonCardComponent extends mixins(StoreMixin) {
+@Options({
+    watch: {
+        selectedObjectId: "loadPerson",
+    },
+})
+export default class PersonCardComponent extends mixins(StoreMixin, QueryMixin) {
+    created() {
+        void this.loadPerson(this.selectedObjectId);
+    }
+
+    async loadPerson(id: number | null) {
+        if (!id || !this.userId) return;
+        const role = this.infoTabStatus === InfoTabStatus.Director ? "director" : "actor";
+        const cached = role === "director" ? this.getDirector(id) : this.getActor(id);
+        if (cached?.films?.length) return;
+        const person = await this.getPersonQuery(id, this.userId, role);
+        if (!person) return;
+        const { filmography, img, ...rest } = person;
+        const normalized = { ...rest, photo: img?.photo?.x2 || img?.photo?.x1 };
+        if (role === "director") this.addDirector(normalized);
+        else this.addActor(normalized);
+    }
+
     get person() {
         const personId = this.selectedObjectId;
         switch (this.infoTabStatus) {
@@ -46,10 +69,15 @@ export default class PersonCardComponent extends mixins(StoreMixin) {
     flex-direction: column
     gap: 1rem
     padding: 0 2rem
-    overflow: scroll
-    height: 100%
+    min-height: 0
 
 .person-card-photo
+    display: block
+    width: min(100%, 260px)
+    height: auto
+    max-height: none
+    align-self: center
+    object-fit: contain
     border-radius: 5px
 
 .person-contribution

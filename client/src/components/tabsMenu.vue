@@ -49,26 +49,21 @@ export default class StatisticPageComponent extends Vue {
 <style lang="sass">
 .tabs-list
     display: flex
-    flex-direction: column
-
-    gap: 0.2rem
-    padding: 1rem 0rem
-
-    border-right: 1px solid var(--main-text-color)
+    flex-direction: row
+    justify-content: center
+    gap: 0.25rem
+    padding: 0
 
 .tab-button
     user-select: none
     cursor: pointer
 
-    padding: 0.4rem 1rem
-
-    text-align: right
-
-    border: 1px solid var(--regular-tab-color)
-    border-right: none
-    border-radius: 5px 0px 0px 5px
-
-    transition: 0.5s
+    margin: 0
+    padding: 1.45rem 0.8rem 1.25rem
+    white-space: nowrap
+    text-align: center
+    border-bottom: 2px solid transparent
+    transition: color 0.2s, border-color 0.2s
 
     color: var(--secondary-text-color)
 
@@ -77,4 +72,16 @@ export default class StatisticPageComponent extends Vue {
     
     &.active
         color: var(--main-text-color)
+        border-bottom-color: var(--kinopoisk-color)
+
+@media (max-width: 720px)
+    .tabs-list
+        justify-content: flex-start
+        overflow-x: auto
+        border-bottom: 1px solid var(--main-text-color)
+
+    .tab-button
+        margin: 0
+        white-space: nowrap
+        padding-inline: 0.8rem
 </style>

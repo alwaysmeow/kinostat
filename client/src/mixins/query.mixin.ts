@@ -43,11 +43,24 @@ export default class QueryMixin extends Vue {
         return this.getObjectQuery<Film>(QueryObjectType.Film, id);
     }
 
-    getPersonQuery(id: number): Promise<Person | null> {
-        return this.getObjectQuery<Person>(QueryObjectType.Person, id);
+    async getFilmsQuery(userId: string | number): Promise<Film[]> {
+        const URL = `/api/films?user_id=${userId}`;
+        const response = await fetch(URL);
+        if (!response.ok) {
+            throw new Error(`Request ${URL} execution failed: ${response.status}`);
+        }
+        return response.json();
     }
 
-    async getVotes(userId: number): Promise<Vote[]> {
+    async getPersonQuery(id: number, userId: string, role: "actor" | "director"): Promise<Person | null> {
+        const URL = `api/object?type=person&id=${id}&user_id=${encodeURIComponent(userId)}&role=${role}`;
+        const response = await fetch(URL);
+        if (!response.ok) return null;
+        const data = await response.json();
+        return data.person ?? null;
+    }
+
+    async getVotes(userId: string | number): Promise<Vote[]> {
         const URL = `/api/votes?user_id=${userId}`;
         const response: Vote[] = await fetch(URL).then((response) =>
             response.json()
@@ -70,25 +83,25 @@ export default class QueryMixin extends Vue {
         return votes;
     }
 
-    async getActorsQuery(userId: number): Promise<Person[]> {
+    async getActorsQuery(userId: string | number): Promise<Person[]> {
         const URL = `api/actors?user_id=${userId}`;
         const response = await fetch(URL);
         return response.json();
     }
 
-    async getDirectorsQuery(userId: number): Promise<Person[]> {
+    async getDirectorsQuery(userId: string | number): Promise<Person[]> {
         const URL = `api/directors?user_id=${userId}`;
         const response = await fetch(URL);
         return response.json();
     }
 
-    async getCountriesQuery(userId: number): Promise<FilmAttribute[]> {
+    async getCountriesQuery(userId: string | number): Promise<FilmAttribute[]> {
         const URL = `api/countries?user_id=${userId}`;
         const response = await fetch(URL);
         return response.json();
     }
 
-    async getGenresQuery(userId: number): Promise<FilmAttribute[]> {
+    async getGenresQuery(userId: string | number): Promise<FilmAttribute[]> {
         const URL = `api/genres?user_id=${userId}`;
         const response = await fetch(URL);
         return response.json();

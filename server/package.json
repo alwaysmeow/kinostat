@@ -1,0 +1,37 @@
+{
+  "name": "kinostat-server",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "sync": "tsx src/cli/sync-letterboxd.ts",
+    "import": "tsx src/cli/import-letterboxd.ts",
+    "import:letterboxd": "tsx src/cli/import-letterboxd.ts",
+    "import:kinopoisk-dates": "tsx src/cli/import-kinopoisk-dates.ts",
+    "test": "NODE_ENV=test tsx --test src/*.test.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "csv-parse": "^7.0.3",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "fast-xml-parser": "^5.3.1",
+    "fflate": "^0.8.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.15.21",
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.1.1",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,7 +1,7 @@
 <template>
     <div class="genres-tab">
         <div>
-            <h3>Количество оценок</h3>
+            <h3>Number of ratings</h3>
             <line-chart
                 :data="yearsCountData"
                 :colors="['#ff8040', '#ffe040', '#ff405f']"
@@ -9,7 +9,7 @@
             ></line-chart>
         </div>
         <div>
-            <h3>Средняя оценка</h3>
+            <h3>Average rating</h3>
             <line-chart
                 :data="yearsVoteData"
                 :colors="['#ff8040', '#ffe040', '#ff405f']"

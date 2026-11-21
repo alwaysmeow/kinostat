@@ -1,14 +1,13 @@
 <template>
-    <h4>Статистика пользователя {{ $props.userId }}</h4>
-    <div class="page-body">
-        <div class="page-right-space">
-            <tabs-menu
-                class="tabs-menu"
-                v-model="selectedTabIndex"
-                :tabs-titles="tabsTitles"
-            ></tabs-menu>
-        </div>
-
+    <Teleport to="#header-navigation">
+        <tabs-menu
+            class="tabs-menu"
+            v-model="selectedTabIndex"
+            :tabs-titles="tabsTitles"
+            @update:modelValue="loadTab"
+        ></tabs-menu>
+    </Teleport>
+    <div :class="['page-body', { 'with-info-tab': infoTabStatus !== InfoTabStatus.None }]">
         <div class="tab-content">
             <votes-list v-if="isTab(TabIndex.Votes)" />
             <person-list list="directors" v-if="isTab(TabIndex.Directors)" />
@@ -54,12 +53,12 @@ import {
 } from "../common/types";
 
 type PropsType = {
-    userId: number;
+    userId: string | number;
 };
 
 @Options({
     props: {
-        userId: { type: Number, required: true },
+        userId: { type: [String, Number], required: true },
     },
 })
 export default class StatisticPageComponent extends mixins(
@@ -70,16 +69,17 @@ export default class StatisticPageComponent extends mixins(
 
     selectedTabIndex: number = 0;
     tabsTitles: string[] = [
-        "Оценки",
-        "Режиссеры",
-        "Актеры",
-        "Cтраны",
-        "Жанры",
-        "Годы",
+        "Ratings",
+        "Directors",
+        "Actors",
+        "Countries",
+        "Genres",
+        "Years",
     ];
 
     TabIndex = TabIndex;
     InfoTabStatus = InfoTabStatus;
+    loadedTabs = new Set<number>([TabIndex.Votes, TabIndex.Years]);
 
     get cssInfoTabVisibleClass() {
         if (this.infoTabStatus === InfoTabStatus.None) {
@@ -89,15 +89,10 @@ export default class StatisticPageComponent extends mixins(
     }
 
     async created() {
-        const timeout = 10;
+        this.setUserId(this.$props.userId);
         const votes: Vote[] = await this.getVotes(this.$props.userId);
         this.setVotes(votes);
-        await this.getFilms(timeout);
-
-        this.getCountries();
-        this.getGenres();
-        this.getPersonList("actor");
-        this.getPersonList("director");
+        await this.loadFilms();
     }
 
     isTab(tab: TabIndex): boolean {
@@ -108,42 +103,42 @@ export default class StatisticPageComponent extends mixins(
         return this.infoTabStatus === status;
     }
 
-    async getFilms(timeout: number = 100) {
-        for (var i = this.votes.length - 1; i >= 0; i--) {
-            const vote: Vote = this.votes[i];
+    async loadFilms() {
+        const films = await this.getFilmsQuery(this.$props.userId);
+        this.setFilms(films);
+    }
 
-            const filmData = await this.getFilmQuery(vote.filmId);
-
-            if (filmData) {
-                this.addFilm(filmData);
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, timeout));
-        }
+    async loadTab(tab: TabIndex) {
+        if (this.loadedTabs.has(tab)) return;
+        this.loadedTabs.add(tab);
+        if (tab === TabIndex.Directors) await this.getPersonList("director");
+        if (tab === TabIndex.Actors) await this.getPersonList("actor");
+        if (tab === TabIndex.Countries) await this.getCountries();
+        if (tab === TabIndex.Genres) await this.getGenres();
     }
 
     async getPersonList(list: "director" | "actor") {
         let persons;
-        let addPerson;
 
         if (list === "director") {
             persons = await this.getDirectorsQuery(this.$props.userId);
-            addPerson = this.addDirector;
         } else {
             persons = await this.getActorsQuery(this.$props.userId);
-            addPerson = this.addActor;
         }
 
-        persons.forEach((person) => {
+        const items = persons.flatMap((person) => {
             if (person.name) {
                 const { filmography, img, ...rest } = person;
                 const personItem: Person = {
                     ...rest,
                     photo: img.photo.x2 || img.photo.x1,
                 };
-                addPerson(personItem);
+                return [personItem];
             }
+            return [];
         });
+        if (list === "director") this.setDirectors(items);
+        else this.setActors(items);
     }
 
     async getCountries() {
@@ -162,46 +157,69 @@ export default class StatisticPageComponent extends mixins(
 
 <style lang="sass">
 .page-body
-    display: flex
-    gap: 5rem
-    padding: 2rem
+    box-sizing: border-box
+    width: min(100% - 2rem, 1440px)
+    margin: 0 auto
+    display: grid
+    grid-template-columns: minmax(0, 1100px) 0
+    grid-template-areas: "content info"
+    justify-content: center
+    column-gap: 0
+    padding: 1.5rem 0 4rem
+    transition: grid-template-columns 0.2s ease, column-gap 0.2s ease
 
-.page-left-space, .page-right-space
-    width: 20vw
-    margin: 5vh 0
+    &.with-info-tab
+        grid-template-columns: minmax(0, 1fr) 420px
+        column-gap: 2rem
 
-.tabs-menu
-    position: sticky
-    top: 5vh
+.page-left-space
+    min-width: 0
 
-    height: 90vh
+.page-left-space
+    grid-area: info
+    position: relative
+    align-self: stretch
+    height: auto
+    overflow: visible
 
 .tab-content
-    width: 60vw
+    grid-area: content
+    min-width: 0
 
 .info-tab
     position: sticky
-    top: 5vh
-    height: 90vh
+    top: 5.5rem
+    box-sizing: border-box
+    height: auto
+    max-height: calc(100vh - 6.5rem)
+    display: grid
+    grid-template-rows: minmax(0, 1fr)
 
-    width: 20vw
-
-    border-left: 1px solid var(--main-text-color)
-    transform: translateX(calc(100% + 2rem))
+    transform: translateX(calc(100% + 3rem))
+    opacity: 0
+    background: var(--neutral-shade-one)
+    border-radius: 1em
+    overflow: hidden
+    pointer-events: none
 
     transition: 0.2s
 
     &.visible
         transform: none
+        opacity: 1
+        pointer-events: auto
 
     .close-info-tab-btn
+        position: absolute
+        top: 1.25rem
+        right: 1.25rem
+        z-index: 2
         display: flex
-        justify-content: start
-        align-items: top
+        justify-content: center
+        align-items: center
 
-        height: 5vh
-        position: relative
-        left: 1rem
+        width: 2.5rem
+        height: 2.5rem
 
         color: var(--secondary-text-color)
 
@@ -210,5 +228,25 @@ export default class StatisticPageComponent extends mixins(
             cursor: pointer
     
     .info-tab-content
-        height: 85vh
+        min-height: 0
+        height: auto
+        max-height: calc(100vh - 6.5rem)
+        overflow: auto
+        overscroll-behavior: contain
+
+@media (max-width: 1100px)
+    .page-body
+        grid-template-columns: minmax(0, 1fr)
+        grid-template-areas: "content"
+
+        &.with-info-tab
+            grid-template-columns: minmax(0, 1fr)
+
+    .page-left-space
+        display: none
+
+@media (max-width: 720px)
+    .page-body
+        display: grid
+
 </style>

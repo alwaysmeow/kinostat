@@ -3,6 +3,11 @@
 
 **/node_modules
 **/package-lock.json
+!server/package-lock.json
 
 server/cache/**/*.json
 !**/example.json
+
+server/data/
+server/dist/
+client/dist/
