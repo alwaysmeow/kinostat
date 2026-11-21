@@ -1,6 +1,6 @@
 <template>
     <header class="app-header">
-        <div class="app-brand">Kinostat</div>
+        <div class="app-brand">KINOSTAT</div>
         <div id="header-navigation" class="header-navigation"></div>
         <details ref="profileMenu" class="profile-menu">
             <summary>

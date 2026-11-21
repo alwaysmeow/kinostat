@@ -72,21 +72,61 @@ export default class ChartMixin extends Vue {
     };
 
     lineChartOptions = {
+        elements: {
+            line: {
+                borderWidth: 3,
+            },
+            point: {
+                radius: 3,
+                hoverRadius: 6,
+                borderWidth: 0,
+            },
+        },
         scales: {
           x: {
             type: 'linear',
             offset: false,
             bounds: 'data',
+            afterBuildTicks: (axis: any) => {
+                const ticks = axis.ticks;
+                if (ticks.length < 3) return;
+
+                const lastGap =
+                    ticks[ticks.length - 1].value -
+                    ticks[ticks.length - 2].value;
+                const regularGap =
+                    ticks[ticks.length - 2].value -
+                    ticks[ticks.length - 3].value;
+
+                if (lastGap < regularGap / 2) {
+                    ticks.splice(ticks.length - 2, 1);
+                }
+            },
+            ticks: {
+                color: "#888888",
+                maxRotation: 0,
+            },
           },
           y: {
             grid: {
-                color: "#333333",
+                color: "rgba(255, 255, 255, 0.07)",
+            },
+            ticks: {
+                color: "#888888",
             },
           }
         },
         plugins: {
           datalabels: {
             display: false,
+          },
+          tooltip: {
+            backgroundColor: "#242424",
+            titleColor: "#ffffff",
+            bodyColor: "#ffffff",
+            padding: 12,
+            cornerRadius: 10,
+            displayColors: false,
           }
         },
     };

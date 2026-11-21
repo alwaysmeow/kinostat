@@ -67,14 +67,14 @@ export default class QueryMixin extends Vue {
         );
 
         const votes: Vote[] = response.map((item) => {
-            const [title, year] = item.alt
-                .split("(")
-                .map((str) => str.slice(0, -1));
+            const altMatch = item.alt.match(/^(.*)\s+\((\d{4})\)$/);
+            const title = altMatch?.[1] ?? item.alt;
+            const year = Number(altMatch?.[2]);
             const [, type, id] = item.url.split("/");
             return {
                 ...item,
                 filmId: Number(id),
-                year: Number(year),
+                year,
                 title,
                 type,
             };
