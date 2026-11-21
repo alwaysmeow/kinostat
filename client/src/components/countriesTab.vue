@@ -1,35 +1,23 @@
 <template>
     <div class="countries-tab">
         <div class="countries-summary">
-            <div class="countries-summary-item">
-                <strong>{{ countries.length }}</strong>
-                <span>Countries</span>
-            </div>
-            <div
-                class="countries-summary-item countries-summary-link"
+            <stat-summary-item :value="countries.length" label="Countries" />
+            <stat-summary-item
+                :value="mostWatchedCountry?.name ?? '—'"
+                :label="`Most watched · ${mostWatchedCountry?.films.length ?? 0} films`"
+                clickable
                 @click="mostWatchedCountry && openCountry(mostWatchedCountry)"
-            >
-                <strong>{{ mostWatchedCountry?.name ?? "—" }}</strong>
-                <span>Most watched · {{ mostWatchedCountry?.films.length ?? 0 }} films</span>
-            </div>
-            <div class="countries-summary-item">
-                <span>Highest rated countries</span>
-                <ol class="countries-summary-ranking">
-                    <li v-for="country in highestRatedCountries" :key="country.name" @click="openCountry(country)">
-                        <strong>{{ country.name }}</strong>
-                        <span>{{ country.averageVote.toFixed(1) }} · {{ country.films.length }} films</span>
-                    </li>
-                </ol>
-            </div>
-            <div class="countries-summary-item">
-                <span>Lowest rated countries</span>
-                <ol class="countries-summary-ranking">
-                    <li v-for="country in lowestRatedCountries" :key="country.name" @click="openCountry(country)">
-                        <strong>{{ country.name }}</strong>
-                        <span>{{ country.averageVote.toFixed(1) }} · {{ country.films.length }} films</span>
-                    </li>
-                </ol>
-            </div>
+            />
+            <stat-summary-item
+                heading="Highest rated countries"
+                :items="highestRatedCountrySummary"
+                @item-click="openCountry"
+            />
+            <stat-summary-item
+                heading="Lowest rated countries"
+                :items="lowestRatedCountrySummary"
+                @item-click="openCountry"
+            />
         </div>
 
         <section class="countries-chart-card">
@@ -182,6 +170,23 @@ export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin
             .slice(0, 3);
     }
 
+    get highestRatedCountrySummary() {
+        return this.countrySummary(this.highestRatedCountries);
+    }
+
+    get lowestRatedCountrySummary() {
+        return this.countrySummary(this.lowestRatedCountries);
+    }
+
+    countrySummary(countries: FilmAttribute[]) {
+        return countries.map((country) => ({
+            key: country.name,
+            title: country.name,
+            meta: `${country.averageVote.toFixed(1)} · ${country.films.length} films`,
+            payload: country,
+        }));
+    }
+
     get countryRatingMetric() {
         return estimateAttributeRatingMetric(this.countries, this.votes, {
             softenPrior: false,
@@ -229,28 +234,6 @@ export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin
         display: grid
         grid-template-columns: repeat(4, minmax(0, 1fr))
         gap: 1rem
-
-    .countries-summary-item
-        display: flex
-        flex-direction: column
-        justify-content: center
-        min-height: 6rem
-        padding: 1.25rem 1.5rem
-        border-radius: 1.25rem
-        background: var(--neutral-shade-one)
-
-        strong
-            font-size: 1.35rem
-
-        span
-            color: var(--secondary-text-color)
-            font-size: 0.9rem
-
-        &.countries-summary-link
-            cursor: pointer
-
-            &:hover strong
-                color: var(--kinopoisk-color)
 
     .countries-summary-ranking
         display: flex

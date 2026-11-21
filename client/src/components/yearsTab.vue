@@ -1,32 +1,18 @@
 <template>
     <div class="years-tab">
         <div class="years-summary">
-            <div class="years-summary-item years-summary-item-compact">
-                <span class="years-summary-value">{{ totalRatings }}</span>
-                <span class="years-summary-label">Rated films</span>
-            </div>
-            <div class="years-summary-item years-summary-item-compact">
-                <span class="years-summary-value">{{ releaseSpan }}</span>
-                <span class="years-summary-label">Release span</span>
-            </div>
-            <div class="years-summary-item">
-                <span class="years-summary-label">Most represented years</span>
-                <ol class="years-summary-ranking">
-                    <li v-for="item in mostRepresentedYears" :key="item.year" @click="openYear(item.year)">
-                        <strong>{{ item.year }}</strong>
-                        <span>{{ item.count }} films</span>
-                    </li>
-                </ol>
-            </div>
-            <div class="years-summary-item">
-                <span class="years-summary-label">Highest average ratings</span>
-                <ol class="years-summary-ranking">
-                    <li v-for="item in highestRatedYears" :key="item.year" @click="openYear(item.year)">
-                        <strong>{{ item.year }}</strong>
-                        <span>{{ item.average.toFixed(1) }} · {{ item.count }} films</span>
-                    </li>
-                </ol>
-            </div>
+            <stat-summary-item :value="totalRatings" label="Rated films" />
+            <stat-summary-item :value="releaseSpan" label="Release span" />
+            <stat-summary-item
+                heading="Most represented years"
+                :items="mostRepresentedYearSummary"
+                @item-click="openYear"
+            />
+            <stat-summary-item
+                heading="Highest average ratings"
+                :items="highestRatedYearSummary"
+                @item-click="openYear"
+            />
         </div>
 
         <section class="years-chart-card">
@@ -333,6 +319,24 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
             .slice(0, 3);
     }
 
+    get mostRepresentedYearSummary() {
+        return this.mostRepresentedYears.map((item) => ({
+            key: item.year,
+            title: String(item.year),
+            meta: `${item.count} films`,
+            payload: item.year,
+        }));
+    }
+
+    get highestRatedYearSummary() {
+        return this.highestRatedYears.map((item) => ({
+            key: item.year,
+            title: String(item.year),
+            meta: `${item.average.toFixed(1)} · ${item.count} films`,
+            payload: item.year,
+        }));
+    }
+
     get decadesData() {
         const voteValues = new Map(
             this.votes.map((vote) => [vote.filmId, vote.value])
@@ -438,54 +442,6 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
         display: grid
         grid-template-columns: repeat(4, minmax(0, 1fr))
         gap: 1rem
-
-    .years-summary-item
-        display: flex
-        flex-direction: column
-        padding: 1.25rem 1.5rem
-        border-radius: 1.25rem
-        background: var(--neutral-shade-one)
-
-        &.years-summary-item-compact
-            justify-content: center
-
-    .years-summary-value
-        font-size: 1.5rem
-        font-weight: 700
-
-    .years-summary-label
-        color: var(--secondary-text-color)
-        font-size: 0.9rem
-
-    .years-summary-ranking
-        display: flex
-        flex-direction: column
-        gap: 0.35rem
-        margin: 0.65rem 0 0
-        padding: 0
-        list-style: none
-        counter-reset: ranking
-
-        li
-            display: grid
-            grid-template-columns: auto 1fr auto
-            align-items: baseline
-            gap: 0.5rem
-            counter-increment: ranking
-            cursor: pointer
-
-            &:hover strong
-                color: var(--kinopoisk-color)
-
-            &::before
-                content: counter(ranking)
-                color: var(--secondary-text-color)
-                font-size: 0.75rem
-
-            span
-                color: var(--secondary-text-color)
-                font-size: 0.85rem
-                white-space: nowrap
 
     .years-chart-card
         padding: 1.5rem

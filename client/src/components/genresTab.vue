@@ -1,35 +1,23 @@
 <template>
     <div class="genres-tab">
         <div class="genres-summary">
-            <div class="genres-summary-item">
-                <strong>{{ genres.length }}</strong>
-                <span>Genres</span>
-            </div>
-            <div
-                class="genres-summary-item genres-summary-link"
+            <stat-summary-item :value="genres.length" label="Genres" />
+            <stat-summary-item
+                :value="titleCase(mostWatchedGenre?.name)"
+                :label="`Most watched · ${mostWatchedGenre?.films.length ?? 0} films`"
+                clickable
                 @click="mostWatchedGenre && openGenre(mostWatchedGenre)"
-            >
-                <strong>{{ titleCase(mostWatchedGenre?.name) }}</strong>
-                <span>Most watched · {{ mostWatchedGenre?.films.length ?? 0 }} films</span>
-            </div>
-            <div class="genres-summary-item">
-                <span>Highest rated genres</span>
-                <ol class="genres-summary-ranking">
-                    <li v-for="genre in highestRatedGenres" :key="genre.name" @click="openGenre(genre)">
-                        <strong>{{ titleCase(genre.name) }}</strong>
-                        <span>{{ genre.averageVote.toFixed(1) }} · {{ genre.films.length }} films</span>
-                    </li>
-                </ol>
-            </div>
-            <div class="genres-summary-item">
-                <span>Lowest rated genres</span>
-                <ol class="genres-summary-ranking">
-                    <li v-for="genre in lowestRatedGenres" :key="genre.name" @click="openGenre(genre)">
-                        <strong>{{ titleCase(genre.name) }}</strong>
-                        <span>{{ genre.averageVote.toFixed(1) }} · {{ genre.films.length }} films</span>
-                    </li>
-                </ol>
-            </div>
+            />
+            <stat-summary-item
+                heading="Highest rated genres"
+                :items="highestRatedGenreSummary"
+                @item-click="openGenre"
+            />
+            <stat-summary-item
+                heading="Lowest rated genres"
+                :items="lowestRatedGenreSummary"
+                @item-click="openGenre"
+            />
         </div>
 
         <section class="genres-chart-card">
@@ -220,6 +208,23 @@ export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
         ).slice(0, 3);
     }
 
+    get highestRatedGenreSummary() {
+        return this.genreSummary(this.highestRatedGenres);
+    }
+
+    get lowestRatedGenreSummary() {
+        return this.genreSummary(this.lowestRatedGenres);
+    }
+
+    genreSummary(genres: FilmAttribute[]) {
+        return genres.map((genre) => ({
+            key: genre.name,
+            title: this.titleCase(genre.name),
+            meta: `${genre.averageVote.toFixed(1)} · ${genre.films.length} films`,
+            payload: genre,
+        }));
+    }
+
     get genreRatingMetric() {
         return estimateAttributeRatingMetric(this.genres, this.votes);
     }
@@ -280,28 +285,6 @@ export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
         display: grid
         grid-template-columns: repeat(4, minmax(0, 1fr))
         gap: 1rem
-
-    .genres-summary-item
-        display: flex
-        flex-direction: column
-        justify-content: center
-        min-height: 6rem
-        padding: 1.25rem 1.5rem
-        border-radius: 1.25rem
-        background: var(--neutral-shade-one)
-
-        strong
-            font-size: 1.35rem
-
-        span
-            color: var(--secondary-text-color)
-            font-size: 0.9rem
-
-        &.genres-summary-link
-            cursor: pointer
-
-            &:hover strong
-                color: var(--kinopoisk-color)
 
     .genres-summary-ranking
         display: flex
