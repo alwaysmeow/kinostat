@@ -46,18 +46,17 @@ export async function syncLetterboxd(db: AppDatabase, options: SyncOptions) {
   // Old RSS entries are not allowed to restore deleted ratings after a full import,
   // but they are still the best source for the member's actual Letterboxd poster.
   const updateLetterboxdPoster = db.prepare(`UPDATE films SET poster_base_url = ?
-    WHERE tmdb_id = ? AND ? IS NOT NULL`);
+    WHERE tmdb_id = ? AND tmdb_media_type = ? AND ? IS NOT NULL`);
   for (const item of allRated) {
-    updateLetterboxdPoster.run(item.poster, item.tmdbId, item.poster);
+    updateLetterboxdPoster.run(item.poster, item.tmdbId, item.mediaType, item.poster);
   }
 
   const insertFilm = db.prepare(`INSERT INTO films
     (tmdb_id, tmdb_media_type, title, year, letterboxd_uri, poster_base_url) VALUES (?, ?, ?, ?, ?, ?)
-    ON CONFLICT(tmdb_id) DO UPDATE SET title = excluded.title, year = excluded.year,
-      tmdb_media_type = excluded.tmdb_media_type,
+    ON CONFLICT(tmdb_media_type, tmdb_id) DO UPDATE SET title = excluded.title, year = excluded.year,
       letterboxd_uri = excluded.letterboxd_uri,
       poster_base_url = COALESCE(excluded.poster_base_url, films.poster_base_url)`);
-  const findFilm = db.prepare("SELECT id, enriched_at FROM films WHERE tmdb_id = ?");
+  const findFilm = db.prepare("SELECT id, enriched_at FROM films WHERE tmdb_id = ? AND tmdb_media_type = ?");
   const upsertRating = db.prepare(`INSERT INTO ratings (user_id, film_id, value, rated_at, watched_at)
     VALUES (?, ?, ?, ?, ?)
     ON CONFLICT(user_id, film_id) DO UPDATE SET value = excluded.value,
@@ -66,7 +65,7 @@ export async function syncLetterboxd(db: AppDatabase, options: SyncOptions) {
   db.transaction(() => {
     for (const item of rated) {
       insertFilm.run(item.tmdbId, item.mediaType, item.title, item.year, item.uri, item.poster);
-      const film = findFilm.get(item.tmdbId) as { id: number };
+      const film = findFilm.get(item.tmdbId, item.mediaType) as { id: number };
       upsertRating.run(userId, film.id, item.rating, item.watchedAt, item.watchedAt);
     }
   })();
@@ -77,15 +76,15 @@ export async function syncLetterboxd(db: AppDatabase, options: SyncOptions) {
     if (!tmdb.enabled) throw new Error("TMDB_API_KEY is required for metadata enrichment");
     const update = db.prepare(`UPDATE films SET poster_base_url = COALESCE(poster_base_url, ?),
       countries_json = ?, genres_json = ?, actors_json = ?, directors_json = ?, enriched_at = CURRENT_TIMESTAMP
-      WHERE tmdb_id = ?`);
+      WHERE tmdb_id = ? AND tmdb_media_type = ?`);
     for (const [index, item] of rated.entries()) {
-      const film = findFilm.get(item.tmdbId) as { enriched_at: string | null };
+      const film = findFilm.get(item.tmdbId, item.mediaType) as { enriched_at: string | null };
       if (film.enriched_at) continue;
       options.onProgress?.(`[${index + 1}/${rated.length}] ${item.title} (${item.year})`);
       const metadata = await tmdb.getFilm(item.tmdbId, item.year, item.mediaType);
       update.run(metadata.posterBaseUrl,
         JSON.stringify(metadata.countries), JSON.stringify(metadata.genres),
-        JSON.stringify(metadata.actors), JSON.stringify(metadata.directors), item.tmdbId);
+        JSON.stringify(metadata.actors), JSON.stringify(metadata.directors), item.tmdbId, item.mediaType);
       enriched++;
     }
   }
@@ -135,9 +134,12 @@ function parseDate(value?: string) {
   return Number.isNaN(timestamp) ? null : timestamp;
 }
 
-function deduplicate<T extends { tmdbId: number }>(items: T[]) {
-  const result = new Map<number, T>();
-  for (const item of items) if (!result.has(item.tmdbId)) result.set(item.tmdbId, item);
+function deduplicate<T extends { tmdbId: number; mediaType: "movie" | "tv" }>(items: T[]) {
+  const result = new Map<string, T>();
+  for (const item of items) {
+    const key = `${item.mediaType}:${item.tmdbId}`;
+    if (!result.has(key)) result.set(key, item);
+  }
   return [...result.values()];
 }
 

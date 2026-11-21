@@ -5,6 +5,7 @@ import { unzipSync } from "fflate";
 import type { AppDatabase } from "../db.js";
 import { TmdbClient } from "./tmdb.js";
 import { getLetterboxdPoster } from "./letterboxd-poster.js";
+import { getTmdbMappingOverride } from "./tmdb-overrides.js";
 
 interface CsvRow {
   Date?: string;
@@ -90,11 +91,17 @@ export async function importLetterboxd(db: AppDatabase, options: ImportOptions) 
       const film = (findFilm.get(rating.uri) ?? findFilmByTitleYear.get(rating.title, rating.year)) as {
         id: number; tmdb_id: number | null; tmdb_media_type: "movie" | "tv"; poster_base_url: string | null; enriched_at: string | null;
       };
+      const mappingOverride = getTmdbMappingOverride(rating.uri);
       if (film.enriched_at) {
         // RSS images come directly from Letterboxd and must never be replaced.
         // Older ZIP entries use TMDB; refresh those with the preferred English artwork.
-        if (film.tmdb_id) {
-          const metadata = await tmdb.getFilm(film.tmdb_id, rating.year, film.tmdb_media_type);
+        const tmdbId = mappingOverride?.tmdbId ?? film.tmdb_id;
+        if (tmdbId) {
+          const metadata = await tmdb.getFilm(
+            tmdbId,
+            rating.year,
+            mappingOverride?.mediaType ?? film.tmdb_media_type,
+          );
           const poster = metadata.posterBaseUrl
             ?? (!film.poster_base_url ? await getLetterboxdPoster(rating.uri) : null);
           update.run(metadata.tmdbId, metadata.mediaType, poster,
@@ -107,7 +114,9 @@ export async function importLetterboxd(db: AppDatabase, options: ImportOptions) 
         return;
       }
       options.onProgress?.(`[${index + 1}/${ratings.length}] ${rating.title} (${rating.year})`);
-      const metadata = await tmdb.findFilm(rating.title, rating.year);
+      const metadata = mappingOverride
+        ? await tmdb.getFilm(mappingOverride.tmdbId, rating.year, mappingOverride.mediaType)
+        : await tmdb.findFilm(rating.title, rating.year);
       if (!metadata) return;
       const poster = metadata.posterBaseUrl ?? await getLetterboxdPoster(rating.uri);
       update.run(metadata.tmdbId, metadata.mediaType, poster,

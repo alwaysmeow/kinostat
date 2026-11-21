@@ -15,6 +15,7 @@
     "import:letterboxd": "tsx src/cli/import-letterboxd.ts",
     "import:kinopoisk-dates": "tsx src/cli/import-kinopoisk-dates.ts",
     "refresh:cast": "tsx src/cli/refresh-cast.ts",
+    "repair:tmdb": "tsx src/cli/repair-tmdb-mappings.ts",
     "test": "NODE_ENV=test tsx --test src/*.test.ts"
   },
   "dependencies": {

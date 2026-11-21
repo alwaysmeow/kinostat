@@ -1,6 +1,7 @@
 import type { AppDatabase } from "../db.js";
 import type { FilmRow, PersonSummary, VoteRow } from "../types.js";
 import { parseJson } from "../types.js";
+import { normalizeGenres } from "./genres.js";
 
 export class LibraryService {
   constructor(private readonly db: AppDatabase) {}
@@ -9,8 +10,12 @@ export class LibraryService {
     return this.db.prepare(`
       SELECT f.*, r.value, r.rated_at, r.watched_at,
         CASE
-          WHEN COALESCE(r.watched_at, r.rated_at) = '2026-11-20'
-            THEN COALESCE(date_override.rated_at, r.watched_at, r.rated_at)
+          WHEN date_override.rated_at IS NOT NULL
+            AND (
+              COALESCE(r.watched_at, r.rated_at) IS NULL
+              OR date_override.rated_at < COALESCE(r.watched_at, r.rated_at)
+            )
+            THEN date_override.rated_at
           ELSE COALESCE(r.watched_at, r.rated_at)
         END AS effective_date
       FROM ratings r
@@ -65,7 +70,7 @@ export class LibraryService {
       letterboxdUri: row.letterboxd_uri,
       posterBaseUrl: row.poster_base_url,
       countries: parseJson<string[]>(row.countries_json),
-      genres: parseJson<string[]>(row.genres_json),
+      genres: normalizeGenres(parseJson<string[]>(row.genres_json)),
       actors: displayActors(parseJson<PersonSummary[]>(row.actors_json)),
       directors: parseJson<PersonSummary[]>(row.directors_json),
       detailsLoaded: true,
@@ -108,7 +113,9 @@ export class LibraryService {
   getAttributes(userId: string, field: "countries_json" | "genres_json") {
     const items = new Map<string, { films: number[]; values: number[] }>();
     for (const film of this.votes(userId)) {
-      for (const name of parseJson<string[]>(film[field])) {
+      const names = parseJson<string[]>(film[field]);
+      const normalizedNames = field === "genres_json" ? normalizeGenres(names) : names;
+      for (const name of normalizedNames) {
         const item = items.get(name) ?? { films: [], values: [] };
         item.films.push(film.id);
         item.values.push(film.value);

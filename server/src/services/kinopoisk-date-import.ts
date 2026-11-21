@@ -8,6 +8,7 @@ interface KinopoiskRow {
   name?: string;
   year?: string;
   tmdbId?: string;
+  isSeries?: string;
 }
 
 export function importKinopoiskDates(db: AppDatabase, source: string, userId: string) {
@@ -20,7 +21,7 @@ export function importKinopoiskDates(db: AppDatabase, source: string, userId: st
 
   const findByTmdb = db.prepare(`SELECT f.id FROM films f
     JOIN ratings r ON r.film_id = f.id
-    WHERE r.user_id = ? AND f.tmdb_id = ?`);
+    WHERE r.user_id = ? AND f.tmdb_id = ? AND f.tmdb_media_type = ?`);
   const findByTitleYear = db.prepare(`SELECT f.id FROM films f
     JOIN ratings r ON r.film_id = f.id
     WHERE r.user_id = ? AND abs(f.year - ?) <= 1
@@ -37,12 +38,13 @@ export function importKinopoiskDates(db: AppDatabase, source: string, userId: st
     for (const row of rows) {
       const year = Number(row.year);
       const tmdbId = Number(row.tmdbId);
+      const mediaType = row.isSeries?.toLocaleLowerCase() === "да" ? "tv" : "movie";
       if (!row.dateTime || !/^\d{4}-\d{2}-\d{2}$/.test(row.dateTime) || !Number.isInteger(year)) {
         unmatched++;
         continue;
       }
       const film = (Number.isInteger(tmdbId) && tmdbId > 0
-        ? findByTmdb.get(userId, tmdbId)
+        ? findByTmdb.get(userId, tmdbId, mediaType)
         : undefined) as { id: number } | undefined
         ?? findByTitleYear.get(userId, year, row.originalName ?? "", row.name ?? "") as { id: number } | undefined;
       if (!film) {

@@ -54,7 +54,11 @@ describe("Letterboxd-compatible API", () => {
       VALUES (?, ?, ?, ?, ?, ?, ?)`)
       .run("Example", 2026, "https://letterboxd.com/film/example/", '["США"]', '["драма"]',
         '[{"id":7,"name":"Actor","profilePath":"https://example.com/actor.jpg"}]', '[{"id":8,"name":"Director"}]');
-    db.prepare("INSERT INTO ratings (user_id, film_id, value) VALUES (?, ?, ?)").run("1", film.lastInsertRowid, 8);
+    db.prepare("INSERT INTO ratings (user_id, film_id, value, rated_at) VALUES (?, ?, ?, ?)")
+      .run("1", film.lastInsertRowid, 8, "2026-11-22");
+    db.prepare(`INSERT INTO rating_date_overrides (user_id, film_id, rated_at)
+      VALUES (?, ?, ?)`)
+      .run("1", film.lastInsertRowid, "2025-04-03");
 
     const app = createApp(db);
     const actor = (await request(app).get("/api/actors?user_id=1").expect(200)).body[0];
@@ -65,6 +69,42 @@ describe("Letterboxd-compatible API", () => {
     assert.equal(director.averageVote, 8);
     assert.deepEqual((await request(app).get("/api/countries?user_id=1").expect(200)).body[0], { name: "США", films: [1], averageVote: 8 });
     assert.deepEqual((await request(app).get("/api/genres?user_id=1").expect(200)).body[0], { name: "драма", films: [1], averageVote: 8 });
+    assert.equal((await request(app).get("/api/votes?user_id=1").expect(200)).body[0].time, "03.04.25 00:00");
+
+    db.prepare(`UPDATE rating_date_overrides SET rated_at = ?
+      WHERE user_id = ? AND film_id = ?`)
+      .run("2027-01-01", "1", film.lastInsertRowid);
+    assert.equal((await request(app).get("/api/votes?user_id=1").expect(200)).body[0].time, "22.11.26 00:00");
+  });
+
+  it("splits TMDB's composite action and adventure genre", async () => {
+    db = createDatabase(":memory:");
+    db.prepare("INSERT INTO users (id, username) VALUES (?, ?)").run("1", "tester");
+    const film = db.prepare(`INSERT INTO films
+      (title, year, letterboxd_uri, genres_json)
+      VALUES (?, ?, ?, ?)`)
+      .run(
+        "Brigada",
+        2002,
+        "https://letterboxd.com/film/brigada/",
+        '["action & adventure","action"]',
+      );
+    db.prepare("INSERT INTO ratings (user_id, film_id, value) VALUES (?, ?, ?)")
+      .run("1", film.lastInsertRowid, 9);
+
+    const app = createApp(db);
+    assert.deepEqual(
+      (await request(app).get("/api/genres?user_id=1").expect(200)).body,
+      [
+        { name: "action", films: [1], averageVote: 9 },
+        { name: "adventure", films: [1], averageVote: 9 },
+      ],
+    );
+
+    const details = (await request(app)
+      .get(`/api/object?type=film&id=${film.lastInsertRowid}`)
+      .expect(200)).body.film;
+    assert.deepEqual(details.genres, ["action", "adventure"]);
   });
 
   it("keeps actor cards limited to top-five cast while including their full filmography", async () => {
@@ -125,6 +165,38 @@ describe("Letterboxd-compatible API", () => {
     assert.equal(votes[0].value, 9);
     assert.equal(votes[0].tmdbId, 157336);
     assert.equal(votes[0].letterboxdUri, "https://letterboxd.com/film/interstellar/");
+  });
+
+  it("keeps movie and TV entries with the same TMDB ID separate", async () => {
+    db = createDatabase(":memory:");
+    const xml = `<?xml version="1.0"?><rss><channel>
+      <item>
+        <link>https://letterboxd.com/example/film/adolescence-2025/</link>
+        <letterboxd:filmTitle>Adolescence</letterboxd:filmTitle>
+        <letterboxd:filmYear>2025</letterboxd:filmYear>
+        <letterboxd:memberRating>3.5</letterboxd:memberRating>
+        <tmdb:tvId>249042</tmdb:tvId>
+      </item>
+      <item>
+        <link>https://letterboxd.com/example/film/all-i-want-for-christmas/</link>
+        <letterboxd:filmTitle>All I Want for Christmas</letterboxd:filmTitle>
+        <letterboxd:filmYear>2013</letterboxd:filmYear>
+        <letterboxd:memberRating>2.0</letterboxd:memberRating>
+        <tmdb:movieId>249042</tmdb:movieId>
+      </item>
+    </channel></rss>`;
+
+    await syncLetterboxd(db, {
+      username: "Example",
+      fetcher: async () => new Response(xml, { status: 200 }),
+    });
+
+    const films = db.prepare(`SELECT title, tmdb_media_type AS mediaType
+      FROM films WHERE tmdb_id = 249042 ORDER BY tmdb_media_type`).all();
+    assert.deepEqual(films, [
+      { title: "All I Want for Christmas", mediaType: "movie" },
+      { title: "Adolescence", mediaType: "tv" },
+    ]);
   });
 
   it("imports a Letterboxd ZIP through the HTTP API", async () => {

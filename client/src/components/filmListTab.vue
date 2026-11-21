@@ -1,7 +1,6 @@
 <template>
     <div class="film-list-tab">
         <header class="film-list-header">
-            <span class="film-list-eyebrow">FILMS</span>
             <h3>{{ filmListSelection?.title }}</h3>
             <span>{{ selectedVotes.length }} {{ filmCountLabel }}</span>
         </header>

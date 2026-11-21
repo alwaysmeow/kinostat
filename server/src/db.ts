@@ -20,7 +20,7 @@ export function createDatabase(filename = config.databasePath): AppDatabase {
 
     CREATE TABLE IF NOT EXISTS films (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tmdb_id INTEGER UNIQUE,
+      tmdb_id INTEGER,
       tmdb_media_type TEXT NOT NULL DEFAULT 'movie',
       title TEXT NOT NULL,
       year INTEGER NOT NULL,
@@ -30,7 +30,8 @@ export function createDatabase(filename = config.databasePath): AppDatabase {
       genres_json TEXT NOT NULL DEFAULT '[]',
       actors_json TEXT NOT NULL DEFAULT '[]',
       directors_json TEXT NOT NULL DEFAULT '[]',
-      enriched_at TEXT
+      enriched_at TEXT,
+      UNIQUE(tmdb_media_type, tmdb_id)
     );
 
     CREATE TABLE IF NOT EXISTS ratings (
@@ -62,8 +63,63 @@ export function createDatabase(filename = config.databasePath): AppDatabase {
   if (!filmColumns.some((column) => column.name === "tmdb_media_type")) {
     db.exec("ALTER TABLE films ADD COLUMN tmdb_media_type TEXT NOT NULL DEFAULT 'movie'");
   }
+  migrateGlobalTmdbIdUniqueness(db);
   mergeDuplicateFilms(db);
   return db;
+}
+
+function migrateGlobalTmdbIdUniqueness(db: AppDatabase) {
+  const indexes = db.prepare("PRAGMA index_list(films)").all() as Array<{
+    name: string;
+    unique: number;
+  }>;
+  const hasGlobalTmdbIdConstraint = indexes.some((index) => {
+    if (!index.unique) return false;
+    const columns = db.prepare(`PRAGMA index_info('${index.name.replaceAll("'", "''")}')`)
+      .all() as Array<{ name: string }>;
+    return columns.length === 1 && columns[0]?.name === "tmdb_id";
+  });
+  if (!hasGlobalTmdbIdConstraint) return;
+
+  db.pragma("foreign_keys = OFF");
+  try {
+    db.exec(`
+      BEGIN;
+      CREATE TABLE films_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        tmdb_id INTEGER,
+        tmdb_media_type TEXT NOT NULL DEFAULT 'movie',
+        title TEXT NOT NULL,
+        year INTEGER NOT NULL,
+        letterboxd_uri TEXT NOT NULL UNIQUE,
+        poster_base_url TEXT,
+        countries_json TEXT NOT NULL DEFAULT '[]',
+        genres_json TEXT NOT NULL DEFAULT '[]',
+        actors_json TEXT NOT NULL DEFAULT '[]',
+        directors_json TEXT NOT NULL DEFAULT '[]',
+        enriched_at TEXT,
+        UNIQUE(tmdb_media_type, tmdb_id)
+      );
+      INSERT INTO films_new (
+        id, tmdb_id, tmdb_media_type, title, year, letterboxd_uri,
+        poster_base_url, countries_json, genres_json, actors_json,
+        directors_json, enriched_at
+      )
+      SELECT
+        id, tmdb_id, tmdb_media_type, title, year, letterboxd_uri,
+        poster_base_url, countries_json, genres_json, actors_json,
+        directors_json, enriched_at
+      FROM films;
+      DROP TABLE films;
+      ALTER TABLE films_new RENAME TO films;
+      COMMIT;
+    `);
+  } catch (error) {
+    if (db.inTransaction) db.exec("ROLLBACK");
+    throw error;
+  } finally {
+    db.pragma("foreign_keys = ON");
+  }
 }
 
 function mergeDuplicateFilms(db: AppDatabase) {

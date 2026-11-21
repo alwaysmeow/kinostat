@@ -1,10 +1,11 @@
 import { config } from "../config.js";
 import type { PersonSummary } from "../types.js";
+import { normalizeGenres } from "./genres.js";
+import type { TmdbMediaType } from "./tmdb-overrides.js";
 
 const baseUrl = "https://api.themoviedb.org/3";
 const imageBaseUrl = "https://image.tmdb.org/t/p";
 
-type TmdbMediaType = "movie" | "tv";
 interface SearchResult {
   id: number;
   title?: string;
@@ -25,8 +26,32 @@ interface MovieDetails {
   poster_path?: string | null;
   genres?: Array<{ name: string }>;
   production_countries?: Array<{ name: string }>;
+  aggregate_credits?: {
+    cast?: Array<{
+      id: number;
+      name: string;
+      original_name?: string;
+      character?: string;
+      profile_path?: string | null;
+      roles?: Array<{ character?: string; episode_count?: number }>;
+    }>;
+    crew?: Array<{
+      id: number;
+      name: string;
+      original_name?: string;
+      profile_path?: string | null;
+      jobs?: Array<{ job?: string; episode_count?: number }>;
+    }>;
+  };
   credits?: {
-    cast?: Array<{ id: number; name: string; original_name?: string; character?: string; profile_path?: string | null }>;
+    cast?: Array<{
+      id: number;
+      name: string;
+      original_name?: string;
+      character?: string;
+      profile_path?: string | null;
+      roles?: Array<{ character?: string; episode_count?: number }>;
+    }>;
     crew?: Array<{ id: number; name: string; original_name?: string; job?: string; profile_path?: string | null }>;
   };
   images?: {
@@ -79,11 +104,18 @@ export class TmdbClient {
   async getFilm(tmdbId: number, fallbackYear?: number, mediaType: TmdbMediaType = "movie"): Promise<TmdbFilm> {
     if (!this.apiKey) throw new Error("TMDB_API_KEY is not configured");
     const movie = await this.request<MovieDetails>(`/${mediaType}/${tmdbId}`, {
-      append_to_response: "credits,images",
+      append_to_response: mediaType === "tv" ? "credits,aggregate_credits,images" : "credits,images",
       include_image_language: "en,null",
       language: "en-US",
     });
     const preferredPoster = choosePoster(movie.images?.posters) ?? movie.poster_path;
+    const cast = mediaType === "tv"
+      ? movie.aggregate_credits?.cast ?? movie.credits?.cast ?? []
+      : movie.credits?.cast ?? [];
+    const directors = mediaType === "tv"
+      ? (movie.aggregate_credits?.crew ?? []).filter((person) =>
+          person.jobs?.some((job) => job.job === "Director"))
+      : (movie.credits?.crew ?? []).filter((person) => person.job === "Director");
     return {
       tmdbId: movie.id,
       mediaType,
@@ -91,15 +123,17 @@ export class TmdbClient {
       year: yearOf(movie.release_date ?? movie.first_air_date) ?? fallbackYear ?? 0,
       posterBaseUrl: preferredPoster ? `${imageBaseUrl}/original${preferredPoster}` : null,
       countries: movie.production_countries?.map((item) => item.name) ?? [],
-      genres: movie.genres?.map((item) => item.name.toLocaleLowerCase()) ?? [],
-      actors: (movie.credits?.cast ?? []).map((person) => ({
+      genres: normalizeGenres(movie.genres?.map((item) => item.name.toLocaleLowerCase()) ?? []),
+      actors: cast.map((person) => ({
         id: person.id,
         name: person.name,
         originalName: person.original_name,
-        roleDetails: person.character,
+        roleDetails: mediaType === "tv"
+          ? person.roles?.map((role) => role.character).filter(Boolean).join(" / ")
+          : person.character,
         profilePath: person.profile_path ? `${imageBaseUrl}/h632${person.profile_path}` : null,
       })),
-      directors: (movie.credits?.crew ?? []).filter((person) => person.job === "Director").map((person) => ({
+      directors: directors.map((person) => ({
         id: person.id,
         name: person.name,
         originalName: person.original_name,
