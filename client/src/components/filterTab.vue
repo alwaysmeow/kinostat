@@ -15,6 +15,7 @@
                             cssValueSelectedClass(index),
                         ]"
                         @click="handleValueClick(index)"
+                        @dblclick.stop="handleValueDoubleClick(index)"
                     >
                         {{ index + 1 }}
                     </div>
@@ -163,6 +164,13 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
             directorsBirthYears;
         this.maxActorsFilms = maxActorsFilms;
         this.maxDirectorFilms = maxDirectorFilms;
+
+        const ratedFilmYears = this.votes
+            .map((vote) => vote.year)
+            .filter((year) => Number.isFinite(year));
+        if (ratedFilmYears.length) {
+            this.earliestFilmYear = Math.min(...ratedFilmYears);
+        }
     }
 
     isTab(tab: TabIndex): boolean {
@@ -172,6 +180,16 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
     handleValueClick(index: number) {
         this.filterParams.selectedVoteValues[index] =
             !this.filterParams.selectedVoteValues[index];
+    }
+
+    handleValueDoubleClick(index: number) {
+        const isOnlySelected = this.filterParams.selectedVoteValues.every(
+            (selected, valueIndex) => selected === (valueIndex === index)
+        );
+        this.filterParams.selectedVoteValues.forEach((_, valueIndex) => {
+            this.filterParams.selectedVoteValues[valueIndex] =
+                isOnlySelected || valueIndex === index;
+        });
     }
 
     cssValueSelectedClass(index: number): string {
@@ -190,7 +208,12 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
     }
 
     handleResetFilters() {
-        this.setDefaultFilters();
+        const defaultFilters = this.getDefaultFilters();
+        defaultFilters.filmYearRange = [
+            this.earliestFilmYear,
+            this.currentYear,
+        ];
+        this.setFilters(defaultFilters);
         this.fetchFilters(this.filterParams);
     }
 }
@@ -200,14 +223,17 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
 .filter-tab
     display: flex
     flex-direction: column
+    padding: 1.5rem
+    gap: 1.5rem
 
-    margin: 0 2rem
-    gap: 2rem
+    h2
+        margin: 0
+        padding-right: 3rem
 
     .filter-tab-content
         display: flex
         flex-direction: column
-        gap: 2rem
+        gap: 1.5rem
 
     .filter-vote-value-picker
         display: flex
@@ -216,19 +242,20 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
 
         .filter-vote-value-picker-grid
             display: grid
-            grid-template-columns: repeat(5, 1fr)
-            gap: 0.5rem
+            grid-template-columns: repeat(5, 3rem)
+            justify-content: center
+            gap: 1rem
 
             .filter-vote-value-circle
                 display: flex
                 justify-content: center
                 align-items: center
-                width: auto
-                height: auto
-                aspect-ratio: 1
+                width: 3rem
+                height: 3rem
 
                 border: 2px solid var(--neutral-shade-one)
                 border-radius: 100%
+                background-color: var(--background-color)
 
                 cursor: pointer
 
@@ -239,14 +266,19 @@ export default class FilterTabComponent extends mixins(StoreMixin) {
 
                 &.active
                     border-color: var(--value-color)
+                    background-color: transparent
 
     .filter-buttons-block
         display: flex
         flex-direction: column
-        gap: 1rem
+        gap: 0.75rem
 
         .filter-button
-            background-color: var(--neutral-shade-one)
+            min-height: 48px
+            background-color: var(--neutral-shade-two) !important
             border-radius: 1em
             font-weight: bold
+
+            &:hover
+                filter: brightness(1.12)
 </style>

@@ -165,7 +165,7 @@ export default class StatisticPageComponent extends mixins(
     grid-template-areas: "content info"
     justify-content: center
     column-gap: 0
-    padding: 1.5rem 0 4rem
+    padding: 1rem 0 4rem
     transition: grid-template-columns 0.2s ease, column-gap 0.2s ease
 
     &.with-info-tab
@@ -190,8 +190,7 @@ export default class StatisticPageComponent extends mixins(
     position: sticky
     top: 5.5rem
     box-sizing: border-box
-    height: auto
-    max-height: calc(100vh - 6.5rem)
+    height: calc(100vh - 6.5rem)
     display: grid
     grid-template-rows: minmax(0, 1fr)
 
@@ -229,8 +228,7 @@ export default class StatisticPageComponent extends mixins(
     
     .info-tab-content
         min-height: 0
-        height: auto
-        max-height: calc(100vh - 6.5rem)
+        height: 100%
         overflow: auto
         overscroll-behavior: contain
 

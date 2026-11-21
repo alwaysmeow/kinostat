@@ -33,6 +33,12 @@ type PropsType = {
         label: { type: String, default: "" },
     },
     emits: ["update:modelValue"],
+    watch: {
+        modelValue: {
+            handler: "syncIndexRange",
+            deep: true,
+        },
+    },
 })
 export default class VoteItemComponent extends mixins(StoreMixin) {
     declare $props: PropsType;
@@ -43,22 +49,13 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
     created() {
         this.years = Array.from(
             new Set(this.votes?.map((vote) => vote.year))
-        ).sort();
+        )
+            .filter((year) => Number.isFinite(year))
+            .sort((a, b) => a - b);
+        this.syncIndexRange();
     }
 
     get range() {
-        if (
-            this.years[this.indexRange[0]] !== this.$props.modelValue[0] &&
-            this.years[this.indexRange[1]] !== this.$props.modelValue[1]
-        ) {
-            const [min, max] = this.$props.modelValue;
-
-            this.indexRange = [
-                this.years.findIndex((y) => y === min) || 0,
-                this.years.findIndex((y) => y === max) || this.years.length - 1,
-            ];
-        }
-
         return this.$props.modelValue;
     }
 
@@ -66,8 +63,36 @@ export default class VoteItemComponent extends mixins(StoreMixin) {
         this.$emit("update:modelValue", value);
     }
 
-    onRangeInput() {
-        this.range = this.indexRange.map((index) => this.years[index]);
+    syncIndexRange() {
+        if (!this.years.length) {
+            this.indexRange = [0, 0];
+            return;
+        }
+        const [rawMin, rawMax] = this.$props.modelValue;
+        const min = Number.isFinite(rawMin) ? rawMin : this.years[0];
+        const max = Number.isFinite(rawMax) ? rawMax : this.years[this.years.length - 1];
+        const minIndex = this.years.findIndex((year) => year >= min);
+        let maxIndex = -1;
+        for (let index = this.years.length - 1; index >= 0; index -= 1) {
+            if (this.years[index] <= max) {
+                maxIndex = index;
+                break;
+            }
+        }
+        this.indexRange = [
+            minIndex === -1 ? 0 : minIndex,
+            maxIndex === -1 ? this.years.length - 1 : maxIndex,
+        ];
+    }
+
+    onRangeInput(value: number[]) {
+        if (!this.years.length) return;
+        const lastIndex = this.years.length - 1;
+        const indices = value.map((rawIndex) =>
+            Math.max(0, Math.min(lastIndex, Math.round(Number(rawIndex))))
+        );
+        const years = indices.map((index) => this.years[index]);
+        if (years.every((year) => Number.isFinite(year))) this.range = years;
     }
 }
 </script>
