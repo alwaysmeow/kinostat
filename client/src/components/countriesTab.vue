@@ -10,6 +10,7 @@
             :data="countriesVoteData"
             :colors="['#ff8040', '#ffe040', '#ff405f']"
             :library="barChartOptions"
+            :dataset="{ borderWidth: 0 }"
             :height="`${Object.keys(countries).length * 40}px`"
         ></bar-chart>
     </div>
