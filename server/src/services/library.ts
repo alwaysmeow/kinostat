@@ -66,7 +66,7 @@ export class LibraryService {
       posterBaseUrl: row.poster_base_url,
       countries: parseJson<string[]>(row.countries_json),
       genres: parseJson<string[]>(row.genres_json),
-      actors: relevantActors(parseJson<PersonSummary[]>(row.actors_json)),
+      actors: displayActors(parseJson<PersonSummary[]>(row.actors_json)),
       directors: parseJson<PersonSummary[]>(row.directors_json),
       detailsLoaded: true,
     };
@@ -75,9 +75,17 @@ export class LibraryService {
   getPeople(userId: string, role: "actor" | "director") {
     const films = this.votes(userId);
     const people = new Map<number, PersonSummary & { films: number[]; values: number[] }>();
+
+    const eligibleActorIds = role === "actor"
+      ? new Set(films.flatMap((film) =>
+          displayActors(parseJson<PersonSummary[]>(film.actors_json)).map((actor) => actor.id)))
+      : null;
+
     for (const film of films) {
       const stored = parseJson<PersonSummary[]>(role === "actor" ? film.actors_json : film.directors_json);
-      const list = role === "actor" ? relevantActors(stored) : stored;
+      const list = role === "actor"
+        ? actorsWithPhotos(stored).filter((actor) => eligibleActorIds!.has(actor.id))
+        : stored;
       for (const person of list) {
         const current = people.get(person.id) ?? { ...person, films: [], values: [] };
         current.films.push(film.id);
@@ -127,6 +135,10 @@ function average(values: number[]) {
   return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 100) / 100;
 }
 
-function relevantActors(actors: PersonSummary[]) {
+function actorsWithPhotos(actors: PersonSummary[]) {
+  return actors.filter((actor) => Boolean(actor.profilePath));
+}
+
+function displayActors(actors: PersonSummary[]) {
   return actors.slice(0, 5).filter((actor) => Boolean(actor.profilePath));
 }

@@ -67,6 +67,43 @@ describe("Letterboxd-compatible API", () => {
     assert.deepEqual((await request(app).get("/api/genres?user_id=1").expect(200)).body[0], { name: "драма", films: [1], averageVote: 8 });
   });
 
+  it("keeps actor cards limited to top-five cast while including their full filmography", async () => {
+    db = createDatabase(":memory:");
+    db.prepare("INSERT INTO users (id, username) VALUES (?, ?)").run("1", "tester");
+    const actors = Array.from({ length: 7 }, (_, index) => ({
+      id: index + 1,
+      name: `Actor ${index + 1}`,
+      profilePath: `https://example.com/actor-${index + 1}.jpg`,
+    }));
+    const insertFilm = db.prepare(`INSERT INTO films
+      (title, year, letterboxd_uri, actors_json)
+      VALUES (?, ?, ?, ?)`);
+    const ensemble = insertFilm.run(
+      "Ensemble",
+      2026,
+      "https://letterboxd.com/film/ensemble/",
+      JSON.stringify(actors),
+    );
+    const leadingRole = insertFilm.run(
+      "Leading Role",
+      2025,
+      "https://letterboxd.com/film/leading-role/",
+      JSON.stringify([actors[5]]),
+    );
+    const addRating = db.prepare("INSERT INTO ratings (user_id, film_id, value) VALUES (?, ?, ?)");
+    addRating.run("1", ensemble.lastInsertRowid, 8);
+    addRating.run("1", leadingRole.lastInsertRowid, 9);
+
+    const app = createApp(db);
+    const people = (await request(app).get("/api/actors?user_id=1").expect(200)).body;
+    assert.equal(people.length, 6);
+    assert.deepEqual(people.find((person: { id: number }) => person.id === 6).films, [1, 2]);
+    assert.equal(people.some((person: { id: number }) => person.id === 7), false);
+
+    const details = (await request(app).get(`/api/object?type=film&id=${ensemble.lastInsertRowid}`).expect(200)).body.film;
+    assert.equal(details.actors.length, 5);
+  });
+
   it("syncs rated films from a public Letterboxd RSS feed", async () => {
     db = createDatabase(":memory:");
     const xml = `<?xml version="1.0"?><rss><channel><item>

@@ -68,7 +68,7 @@ export class TmdbClient {
       posterBaseUrl: preferredPoster ? `${imageBaseUrl}/original${preferredPoster}` : null,
       countries: movie.production_countries?.map((item) => item.name) ?? [],
       genres: movie.genres?.map((item) => item.name.toLocaleLowerCase()) ?? [],
-      actors: (movie.credits?.cast ?? []).slice(0, 5).filter((person) => Boolean(person.profile_path)).map((person) => ({
+      actors: (movie.credits?.cast ?? []).map((person) => ({
         id: person.id,
         name: person.name,
         originalName: person.original_name,
