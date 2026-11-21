@@ -8,6 +8,9 @@
             </div>
         </header>
         <img v-if="person.photo" class="person-card-photo" :src="person.photo" :alt="person.name" />
+        <div v-else class="person-card-photo person-card-photo-placeholder" aria-hidden="true">
+            <v-icon icon="$account" />
+        </div>
         <div class="person-contribution-heading">
             <span>Rated films</span>
             <span>{{ person.films.length }}</span>
@@ -123,6 +126,17 @@ export default class PersonCardComponent extends mixins(StoreMixin, QueryMixin) 
     align-self: center
     object-fit: contain
     border-radius: 5px
+
+.person-card-photo-placeholder
+    display: flex
+    align-items: center
+    justify-content: center
+    aspect-ratio: 2 / 3
+    background: var(--neutral-shade-two)
+    color: var(--secondary-text-color)
+
+    .v-icon
+        font-size: clamp(4rem, 7vw, 7rem)
 
 .external-person-link
     display: flex

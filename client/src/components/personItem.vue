@@ -1,6 +1,15 @@
 <template>
     <div :class="['person-item', cssValueClass]" @click="onClick">
-        <img class="person-photo" loading="lazy" :src="photoSrc" />
+        <img
+            v-if="photoSrc"
+            class="person-photo"
+            loading="lazy"
+            :src="photoSrc"
+            :alt="person?.name"
+        />
+        <div v-else class="person-photo person-photo-placeholder" aria-hidden="true">
+            <v-icon icon="$account" />
+        </div>
         <div class="person-credits">
             <div class="person-name">{{ person?.name }}</div>
         </div>
@@ -105,6 +114,17 @@ export default class DirectorItemComponent extends mixins(
     width: 100%
     border-radius: 5px 5px 0 0
     aspect-ratio: 2 / 3
+    object-fit: cover
+
+.person-photo-placeholder
+    display: flex
+    align-items: center
+    justify-content: center
+    background: var(--neutral-shade-two)
+    color: var(--secondary-text-color)
+
+    .v-icon
+        font-size: clamp(3rem, 6vw, 6rem)
 
 .person-credits
     display: flex

@@ -17,30 +17,40 @@
             <years-tab v-if="isTab(TabIndex.Years)"/>
         </div>
 
-        <div class="page-left-space">
+        <div
+            :class="[
+                'page-right-space',
+                { active: infoTabStatus !== InfoTabStatus.None },
+            ]"
+        >
             <div :class="['info-tab', cssInfoTabVisibleClass]">
                 <div class="close-info-tab-btn" @click="closeInfoTab">
                     <v-icon icon="$close" />
                 </div>
 
-                <div
-                    :class="[
-                        'info-tab-content',
-                        { 'film-list-info-tab': isInfoTab(InfoTabStatus.FilmList) },
-                    ]"
-                >
-                    <filter-tab
-                        :tab-index="selectedTabIndex"
-                        v-if="isInfoTab(InfoTabStatus.Filter)"
-                    />
-                    <person-card
-                        v-if="
-                            isInfoTab(InfoTabStatus.Actor) ||
-                            isInfoTab(InfoTabStatus.Director)
-                        "
-                    />
-                    <film-card v-if="isInfoTab(InfoTabStatus.Film)" />
-                    <film-list-tab v-if="isInfoTab(InfoTabStatus.FilmList)" />
+                <div class="info-tab-viewport">
+                    <Transition name="info-content" mode="out-in">
+                        <div
+                            :key="infoTabContentKey"
+                            :class="[
+                                'info-tab-content',
+                                { 'film-list-info-tab': isInfoTab(InfoTabStatus.FilmList) },
+                            ]"
+                        >
+                            <filter-tab
+                                :tab-index="selectedTabIndex"
+                                v-if="isInfoTab(InfoTabStatus.Filter)"
+                            />
+                            <person-card
+                                v-if="
+                                    isInfoTab(InfoTabStatus.Actor) ||
+                                    isInfoTab(InfoTabStatus.Director)
+                                "
+                            />
+                            <film-card v-if="isInfoTab(InfoTabStatus.Film)" />
+                            <film-list-tab v-if="isInfoTab(InfoTabStatus.FilmList)" />
+                        </div>
+                    </Transition>
                 </div>
             </div>
         </div>
@@ -92,6 +102,19 @@ export default class StatisticPageComponent extends mixins(
             return "";
         }
         return "visible";
+    }
+
+    get infoTabContentKey() {
+        switch (this.infoTabStatus) {
+            case InfoTabStatus.Actor:
+            case InfoTabStatus.Director:
+            case InfoTabStatus.Film:
+                return `${this.infoTabStatus}:${this.selectedObjectId ?? ""}`;
+            case InfoTabStatus.FilmList:
+                return `${this.infoTabStatus}:${this.filmListSelection?.title ?? ""}`;
+            default:
+                return this.infoTabStatus;
+        }
     }
 
     async created() {
@@ -178,15 +201,20 @@ export default class StatisticPageComponent extends mixins(
         grid-template-columns: minmax(0, 1fr) 420px
         column-gap: 2rem
 
-.page-left-space
-    min-width: 0
-
-.page-left-space
+.page-right-space
     grid-area: info
     position: relative
     align-self: stretch
+    box-sizing: border-box
+    width: 0
+    min-width: 0
     height: auto
     overflow: visible
+    transition: width 0.2s ease, min-width 0.2s ease
+
+    &.active
+        width: 420px
+        min-width: 420px
 
 .tab-content
     grid-area: content
@@ -207,7 +235,7 @@ export default class StatisticPageComponent extends mixins(
     overflow: hidden
     pointer-events: none
 
-    transition: 0.2s
+    transition: transform 0.2s ease, opacity 0.2s ease
 
     &.visible
         transform: none
@@ -232,14 +260,39 @@ export default class StatisticPageComponent extends mixins(
             color: var(--main-text-color)
             cursor: pointer
     
-    .info-tab-content
-        min-height: 0
+    .info-tab-viewport
+        position: relative
+        width: 100%
+        min-width: 0
         height: 100%
+        min-height: 0
+        overflow: hidden
+
+    .info-tab-content
+        position: absolute
+        inset: 0
+        box-sizing: border-box
+        width: 100%
+        min-width: 0
+        height: 100%
+        min-height: 0
         overflow: auto
         overscroll-behavior: contain
 
         &.film-list-info-tab
             overflow: hidden
+
+.info-content-enter-active,
+.info-content-leave-active
+    transition: opacity 0.18s ease, transform 0.18s ease
+
+.info-content-enter-from
+    opacity: 0
+    transform: translateX(0.5rem)
+
+.info-content-leave-to
+    opacity: 0
+    transform: translateX(-0.5rem)
 
 @media (max-width: 1100px)
     .page-body
@@ -249,7 +302,7 @@ export default class StatisticPageComponent extends mixins(
         &.with-info-tab
             grid-template-columns: minmax(0, 1fr)
 
-    .page-left-space
+    .page-right-space
         display: none
 
 @media (max-width: 720px)
