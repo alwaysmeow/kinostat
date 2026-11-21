@@ -110,7 +110,7 @@
                 >
                     <span>{{ hoveredCountry.name }}</span>
                     <strong>{{ hoveredCountry.averageVote.toFixed(1) }}</strong>
-                    <small>{{ hoveredCountry.films.length }} films · click to open</small>
+                    <small>{{ hoveredCountry.films.length }} films</small>
                 </div>
             </Transition>
         </div>
@@ -131,6 +131,7 @@ import { feature, merge } from "topojson-client";
 import { geoEquirectangular, geoPath } from "d3-geo";
 import worldAtlas from "world-atlas/countries-110m.json";
 import type { FilmAttribute } from "../common/types";
+import { relativeRatingColor } from "../common/ratingColor";
 
 type MapMode = "rating" | "count";
 type ViewMode = "world" | "europe";
@@ -175,6 +176,7 @@ const countryByName = computed(() => new Map(
 const historicalCountry = computed(() => props.countries.find((country) => country.name === "Soviet Union"));
 const showHistorical = computed(() => timeline.value === 0 && Boolean(historicalCountry.value));
 const mappedCountries = computed(() => props.countries.filter((country) => !historicalNames.has(country.name)));
+const countryRatings = computed(() => props.countries.map((country) => country.averageVote));
 const totalFilms = computed(() => props.countries.reduce((sum, country) => sum + country.films.length, 0));
 const maxFilmCount = computed(() => Math.max(...mappedCountries.value.map((country) => country.films.length), 1));
 const mapViewBox = computed(() => viewMode.value === "europe"
@@ -245,7 +247,7 @@ function polygonCenter(coordinates: Position[][]): Position {
 function countryFill(country?: FilmAttribute) {
     if (!country) return "#2a2a2a";
     if (mode.value === "rating") {
-        return ratingColors[Math.max(0, Math.min(9, Math.round(country.averageVote) - 1))];
+        return relativeRatingColor(ratingColors, country.averageVote, countryRatings.value);
     }
     const intensity = Math.sqrt(country.films.length / maxFilmCount.value);
     return `rgba(255, 91, 27, ${0.2 + intensity * 0.78})`;

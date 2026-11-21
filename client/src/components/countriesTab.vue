@@ -37,9 +37,8 @@
                 <bar-chart
                     ref="countriesChart"
                     :data="countriesVoteData"
-                    :colors="countryColors"
                     :library="countriesChartOptions"
-                    :dataset="{ borderWidth: 0 }"
+                    :dataset="countryChartDataset"
                     :height="`${countries.length * 44}px`"
                 ></bar-chart>
             </div>
@@ -94,6 +93,7 @@ import {
     adjustedAttributeRating,
     estimateAttributeRatingMetric,
 } from "../common/genreRating";
+import { relativeRatingColor } from "../common/ratingColor";
 
 export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin) {
     sortMode: "count" | "rating" = "count";
@@ -150,10 +150,17 @@ export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin
     }
 
     get countryColors() {
-        return this.sortedCountries.map((country) => {
-            const index = Math.max(0, Math.min(9, Math.round(country.averageVote) - 1));
-            return this.ratingColors[index];
-        });
+        const ratings = this.sortedCountries.map((country) => country.averageVote);
+        return this.sortedCountries.map((country) =>
+            relativeRatingColor(this.ratingColors, country.averageVote, ratings)
+        );
+    }
+
+    get countryChartDataset() {
+        return {
+            borderWidth: 0,
+            backgroundColor: this.countryColors,
+        };
     }
 
     get mostWatchedCountry() {

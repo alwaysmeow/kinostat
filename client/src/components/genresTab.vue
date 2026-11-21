@@ -100,6 +100,7 @@ import {
     adjustedAttributeRating,
     estimateAttributeRatingMetric,
 } from "../common/genreRating";
+import { relativeRatingColor } from "../common/ratingColor";
 
 export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
     sortMode: "count" | "rating" = "count";
@@ -177,13 +178,10 @@ export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
     }
 
     get genreColors() {
-        return this.sortedGenres.map((genre) => {
-            const index = Math.max(
-                0,
-                Math.min(9, Math.round(genre.averageVote) - 1)
-            );
-            return this.ratingColors[index];
-        });
+        const ratings = this.sortedGenres.map((genre) => genre.averageVote);
+        return this.sortedGenres.map((genre) =>
+            relativeRatingColor(this.ratingColors, genre.averageVote, ratings)
+        );
     }
 
     get mostWatchedGenre() {
