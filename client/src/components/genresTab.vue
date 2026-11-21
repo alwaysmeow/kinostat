@@ -5,14 +5,17 @@
                 <strong>{{ genres.length }}</strong>
                 <span>Genres</span>
             </div>
-            <div class="genres-summary-item">
+            <div
+                class="genres-summary-item genres-summary-link"
+                @click="mostWatchedGenre && openGenre(mostWatchedGenre)"
+            >
                 <strong>{{ titleCase(mostWatchedGenre?.name) }}</strong>
                 <span>Most watched · {{ mostWatchedGenre?.films.length ?? 0 }} films</span>
             </div>
             <div class="genres-summary-item">
                 <span>Highest rated genres</span>
                 <ol class="genres-summary-ranking">
-                    <li v-for="genre in highestRatedGenres" :key="genre.name">
+                    <li v-for="genre in highestRatedGenres" :key="genre.name" @click="openGenre(genre)">
                         <strong>{{ titleCase(genre.name) }}</strong>
                         <span>{{ genre.averageVote.toFixed(1) }} · {{ genre.films.length }} films</span>
                     </li>
@@ -21,7 +24,7 @@
             <div class="genres-summary-item">
                 <span>Lowest rated genres</span>
                 <ol class="genres-summary-ranking">
-                    <li v-for="genre in lowestRatedGenres" :key="genre.name">
+                    <li v-for="genre in lowestRatedGenres" :key="genre.name" @click="openGenre(genre)">
                         <strong>{{ titleCase(genre.name) }}</strong>
                         <span>{{ genre.averageVote.toFixed(1) }} · {{ genre.films.length }} films</span>
                     </li>
@@ -47,13 +50,16 @@
                 </div>
             </div>
 
-            <bar-chart
-                :data="genresVoteData"
-                :colors="genreColors"
-                :library="genresChartOptions"
-                :dataset="{ borderWidth: 0 }"
-                :height="`${genres.length * 44}px`"
-            ></bar-chart>
+            <div @click="onGenresChartClick">
+                <bar-chart
+                    ref="genresChart"
+                    :data="genresVoteData"
+                    :colors="genreColors"
+                    :library="genresChartOptions"
+                    :dataset="{ borderWidth: 0 }"
+                    :height="`${genres.length * 44}px`"
+                ></bar-chart>
+            </div>
         </section>
 
         <section class="genre-metric-section">
@@ -77,7 +83,7 @@
                 <div class="genre-metric-item">
                     <span>Highest adjusted ratings</span>
                     <ol class="genres-summary-ranking">
-                        <li v-for="genre in highestAdjustedGenres" :key="genre.name">
+                        <li v-for="genre in highestAdjustedGenres" :key="genre.name" @click="openGenre(genre)">
                             <strong>{{ titleCase(genre.name) }}</strong>
                             <span>{{ genre.adjusted.toFixed(2) }} · {{ genre.films.length }} films</span>
                         </li>
@@ -86,7 +92,7 @@
                 <div class="genre-metric-item">
                     <span>Lowest adjusted ratings</span>
                     <ol class="genres-summary-ranking">
-                        <li v-for="genre in lowestAdjustedGenres" :key="genre.name">
+                        <li v-for="genre in lowestAdjustedGenres" :key="genre.name" @click="openGenre(genre)">
                             <strong>{{ titleCase(genre.name) }}</strong>
                             <span>{{ genre.adjusted.toFixed(2) }} · {{ genre.films.length }} films</span>
                         </li>
@@ -101,6 +107,7 @@
 import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import ChartMixin from "../mixins/chart.mixin";
+import type { FilmAttribute } from "../common/types";
 import {
     adjustedAttributeRating,
     estimateAttributeRatingMetric,
@@ -251,6 +258,15 @@ export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
         if (!value) return "—";
         return value.replace(/\b\w/g, (letter) => letter.toUpperCase());
     }
+
+    openGenre(genre: FilmAttribute) {
+        this.openFilmList(this.titleCase(genre.name), genre.films);
+    }
+
+    onGenresChartClick(event: MouseEvent) {
+        const index = this.getClickedChartElements("genresChart", event, "y")[0]?.index;
+        if (index !== undefined) this.openGenre(this.sortedGenres[index]);
+    }
 }
 </script>
 
@@ -281,6 +297,12 @@ export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
             color: var(--secondary-text-color)
             font-size: 0.9rem
 
+        &.genres-summary-link
+            cursor: pointer
+
+            &:hover strong
+                color: var(--kinopoisk-color)
+
     .genres-summary-ranking
         display: flex
         flex-direction: column
@@ -296,6 +318,10 @@ export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
             align-items: baseline
             gap: 0.5rem
             counter-increment: ranking
+            cursor: pointer
+
+            &:hover strong
+                color: var(--kinopoisk-color)
 
             &::before
                 content: counter(ranking)
@@ -316,6 +342,9 @@ export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
         padding: 1.5rem
         border-radius: 1.5rem
         background: var(--neutral-shade-one)
+
+        canvas
+            cursor: pointer
 
     .genre-metric-section
         padding: 1.5rem

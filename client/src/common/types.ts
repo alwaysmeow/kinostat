@@ -53,8 +53,14 @@ export enum InfoTabStatus {
     None = "none",
     Filter = "filter",
     Film = "film",
+    FilmList = "film-list",
     Director = "director",
     Actor = "actor"
+}
+
+export interface FilmListSelection {
+    title: string;
+    filmIds: number[];
 }
 
 export enum TabIndex {

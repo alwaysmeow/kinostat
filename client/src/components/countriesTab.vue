@@ -5,14 +5,17 @@
                 <strong>{{ countries.length }}</strong>
                 <span>Countries</span>
             </div>
-            <div class="countries-summary-item">
+            <div
+                class="countries-summary-item countries-summary-link"
+                @click="mostWatchedCountry && openCountry(mostWatchedCountry)"
+            >
                 <strong>{{ mostWatchedCountry?.name ?? "—" }}</strong>
                 <span>Most watched · {{ mostWatchedCountry?.films.length ?? 0 }} films</span>
             </div>
             <div class="countries-summary-item">
                 <span>Highest rated countries</span>
                 <ol class="countries-summary-ranking">
-                    <li v-for="country in highestRatedCountries" :key="country.name">
+                    <li v-for="country in highestRatedCountries" :key="country.name" @click="openCountry(country)">
                         <strong>{{ country.name }}</strong>
                         <span>{{ country.averageVote.toFixed(1) }} · {{ country.films.length }} films</span>
                     </li>
@@ -21,7 +24,7 @@
             <div class="countries-summary-item">
                 <span>Lowest rated countries</span>
                 <ol class="countries-summary-ranking">
-                    <li v-for="country in lowestRatedCountries" :key="country.name">
+                    <li v-for="country in lowestRatedCountries" :key="country.name" @click="openCountry(country)">
                         <strong>{{ country.name }}</strong>
                         <span>{{ country.averageVote.toFixed(1) }} · {{ country.films.length }} films</span>
                     </li>
@@ -40,13 +43,16 @@
                     <button :class="{ active: sortMode === 'rating' }" @click="sortMode = 'rating'">Highest rated</button>
                 </div>
             </div>
-            <bar-chart
-                :data="countriesVoteData"
-                :colors="countryColors"
-                :library="countriesChartOptions"
-                :dataset="{ borderWidth: 0 }"
-                :height="`${countries.length * 44}px`"
-            ></bar-chart>
+            <div @click="onCountriesChartClick">
+                <bar-chart
+                    ref="countriesChart"
+                    :data="countriesVoteData"
+                    :colors="countryColors"
+                    :library="countriesChartOptions"
+                    :dataset="{ borderWidth: 0 }"
+                    :height="`${countries.length * 44}px`"
+                ></bar-chart>
+            </div>
         </section>
 
         <section class="country-metric-section">
@@ -69,7 +75,7 @@
                 <div class="country-metric-item">
                     <span>Highest adjusted ratings</span>
                     <ol class="countries-summary-ranking">
-                        <li v-for="country in highestAdjustedCountries" :key="country.name">
+                        <li v-for="country in highestAdjustedCountries" :key="country.name" @click="openCountry(country)">
                             <strong>{{ country.name }}</strong>
                             <span>{{ country.adjusted.toFixed(2) }} · {{ country.films.length }} films</span>
                         </li>
@@ -78,7 +84,7 @@
                 <div class="country-metric-item">
                     <span>Lowest adjusted ratings</span>
                     <ol class="countries-summary-ranking">
-                        <li v-for="country in lowestAdjustedCountries" :key="country.name">
+                        <li v-for="country in lowestAdjustedCountries" :key="country.name" @click="openCountry(country)">
                             <strong>{{ country.name }}</strong>
                             <span>{{ country.adjusted.toFixed(2) }} · {{ country.films.length }} films</span>
                         </li>
@@ -93,6 +99,7 @@
 import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import ChartMixin from "../mixins/chart.mixin";
+import type { FilmAttribute } from "../common/types";
 import {
     adjustedAttributeRating,
     estimateAttributeRatingMetric,
@@ -200,6 +207,15 @@ export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin
             .sort((left, right) => left.adjusted - right.adjusted || right.films.length - left.films.length)
             .slice(0, 3);
     }
+
+    openCountry(country: FilmAttribute) {
+        this.openFilmList(country.name, country.films);
+    }
+
+    onCountriesChartClick(event: MouseEvent) {
+        const index = this.getClickedChartElements("countriesChart", event, "y")[0]?.index;
+        if (index !== undefined) this.openCountry(this.sortedCountries[index]);
+    }
 }
 </script>
 
@@ -230,6 +246,12 @@ export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin
             color: var(--secondary-text-color)
             font-size: 0.9rem
 
+        &.countries-summary-link
+            cursor: pointer
+
+            &:hover strong
+                color: var(--kinopoisk-color)
+
     .countries-summary-ranking
         display: flex
         flex-direction: column
@@ -245,6 +267,10 @@ export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin
             align-items: baseline
             gap: 0.5rem
             counter-increment: ranking
+            cursor: pointer
+
+            &:hover strong
+                color: var(--kinopoisk-color)
 
             &::before
                 content: counter(ranking)
@@ -266,6 +292,9 @@ export default class CountriesTabComponent extends mixins(StoreMixin, ChartMixin
         padding: 1.5rem
         border-radius: 1.5rem
         background: var(--neutral-shade-one)
+
+    .countries-chart-card canvas
+        cursor: pointer
 
     .countries-chart-header,
     .country-metric-heading

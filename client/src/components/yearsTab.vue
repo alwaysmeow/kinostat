@@ -12,7 +12,7 @@
             <div class="years-summary-item">
                 <span class="years-summary-label">Most represented years</span>
                 <ol class="years-summary-ranking">
-                    <li v-for="item in mostRepresentedYears" :key="item.year">
+                    <li v-for="item in mostRepresentedYears" :key="item.year" @click="openYear(item.year)">
                         <strong>{{ item.year }}</strong>
                         <span>{{ item.count }} films</span>
                     </li>
@@ -21,7 +21,7 @@
             <div class="years-summary-item">
                 <span class="years-summary-label">Highest average ratings</span>
                 <ol class="years-summary-ranking">
-                    <li v-for="item in highestRatedYears" :key="item.year">
+                    <li v-for="item in highestRatedYears" :key="item.year" @click="openYear(item.year)">
                         <strong>{{ item.year }}</strong>
                         <span>{{ item.average.toFixed(1) }} · {{ item.count }} films</span>
                     </li>
@@ -34,13 +34,16 @@
                 <h3>Number of ratings</h3>
                 <p>How many rated films were released each year</p>
             </div>
-            <line-chart
-                :data="yearsCountData"
-                :colors="['#ff8040', '#ffe040', '#ff405f']"
-                :library="lineChartOptions"
-                height="340px"
-                suffix=" films"
-            ></line-chart>
+            <div @click="onYearLineChartClick('yearsCountChart', $event)">
+                <line-chart
+                    ref="yearsCountChart"
+                    :data="yearsCountData"
+                    :colors="['#ff8040', '#ffe040', '#ff405f']"
+                    :library="yearsLineChartOptions"
+                    height="340px"
+                    suffix=" films"
+                ></line-chart>
+            </div>
         </section>
 
         <section class="years-chart-card">
@@ -48,13 +51,16 @@
                 <h3>Average rating</h3>
                 <p>Your average score for films from each release year</p>
             </div>
-            <line-chart
-                :data="yearsVoteData"
-                :colors="['#ff8040', '#ffe040', '#ff405f']"
-                :library="lineChartOptions"
-                height="340px"
-                :round="1"
-            ></line-chart>
+            <div @click="onYearLineChartClick('yearsVoteChart', $event)">
+                <line-chart
+                    ref="yearsVoteChart"
+                    :data="yearsVoteData"
+                    :colors="['#ff8040', '#ffe040', '#ff405f']"
+                    :library="yearsLineChartOptions"
+                    height="340px"
+                    :round="1"
+                ></line-chart>
+            </div>
         </section>
 
         <section class="years-chart-card">
@@ -62,11 +68,14 @@
                 <h3>Rating and number of films</h3>
                 <p>Each point is a release year</p>
             </div>
-            <scatter-chart
-                :data="yearScatterData"
-                :library="yearScatterChartOptions"
-                height="380px"
-            ></scatter-chart>
+            <div @click="onYearScatterChartClick">
+                <scatter-chart
+                    ref="yearScatterChart"
+                    :data="yearScatterData"
+                    :library="yearScatterChartOptions"
+                    height="380px"
+                ></scatter-chart>
+            </div>
         </section>
 
         <section class="decades-section">
@@ -80,6 +89,7 @@
                     v-for="decade in decadesData"
                     :key="decade.decade"
                     class="decade-item"
+                    @click="openDecade(decade.decade, decade.label)"
                 >
                     <strong>{{ decade.label }}</strong>
                     <span>{{ decade.count }} films</span>
@@ -92,13 +102,16 @@
                     <h4>Films by decade</h4>
                     <p>Share of all rated films</p>
                 </div>
-                <pie-chart
-                    :data="decadesPieData"
-                    :colors="decadeColors"
-                    :library="decadePieChartOptions"
-                    height="380px"
-                    suffix=" films"
-                ></pie-chart>
+                <div @click="onDecadesPieClick">
+                    <pie-chart
+                        ref="decadesPieChart"
+                        :data="decadesPieData"
+                        :colors="decadeColors"
+                        :library="decadePieChartOptions"
+                        height="380px"
+                        suffix=" films"
+                    ></pie-chart>
+                </div>
             </div>
         </section>
     </div>
@@ -225,6 +238,10 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
                 },
             },
         },
+    };
+
+    yearsLineChartOptions = {
+        ...this.lineChartOptions,
     };
 
     created() {
@@ -370,6 +387,44 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
             ],
         }));
     }
+
+    openYear(year: number) {
+        const films = this.yearsData.find((item) => item.year === year)?.films ?? [];
+        this.openFilmList(String(year), films);
+    }
+
+    openDecade(decade: number, label: string) {
+        const films = this.yearsData
+            .filter((item) => Math.floor(item.year / 10) * 10 === decade)
+            .flatMap((item) => item.films);
+        this.openFilmList(label, films);
+    }
+
+    onYearLineChartClick(refName: string, event: MouseEvent) {
+        const point = this.getClickedChartElements(refName, event)[0];
+        if (!point) return;
+
+        const chart = this.getChartObject(refName);
+        const value = chart?.data.datasets[point.datasetIndex]?.data[point.index];
+        const year = Number(value?.x ?? chart?.data.labels?.[point.index]);
+        if (Number.isFinite(year)) this.openYear(year);
+    }
+
+    onYearScatterChartClick(event: MouseEvent) {
+        const point = this.getClickedChartElements("yearScatterChart", event)[0];
+        if (!point) return;
+
+        const chart = this.getChartObject("yearScatterChart");
+        const label = chart?.data.datasets[point.datasetIndex]?.label;
+        const year = Number(label);
+        if (Number.isFinite(year)) this.openYear(year);
+    }
+
+    onDecadesPieClick(event: MouseEvent) {
+        const index = this.getClickedChartElements("decadesPieChart", event)[0]?.index;
+        const decade = index === undefined ? undefined : this.decadesData[index];
+        if (decade) this.openDecade(decade.decade, decade.label);
+    }
 }
 </script>
 
@@ -417,6 +472,10 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
             align-items: baseline
             gap: 0.5rem
             counter-increment: ranking
+            cursor: pointer
+
+            &:hover strong
+                color: var(--kinopoisk-color)
 
             &::before
                 content: counter(ranking)
@@ -432,6 +491,9 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
         padding: 1.5rem
         border-radius: 1.5rem
         background: var(--neutral-shade-one)
+
+        canvas
+            cursor: pointer
 
     .decades-section
         padding: 1.5rem
@@ -449,6 +511,10 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
         padding: 1rem
         border-radius: 1rem
         background: var(--background-color)
+        cursor: pointer
+
+        &:hover strong
+            color: var(--kinopoisk-color)
 
         strong
             margin-bottom: 0.25rem
@@ -462,6 +528,9 @@ export default class YearsTabComponent extends mixins(StoreMixin, ChartMixin) {
         margin-top: 1.5rem
         padding-top: 1.5rem
         border-top: 1px solid rgba(255, 255, 255, 0.08)
+
+        canvas
+            cursor: pointer
 
     .decades-pie-heading
         h4

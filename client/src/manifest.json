@@ -13,6 +13,7 @@
     "person-card": "personCard",
     "film-contribution-item": "filmContributionItem",
     "film-card": "filmCard",
+    "film-list-tab": "filmListTab",
     "countries-tab": "countriesTab",
     "genres-tab": "genresTab",
     "years-tab": "yearsTab"

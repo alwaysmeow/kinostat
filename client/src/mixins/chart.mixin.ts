@@ -1,6 +1,30 @@
 import { Vue } from "vue-class-component";
 
 export default class ChartMixin extends Vue {
+    getChartObject(refName: string) {
+        const chartkick = (this.$refs[refName] as any)?.chart;
+        return chartkick?.getChartObject?.();
+    }
+
+    getClickedChartElements(
+        refName: string,
+        event: MouseEvent,
+        axis?: "x" | "y" | "xy"
+    ) {
+        const chart = this.getChartObject(refName);
+        if (!chart || event.target !== chart.canvas) return [];
+        const options: { intersect: boolean; axis?: "x" | "y" | "xy" } = {
+            intersect: false,
+        };
+        if (axis) options.axis = axis;
+        return chart.getElementsAtEventForMode(
+            event,
+            "nearest",
+            options,
+            false
+        );
+    }
+
     pieChartOptions = {
         cutout: "50%",
         radius: "70%",

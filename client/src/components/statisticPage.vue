@@ -23,7 +23,12 @@
                     <v-icon icon="$close" />
                 </div>
 
-                <div class="info-tab-content">
+                <div
+                    :class="[
+                        'info-tab-content',
+                        { 'film-list-info-tab': isInfoTab(InfoTabStatus.FilmList) },
+                    ]"
+                >
                     <filter-tab
                         :tab-index="selectedTabIndex"
                         v-if="isInfoTab(InfoTabStatus.Filter)"
@@ -35,6 +40,7 @@
                         "
                     />
                     <film-card v-if="isInfoTab(InfoTabStatus.Film)" />
+                    <film-list-tab v-if="isInfoTab(InfoTabStatus.FilmList)" />
                 </div>
             </div>
         </div>
@@ -231,6 +237,9 @@ export default class StatisticPageComponent extends mixins(
         height: 100%
         overflow: auto
         overscroll-behavior: contain
+
+        &.film-list-info-tab
+            overflow: hidden
 
 @media (max-width: 1100px)
     .page-body

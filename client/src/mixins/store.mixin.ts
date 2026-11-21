@@ -142,6 +142,14 @@ export default class StoreMixin extends Vue {
         return store.selectedObjectId;
     }
 
+    get filmListSelection() {
+        return useInterface().filmListSelection;
+    }
+
+    openFilmList(title: string, filmIds: number[]) {
+        useInterface().setFilmList({ title, filmIds: [...filmIds] });
+    }
+
     setInfoTabStatus(status: InfoTabStatus) {
         const store = useInterface();
         store.setInfoTabStatus(status);
