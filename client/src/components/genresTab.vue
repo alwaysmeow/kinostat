@@ -102,8 +102,8 @@ import { mixins } from "vue-class-component";
 import StoreMixin from "../mixins/store.mixin";
 import ChartMixin from "../mixins/chart.mixin";
 import {
-    adjustedGenreRating,
-    estimateGenreRatingMetric,
+    adjustedAttributeRating,
+    estimateAttributeRatingMetric,
 } from "../common/genreRating";
 
 export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
@@ -214,14 +214,14 @@ export default class GenresTabComponent extends mixins(StoreMixin, ChartMixin) {
     }
 
     get genreRatingMetric() {
-        return estimateGenreRatingMetric(this.genres, this.votes);
+        return estimateAttributeRatingMetric(this.genres, this.votes);
     }
 
     get adjustedGenres() {
         const metric = this.genreRatingMetric;
         return this.genres.map((genre) => ({
             ...genre,
-            adjusted: adjustedGenreRating(
+            adjusted: adjustedAttributeRating(
                 genre.averageVote,
                 genre.films.length,
                 metric

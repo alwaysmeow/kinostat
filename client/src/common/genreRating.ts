@@ -7,6 +7,12 @@ export interface GenreRatingMetric {
     usedFallback: boolean;
 }
 
+export type AttributeRatingMetric = GenreRatingMetric;
+
+export interface AttributeRatingMetricOptions {
+    softenPrior?: boolean;
+}
+
 const FALLBACK_K = 1;
 const MINIMUM_RATINGS = 30;
 const MINIMUM_USABLE_GENRES = 5;
@@ -34,18 +40,20 @@ function sampleVariance(values: number[]): number {
  *     rawK = pooled within-genre variance / true between-genre variance
  *
  * A raw empirical-Bayes value can be very large and would make film count
- * dominate a personal-statistics UI. log1p keeps the estimate adaptive while
- * deliberately softening its effect:
+ * dominate a personal-statistics UI. By default, log1p keeps the estimate
+ * adaptive while deliberately softening its effect:
  *
  *     k = ln(1 + rawK) / 2
  *
- * There is no arbitrary clamp. When there is not enough data, or no positive
- * between-genre signal can be estimated, we use one virtual average film as a
- * transparent fallback (k = 1).
+ * Attributes with a long tail of tiny samples can opt out of that softening
+ * and use rawK directly. There is no arbitrary clamp. When there is not enough
+ * data, or no positive between-attribute signal can be estimated, we use one
+ * virtual average film as a transparent fallback (k = 1).
  */
 export function estimateGenreRatingMetric(
     genres: FilmAttribute[],
-    votes: Vote[]
+    votes: Vote[],
+    options: AttributeRatingMetricOptions = {}
 ): GenreRatingMetric {
     const voteByFilm = new Map(votes.map((vote) => [vote.filmId, vote.value]));
     const ratings = votes
@@ -102,9 +110,11 @@ export function estimateGenreRatingMetric(
     }
 
     const rawK = pooledWithinVariance / trueBetweenVariance;
-    const k = Math.log1p(rawK) / 2;
+    const k = options.softenPrior === false ? rawK : Math.log1p(rawK) / 2;
     return { baseline, k, rawK, usedFallback: false };
 }
+
+export const estimateAttributeRatingMetric = estimateGenreRatingMetric;
 
 export function adjustedGenreRating(
     average: number,
@@ -117,3 +127,5 @@ export function adjustedGenreRating(
         (filmCount + metric.k)
     );
 }
+
+export const adjustedAttributeRating = adjustedGenreRating;
