@@ -25,7 +25,7 @@ interface MovieDetails {
   first_air_date?: string;
   poster_path?: string | null;
   genres?: Array<{ name: string }>;
-  production_countries?: Array<{ name: string }>;
+  production_countries?: Array<{ name?: string; iso_3166_1?: string }>;
   aggregate_credits?: {
     cast?: Array<{
       id: number;
@@ -122,7 +122,7 @@ export class TmdbClient {
       title: movie.title ?? movie.name ?? "",
       year: yearOf(movie.release_date ?? movie.first_air_date) ?? fallbackYear ?? 0,
       posterBaseUrl: preferredPoster ? `${imageBaseUrl}/original${preferredPoster}` : null,
-      countries: movie.production_countries?.map((item) => item.name) ?? [],
+      countries: movie.production_countries?.map(countryName).filter((name): name is string => Boolean(name)) ?? [],
       genres: normalizeGenres(movie.genres?.map((item) => item.name.toLocaleLowerCase()) ?? []),
       actors: cast.map((person) => ({
         id: person.id,
@@ -158,6 +158,14 @@ export class TmdbClient {
     if (!response.ok) throw new Error(`TMDB ${pathname} failed: ${response.status} ${response.statusText}`);
     return response.json() as Promise<T>;
   }
+}
+
+function countryName(country: { name?: string; iso_3166_1?: string }) {
+  // TMDB country names can vary by locale or API data updates. Keep Hong Kong
+  // under one canonical name so existing country statistics and the map marker
+  // continue to recognize it.
+  if (country.iso_3166_1?.toUpperCase() === "HK") return "Hong Kong";
+  return country.name?.trim() || country.iso_3166_1?.trim();
 }
 
 function matchScore(item: SearchResult, expectedTitle: string, expectedYear: number) {

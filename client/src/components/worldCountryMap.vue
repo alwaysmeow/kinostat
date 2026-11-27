@@ -225,9 +225,12 @@ const hoveredFeatures = computed(() => hoveredCountry.value
         && !(showHistorical.value && item.sovietSuccessor))
     : []);
 const specialMarkers = computed(() => [
-    { name: "Hong Kong", coordinates: [114.17, 22.32] as Position },
+    {
+        names: ["Hong Kong", "Hong Kong SAR China", "Hong Kong S.A.R. China"],
+        coordinates: [114.17, 22.32] as Position,
+    },
 ].flatMap((marker) => {
-    const country = props.countries.find((item) => item.name === marker.name);
+    const country = props.countries.find((item) => marker.names.includes(item.name));
     if (!country) return [];
     const [x, y] = project(marker.coordinates);
     return [{ country, x, y }];
