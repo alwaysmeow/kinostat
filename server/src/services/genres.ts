@@ -3,7 +3,7 @@ const COMPOSITE_GENRES: Record<string, string[]> = {
 };
 
 export function normalizeGenres(genres: string[]) {
-  return [...new Set(genres.flatMap((genre) =>
-    COMPOSITE_GENRES[genre.toLocaleLowerCase()] ?? [genre]
-  ))];
+  return [...new Set(genres
+    .filter((genre) => genre.trim().toLocaleLowerCase() !== "tv movie")
+    .flatMap((genre) => COMPOSITE_GENRES[genre.toLocaleLowerCase()] ?? [genre]))];
 }
