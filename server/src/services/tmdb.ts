@@ -165,7 +165,9 @@ function countryName(country: { name?: string; iso_3166_1?: string }) {
   // under one canonical name so existing country statistics and the map marker
   // continue to recognize it.
   if (country.iso_3166_1?.toUpperCase() === "HK") return "Hong Kong";
-  return country.name?.trim() || country.iso_3166_1?.trim();
+  const name = country.name?.trim() || country.iso_3166_1?.trim();
+  if (name?.toLocaleLowerCase() === "hong kong sar china") return "Hong Kong";
+  return name;
 }
 
 function matchScore(item: SearchResult, expectedTitle: string, expectedYear: number) {

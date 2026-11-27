@@ -69,7 +69,7 @@ export class LibraryService {
       year: row.year,
       letterboxdUri: row.letterboxd_uri,
       posterBaseUrl: row.poster_base_url,
-      countries: parseJson<string[]>(row.countries_json),
+      countries: normalizeCountries(parseJson<string[]>(row.countries_json)),
       genres: normalizeGenres(parseJson<string[]>(row.genres_json)),
       actors: displayActors(parseJson<PersonSummary[]>(row.actors_json)),
       directors: parseJson<PersonSummary[]>(row.directors_json),
@@ -114,7 +114,7 @@ export class LibraryService {
     const items = new Map<string, { films: number[]; values: number[] }>();
     for (const film of this.votes(userId)) {
       const names = parseJson<string[]>(film[field]);
-      const normalizedNames = field === "genres_json" ? normalizeGenres(names) : names;
+      const normalizedNames = field === "genres_json" ? normalizeGenres(names) : normalizeCountries(names);
       for (const name of normalizedNames) {
         const item = items.get(name) ?? { films: [], values: [] };
         item.films.push(film.id);
@@ -140,6 +140,12 @@ export class LibraryService {
 function average(values: number[]) {
   if (!values.length) return 0;
   return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 100) / 100;
+}
+
+function normalizeCountries(countries: string[]) {
+  return countries.map((country) =>
+    country.trim().toLocaleLowerCase() === "hong kong sar china" ? "Hong Kong" : country
+  );
 }
 
 function actorsWithPhotos(actors: PersonSummary[]) {
